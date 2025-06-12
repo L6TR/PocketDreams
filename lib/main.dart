@@ -17,18 +17,40 @@ class _MyWidgetState extends State<PocketDreams> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.pinkAccent,
+          backgroundColor: const Color.fromARGB(255, 225, 175, 210),
           title: const Text("Pocket Dreams"),
           foregroundColor: Colors.white,
         ),
 
-        body: Container(
-          margin: const EdgeInsets.all(10),
-          padding: const EdgeInsets.all(10),
-          color: Colors.black,
-          height: 100,
-          width: 100,
-          child: const Text("What did you dream about today?"),
+        backgroundColor: Colors.black,
+
+        body: Stack(
+          children: [
+            Container(
+              color: Colors.grey,
+              child: SizedBox(
+                width: 100,
+                height: 100,
+                child: const Text("Dreams"),
+              ),
+            ),
+          ],
+        ),
+
+        bottomNavigationBar: BottomNavigationBar(
+          backgroundColor: const Color.fromARGB(255, 225, 175, 210),
+
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.chat), label: "Chat"),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.cloud),
+              label: "Today's Dream",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.calendar_month),
+              label: "Calendar",
+            ),
+          ],
         ),
       ),
     );
