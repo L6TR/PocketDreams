@@ -1,23 +1,46 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(PocketDreams());
+  runApp(LoginScreen());
 }
 
-class PocketDreams extends StatefulWidget {
-  const PocketDreams({super.key});
+class LoginScreen extends StatelessWidget {
+  const LoginScreen({super.key});
 
-  @override
-  State<PocketDreams> createState() => _MyWidgetState();
-}
-
-class _MyWidgetState extends State<PocketDreams> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          backgroundColor: const Color.fromARGB(255, 225, 175, 210),
+          backgroundColor: const Color.fromARGB(255, 250, 175, 195),
+          title: const Text("Pocket Dreams"),
+          foregroundColor: Colors.white,
+        ),
+
+        backgroundColor: Colors.black,
+
+        body: ElevatedButton(
+          child: Text("Login"),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => MainScreen()),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class MainScreen extends StatelessWidget {
+  const MainScreen({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          backgroundColor: const Color.fromARGB(255, 250, 175, 195),
           title: const Text("Pocket Dreams"),
           foregroundColor: Colors.white,
         ),
@@ -38,7 +61,7 @@ class _MyWidgetState extends State<PocketDreams> {
         ),
 
         bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: const Color.fromARGB(255, 225, 175, 210),
+          backgroundColor: const Color.fromARGB(255, 250, 175, 195),
 
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.chat), label: "Chat"),
