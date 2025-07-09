@@ -9,9 +9,24 @@ class PocketDreams extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(title: "Pocket Dreams", home: const LoginScreen());
+    return MaterialApp(title: "Pocket Dreams", home: const Base());
   }
 }
+
+//
+// Base widget
+//
+
+class Base extends StatefulWidget {
+  const Base({super.key});
+
+  @override
+  State<Base> createState() => _BaseState();
+}
+
+//
+// Login widget
+//
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -32,15 +47,33 @@ class LoginScreen extends StatelessWidget {
         onPressed: () {
           Navigator.of(
             context,
-          ).push(MaterialPageRoute(builder: (context) => const MainScreen()));
+          ).push(MaterialPageRoute(builder: (context) => const Base()));
         },
       ),
     );
   }
 }
 
-class MainScreen extends StatelessWidget {
-  const MainScreen({super.key});
+//
+// Main widget
+//
+
+class _BaseState extends State<Base> {
+  bool isUserLogined = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (!isUserLogined) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+        );
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,7 +84,6 @@ class MainScreen extends StatelessWidget {
       ),
 
       backgroundColor: Colors.black,
-
       body: Stack(
         children: [
           Container(
