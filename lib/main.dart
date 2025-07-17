@@ -42,13 +42,27 @@ class LoginScreen extends StatelessWidget {
 
       backgroundColor: Colors.black,
 
-      body: ElevatedButton(
-        child: Text("Login"),
-        onPressed: () {
-          Navigator.of(
-            context,
-          ).push(MaterialPageRoute(builder: (context) => const Base()));
-        },
+      body: Column(
+        children: [
+          Container(
+            width: 150,
+            child: Text(
+              "How can we call you?",
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+          const TextField(decoration: InputDecoration(hintText: "Login")),
+          const Text("Keep your secrets safe"),
+          const TextField(decoration: InputDecoration(hintText: "Password")),
+          ElevatedButton(
+            child: Text("Login"),
+            onPressed: () {
+              Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (context) => const Base()));
+            },
+          ),
+        ],
       ),
     );
   }
