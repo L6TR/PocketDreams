@@ -42,27 +42,52 @@ class LoginScreen extends StatelessWidget {
 
       backgroundColor: Colors.black,
 
-      body: Column(
-        children: [
-          Container(
-            width: 150,
-            child: Text(
-              "How can we call you?",
-              style: TextStyle(color: Colors.white),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              child: Text(
+                "How can we call you?",
+                style: TextStyle(color: Colors.white),
+              ),
             ),
-          ),
-          const TextField(decoration: InputDecoration(hintText: "Login")),
-          const Text("Keep your secrets safe"),
-          const TextField(decoration: InputDecoration(hintText: "Password")),
-          ElevatedButton(
-            child: Text("Login"),
-            onPressed: () {
-              Navigator.of(
-                context,
-              ).push(MaterialPageRoute(builder: (context) => const Base()));
-            },
-          ),
-        ],
+            SizedBox(
+              width: 250,
+              child: TextField(
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: "Login",
+                ),
+              ),
+            ),
+            SizedBox(
+              child: Text(
+                "Keep your secrets safe",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            SizedBox(
+              width: 250,
+              child: TextField(
+                obscureText: true,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: "Password",
+                ),
+              ),
+            ),
+            ElevatedButton(
+              child: Text("Login"),
+              onPressed: () {
+                Navigator.of(
+                  context,
+                ).push(MaterialPageRoute(builder: (context) => const Base()));
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
