@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:pocket_dreams/bloc/backend_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() {
   runApp(const PocketDreams());
@@ -9,7 +11,13 @@ class PocketDreams extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(title: "Pocket Dreams", home: const Base());
+    return MaterialApp(
+      title: "Pocket Dreams",
+      home: BlocProvider(
+        create: (context) => BackendBloc(),
+        child: LoginScreen(),
+      ),
+    );
   }
 }
 
@@ -81,9 +89,10 @@ class LoginScreen extends StatelessWidget {
             ElevatedButton(
               child: Text("Login"),
               onPressed: () {
-                Navigator.of(
-                  context,
-                ).push(MaterialPageRoute(builder: (context) => const Base()));
+                Navigator.of(context).pushReplacement(
+                  //not a just "push" !!!
+                  MaterialPageRoute(builder: (context) => const Base()),
+                );
               },
             ),
           ],
@@ -94,27 +103,25 @@ class LoginScreen extends StatelessWidget {
 }
 
 //
-// Main widget
+// _BaseState widget
+// child of Base()
 //
 
 class _BaseState extends State<Base> {
-  bool isUserLogined = false;
-
   @override
   void initState() {
     super.initState();
 
-    if (!isUserLogined) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
-        );
-      });
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      );
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final backendBloc = BlocProvider.of<BackendBloc>(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 250, 175, 195),
@@ -132,6 +139,11 @@ class _BaseState extends State<Base> {
               height: 100,
               child: const Text("Dreams"),
             ),
+          ),
+          BlocBuilder<BackendBloc, String>(
+            builder: (context, state) {
+              return Text(state);
+            },
           ),
         ],
       ),
