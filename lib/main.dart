@@ -2,42 +2,50 @@ import 'package:flutter/material.dart';
 import 'package:pocket_dreams/bloc/backend_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+//
+// run application
+//
 void main() {
-  runApp(const PocketDreams());
+  runApp(
+    BlocProvider(
+      create: (context) => BackendBloc(),
+      child: const PocketDreams(),
+    ) /*const PocketDreams()*/,
+  );
 }
+
+//
+// application
+//
 
 class PocketDreams extends StatelessWidget {
   const PocketDreams({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "Pocket Dreams",
-      home: BlocProvider(
-        create: (context) => BackendBloc(),
-        child: LoginScreen(),
-      ),
-    );
+    return MaterialApp(title: "Pocket Dreams", home: const LoginScreen());
   }
 }
 
 //
-// Base widget
+// Login widget
+// Base for login
 //
 
-class Base extends StatefulWidget {
-  const Base({super.key});
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
 
   @override
-  State<Base> createState() => _BaseState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
 //
-// Login widget
+// _LoginScreenState
 //
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+class _LoginScreenState extends State<LoginScreen> {
+  final loginController = TextEditingController();
+  final passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -103,6 +111,19 @@ class LoginScreen extends StatelessWidget {
 }
 
 //
+// Base widget
+// Base for Base
+// :D
+//
+
+class Base extends StatefulWidget {
+  const Base({super.key});
+
+  @override
+  State<Base> createState() => _BaseState();
+}
+
+//
 // _BaseState widget
 // child of Base()
 //
@@ -111,12 +132,8 @@ class _BaseState extends State<Base> {
   @override
   void initState() {
     super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-      );
-    });
+    context.read<BackendBloc>().fetchData();
+    // + data from beginning
   }
 
   @override
@@ -148,7 +165,7 @@ class _BaseState extends State<Base> {
         ],
       ),
 
-      bottomNavigationBar: BottomNavigationBar(
+      /*bottomNavigationBar: BottomNavigationBar(
         backgroundColor: const Color.fromARGB(255, 250, 175, 195),
 
         items: const [
@@ -161,7 +178,38 @@ class _BaseState extends State<Base> {
             icon: Icon(Icons.calendar_month),
             label: "Calendar",
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: "Settings",
+          ),
         ],
+      ),*/
+      bottomNavigationBar: NavigationBar(
+        destinations: [
+          NavigationDestination(
+            icon: Icon(Icons.chat, color: Colors.white),
+            label: "Chat",
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.cloud, color: Colors.white),
+            label: "Today's Dream",
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.calendar_month, color: Colors.white),
+            label: "Calendar",
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.settings, color: Colors.white),
+            label: "Settings",
+          ),
+        ],
+        selectedIndex: 0,
+        onDestinationSelected: (int index) {
+          /*setState(() {
+            0 = index;
+          });*/
+        },
+        backgroundColor: const Color.fromARGB(255, 250, 175, 195),
       ),
     );
   }
