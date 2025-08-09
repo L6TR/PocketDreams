@@ -129,11 +129,36 @@ class Base extends StatefulWidget {
 //
 
 class _BaseState extends State<Base> {
+  int _selectedIndex = 0;
   @override
   void initState() {
     super.initState();
     context.read<BackendBloc>().fetchData();
     // + data from beginning
+  }
+
+  Widget _buildBody() {
+    switch (_selectedIndex) {
+      case 0:
+        return Center(
+          child: Text("Chat screen", style: TextStyle(color: Colors.white)),
+        );
+      case 1:
+        return Center(
+          child: Text(
+            "Today's Dream screen",
+            style: TextStyle(color: Colors.white),
+          ),
+        );
+      case 2:
+        return Center(
+          child: Text("Calendar screen", style: TextStyle(color: Colors.white)),
+        );
+      case 3:
+        return const Settings();
+      default:
+        return Container();
+    }
   }
 
   @override
@@ -147,7 +172,9 @@ class _BaseState extends State<Base> {
       ),
 
       backgroundColor: Colors.black,
-      body: Stack(
+      body: _buildBody(),
+
+      /*Stack(
         children: [
           Container(
             color: Colors.grey,
@@ -157,30 +184,15 @@ class _BaseState extends State<Base> {
               child: const Text("Dreams"),
             ),
           ),
+
+// 
+// BlocBuilder !!!
+//
+
           BlocBuilder<BackendBloc, String>(
             builder: (context, state) {
               return Text(state);
             },
-          ),
-        ],
-      ),
-
-      /*bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: const Color.fromARGB(255, 250, 175, 195),
-
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.chat), label: "Chat"),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.cloud),
-            label: "Today's Dream",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month),
-            label: "Calendar",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: "Settings",
           ),
         ],
       ),*/
@@ -203,13 +215,43 @@ class _BaseState extends State<Base> {
             label: "Settings",
           ),
         ],
-        selectedIndex: 0,
+        selectedIndex: _selectedIndex,
         onDestinationSelected: (int index) {
-          /*setState(() {
-            0 = index;
-          });*/
+          setState(() {
+            _selectedIndex = index;
+          });
         },
         backgroundColor: const Color.fromARGB(255, 250, 175, 195),
+      ),
+    );
+  }
+}
+
+//
+// Settings widget
+// Base for Settings
+//
+
+class Settings extends StatefulWidget {
+  const Settings({super.key});
+
+  @override
+  State<Settings> createState() => _SettingsState();
+}
+
+//
+// _SettingsState widget
+// child of Settings()
+//
+
+class _SettingsState extends State<Settings> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 250, 175, 195),
+        title: const Text("Pocket Dreams"),
+        foregroundColor: Colors.white,
       ),
     );
   }
