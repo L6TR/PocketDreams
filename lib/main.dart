@@ -52,7 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     // function for coloring the CheckBox
     // becouse it doesn't allow just a fixed color...
-    // it want be depended on the state of the checkbox
+    // it want to be depended on the state of the checkbox
     // (-_-)
 
     Color getColor(Set<WidgetState> states) {
@@ -85,6 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
             SizedBox(
               width: 250,
               child: TextField(
+                style: TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
                   hintText: "Login",
@@ -100,6 +101,7 @@ class _LoginScreenState extends State<LoginScreen> {
             SizedBox(
               width: 250,
               child: TextField(
+                style: TextStyle(color: Colors.white),
                 obscureText: true,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
@@ -126,7 +128,12 @@ class _LoginScreenState extends State<LoginScreen> {
               ],
             ),
             ElevatedButton(
-              child: Text("Login"),
+              child: Text(
+                "Login",
+                style: TextStyle(
+                  color: const Color.fromARGB(255, 250, 175, 195),
+                ),
+              ),
               onPressed: () {
                 Navigator.of(context).pushReplacement(
                   // not a just "push" !!!
