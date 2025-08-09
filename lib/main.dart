@@ -44,11 +44,24 @@ class LoginScreen extends StatefulWidget {
 //
 
 class _LoginScreenState extends State<LoginScreen> {
+  bool isRemembered = false;
   final loginController = TextEditingController();
   final passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    // function for coloring the CheckBox
+    // becouse it doesn't allow just a fixed color...
+    // it want be depended on the state of the checkbox
+    // (-_-)
+
+    Color getColor(Set<WidgetState> states) {
+      if (states.contains(WidgetState.selected)) {
+        return Color.fromARGB(255, 250, 175, 195);
+      }
+      return Colors.transparent;
+    }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 250, 175, 195),
@@ -94,11 +107,29 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Checkbox(
+                  fillColor: WidgetStateProperty.resolveWith(getColor),
+                  value: isRemembered,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      isRemembered = value!;
+                    });
+                  },
+                ),
+                Text("can we "),
+                Text("remember ", style: TextStyle(color: Colors.white)),
+                Text("you?"),
+              ],
+            ),
             ElevatedButton(
               child: Text("Login"),
               onPressed: () {
                 Navigator.of(context).pushReplacement(
-                  //not a just "push" !!!
+                  // not a just "push" !!!
                   MaterialPageRoute(builder: (context) => const Base()),
                 );
               },
@@ -248,10 +279,22 @@ class _SettingsState extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 250, 175, 195),
-        title: const Text("Pocket Dreams"),
-        foregroundColor: Colors.white,
+      backgroundColor: Colors.black,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                );
+              },
+              child: Text("Log Out"),
+            ),
+          ],
+        ),
       ),
     );
   }
