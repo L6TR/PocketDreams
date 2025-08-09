@@ -86,9 +86,18 @@ class _LoginScreenState extends State<LoginScreen> {
               width: 250,
               child: TextField(
                 style: TextStyle(color: Colors.white),
+
+                // color of blinking |
+                cursorColor: Color.fromARGB(255, 250, 175, 195),
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
                   hintText: "Login",
+                  focusedBorder: OutlineInputBorder(
+                    // color of the border
+                    borderSide: BorderSide(
+                      color: Color.fromARGB(255, 250, 175, 195),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -103,9 +112,18 @@ class _LoginScreenState extends State<LoginScreen> {
               child: TextField(
                 style: TextStyle(color: Colors.white),
                 obscureText: true,
+
+                // color of blinking |
+                cursorColor: Color.fromARGB(255, 250, 175, 195),
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
                   hintText: "Password",
+                  focusedBorder: OutlineInputBorder(
+                    // color of the border
+                    borderSide: BorderSide(
+                      color: Color.fromARGB(255, 250, 175, 195),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -127,16 +145,20 @@ class _LoginScreenState extends State<LoginScreen> {
                 Text("you?"),
               ],
             ),
-            ElevatedButton(
-              child: Text(
-                "Login",
-                style: TextStyle(
-                  color: const Color.fromARGB(255, 250, 175, 195),
+            OutlinedButton(
+              style: ButtonStyle(
+                backgroundColor: WidgetStatePropertyAll(Colors.white),
+                side: WidgetStatePropertyAll(
+                  BorderSide(
+                    color: Color.fromARGB(255, 250, 175, 195),
+                    width: 5,
+                  ),
                 ),
               ),
+              child: Text("Login", style: TextStyle(color: Colors.black)),
               onPressed: () {
                 Navigator.of(context).pushReplacement(
-                  // not a just "push" !!!
+                  // not just a "push" !!!
                   MaterialPageRoute(builder: (context) => const Base()),
                 );
               },
@@ -292,13 +314,22 @@ class _SettingsState extends State<Settings> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            ElevatedButton(
+            OutlinedButton(
+              style: ButtonStyle(
+                backgroundColor: WidgetStatePropertyAll(Colors.white),
+                side: WidgetStatePropertyAll(
+                  BorderSide(
+                    color: Color.fromARGB(255, 250, 175, 195),
+                    width: 5,
+                  ),
+                ),
+              ),
               onPressed: () {
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(builder: (context) => const LoginScreen()),
                 );
               },
-              child: Text("Log Out"),
+              child: Text("Log Out", style: TextStyle(color: Colors.black)),
             ),
           ],
         ),
