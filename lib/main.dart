@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:pocket_dreams/bloc/backend_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 //
 // run application
@@ -24,6 +26,22 @@ class PocketDreams extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(title: "Pocket Dreams", home: const LoginScreen());
+  }
+}
+
+Future<void> registerUser(String username, String password) async {
+  final url = Uri.parse('http://127.0.0.1:5000/register');
+
+  final response = await http.post(
+    url,
+    headers: {"Content-Type": "application/json"},
+    body: jsonEncode({"username": username, "password": password}),
+  );
+
+  if (response.statusCode == 201) {
+    print("Регистрация успешна!");
+  } else {
+    print("Ошибка: ${response.body}");
   }
 }
 
@@ -91,7 +109,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 cursorColor: Color.fromARGB(255, 250, 175, 195),
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
-                  hintText: "Login",
+                  hintText: "Username",
                   focusedBorder: OutlineInputBorder(
                     // color of the border
                     borderSide: BorderSide(
