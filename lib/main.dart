@@ -116,7 +116,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 cursorColor: Color.fromARGB(255, 250, 175, 195),
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
-                  hintText: "Username",
+                  hintText: "Login",
                   focusedBorder: OutlineInputBorder(
                     // color of the border
                     borderSide: BorderSide(
