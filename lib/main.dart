@@ -29,22 +29,6 @@ class PocketDreams extends StatelessWidget {
   }
 }
 
-Future<void> registerUser(String username, String password) async {
-  final url = Uri.parse('http://127.0.0.1:5000/register');
-
-  final response = await http.post(
-    url,
-    headers: {"Content-Type": "application/json"},
-    body: jsonEncode({"username": username, "password": password}),
-  );
-
-  if (response.statusCode == 201) {
-    print("Регистрация успешна!");
-  } else {
-    print("Ошибка: ${response.body}");
-  }
-}
-
 //
 // Login widget
 // Base for login
@@ -63,8 +47,30 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool isRemembered = false;
-  final loginController = TextEditingController();
+  final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  String message = "";
+
+  Future<void> login() async {
+    final response = await http.post(
+      Uri.parse("http://10.0.1.12:5000/api/login"),
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({
+        "email": emailController.text,
+        "password": passwordController.text,
+      }),
+    );
+
+    final data = json.decode(response.body);
+
+    setState(() {
+      message = data["message"];
+    });
+
+    if (data["success"]) {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => Base()));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -103,6 +109,7 @@ class _LoginScreenState extends State<LoginScreen> {
             SizedBox(
               width: 250,
               child: TextField(
+                controller: emailController,
                 style: TextStyle(color: Colors.white),
 
                 // color of blinking |
@@ -128,6 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
             SizedBox(
               width: 250,
               child: TextField(
+                controller: passwordController,
                 style: TextStyle(color: Colors.white),
                 obscureText: true,
 
@@ -175,12 +183,15 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               child: Text("Login", style: TextStyle(color: Colors.black)),
               onPressed: () {
-                Navigator.of(context).pushReplacement(
+                /*Navigator.of(context).pushReplacement(
                   // not just a "push" !!!
                   MaterialPageRoute(builder: (context) => const Base()),
-                );
+                );*/
+                login();
               },
             ),
+            SizedBox(height: 10),
+            Text(message, style: TextStyle(color: Colors.red)),
           ],
         ),
       ),
