@@ -25,7 +25,10 @@ class PocketDreams extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(title: "Pocket Dreams", home: const LoginScreen());
+    return MaterialApp(
+      title: "Pocket Dreams",
+      home: const /*LoginScreen*/ Base(),
+    );
   }
 }
 
