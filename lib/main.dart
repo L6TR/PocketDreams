@@ -382,6 +382,75 @@ class TodaysDream extends StatefulWidget {
 class _TodaysDreamState extends State<TodaysDream> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(backgroundColor: Colors.black);
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Column(
+        children: [
+          Expanded(
+            flex: 9,
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 9,
+                  child: Column(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: Center(
+                          child: SizedBox(
+                            width: 200,
+                            child: TextField(
+                              style: TextStyle(color: Colors.white),
+
+                              // color of blinking |
+                              cursorColor: Color.fromARGB(255, 250, 175, 195),
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(),
+                                hintText: "Find key words",
+                                focusedBorder: OutlineInputBorder(
+                                  // color of the border
+                                  borderSide: BorderSide(
+                                    color: Color.fromARGB(255, 250, 175, 195),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 8,
+                        child: SizedBox(
+                          width: 200,
+                          child: Text("zde budou Key words"),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: SizedBox(
+                    width: 15,
+                    child: Text(
+                      "zde budou spheres hehe :D",
+                      style: TextStyle(fontSize: 10),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: Center(
+              child: SizedBox(
+                child: Text("zde bude button", style: TextStyle(fontSize: 10)),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
