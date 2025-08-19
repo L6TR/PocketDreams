@@ -233,12 +233,7 @@ class _BaseState extends State<Base> {
           child: Text("Chat screen", style: TextStyle(color: Colors.white)),
         );
       case 1:
-        return Center(
-          child: Text(
-            "Today's Dream screen",
-            style: TextStyle(color: Colors.white),
-          ),
-        );
+        return const TodaysDream();
       case 2:
         return Center(
           child: Text("Calendar screen", style: TextStyle(color: Colors.white)),
@@ -318,7 +313,7 @@ class _BaseState extends State<Base> {
 
 //
 // Settings widget
-// Base for Settings
+// Base for _SettingsState
 //
 
 class Settings extends StatefulWidget {
@@ -364,5 +359,29 @@ class _SettingsState extends State<Settings> {
         ),
       ),
     );
+  }
+}
+
+//
+// TodaysDream widget
+// Base for _TodaysDreamState
+//
+
+class TodaysDream extends StatefulWidget {
+  const TodaysDream({super.key});
+
+  @override
+  State<TodaysDream> createState() => _TodaysDreamState();
+}
+
+//
+// _TodaysDreamState
+// child of TodaysDream()
+//
+
+class _TodaysDreamState extends State<TodaysDream> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(backgroundColor: Colors.black);
   }
 }
