@@ -383,6 +383,7 @@ class TodaysDream extends StatefulWidget {
 //
 
 class _TodaysDreamState extends State<TodaysDream> {
+  static const List<String> emotionList = <String>["ooo", "bob"];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -402,21 +403,54 @@ class _TodaysDreamState extends State<TodaysDream> {
                         child: Center(
                           child: SizedBox(
                             width: 200,
-                            child: TextField(
-                              style: TextStyle(color: Colors.white),
+                            child: Autocomplete<String>(
+                              optionsBuilder:
+                                  (TextEditingValue textEditingValue) {
+                                    if (textEditingValue.text == "") {
+                                      return const Iterable.empty();
+                                    }
+                                    return emotionList.where((String option) {
+                                      return option.contains(
+                                        textEditingValue.text.toLowerCase(),
+                                      );
+                                    });
+                                  },
+                              fieldViewBuilder:
+                                  (
+                                    context,
+                                    textEditingController,
+                                    focusNode,
+                                    onFieldSubmitted,
+                                  ) {
+                                    return TextField(
+                                      controller: textEditingController,
+                                      focusNode: focusNode,
+                                      style: TextStyle(color: Colors.white),
 
-                              // color of blinking |
-                              cursorColor: Color.fromARGB(255, 250, 175, 195),
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(),
-                                hintText: "Find key words",
-                                focusedBorder: OutlineInputBorder(
-                                  // color of the border
-                                  borderSide: BorderSide(
-                                    color: Color.fromARGB(255, 250, 175, 195),
-                                  ),
-                                ),
-                              ),
+                                      // color of blinking |
+                                      cursorColor: Color.fromARGB(
+                                        255,
+                                        250,
+                                        175,
+                                        195,
+                                      ),
+                                      decoration: InputDecoration(
+                                        border: OutlineInputBorder(),
+                                        hintText: "Find key words",
+                                        focusedBorder: OutlineInputBorder(
+                                          // color of the border
+                                          borderSide: BorderSide(
+                                            color: Color.fromARGB(
+                                              255,
+                                              250,
+                                              175,
+                                              195,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
                             ),
                           ),
                         ),
