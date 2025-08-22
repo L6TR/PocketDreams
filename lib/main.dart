@@ -366,7 +366,7 @@ class _SettingsState extends State<Settings> {
 }
 
 //
-// class for making  Emotional Buttons
+// class for making Emotional Buttons
 //
 
 class EmotionButton extends StatelessWidget {
@@ -390,6 +390,26 @@ class EmotionButton extends StatelessWidget {
     );
   }
 }
+
+//
+// class for making Emotion
+// that we need for buttons
+//
+
+class Emotion {
+  final String name;
+  final Color color;
+
+  Emotion({required this.name, required this.color});
+}
+
+//
+// list for all emotion what we have
+//
+
+final List<Emotion> emotions = [
+  Emotion(name: "Happiness", color: Colors.yellow),
+];
 
 //
 // TodaysDream widget
