@@ -467,11 +467,23 @@ class _TodaysDreamState extends State<TodaysDream> {
                 ),
                 Expanded(
                   flex: 1,
-                  child: SizedBox(
-                    width: 15,
-                    child: Text(
-                      "zde budou spheres hehe :D",
-                      style: TextStyle(fontSize: 10),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Icon(Icons.circle, color: Colors.white10),
+                        Icon(Icons.circle, color: Colors.white10),
+                        Icon(Icons.circle, color: Colors.white10),
+                        Icon(Icons.circle, color: Colors.white10),
+                        Icon(Icons.circle, color: Colors.white10),
+                        Icon(Icons.circle, color: Colors.white10),
+                        Icon(
+                          Icons.keyboard_double_arrow_down_rounded,
+                          color: Colors.white10,
+                        ),
+                        Icon(Icons.square_rounded, color: Colors.white10),
+                      ],
                     ),
                   ),
                 ),
