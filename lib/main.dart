@@ -429,7 +429,6 @@ class TodaysDream extends StatefulWidget {
 //
 
 class _TodaysDreamState extends State<TodaysDream> {
-  static const List<String> emotionList = <String>["happy", "sad"];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -449,18 +448,23 @@ class _TodaysDreamState extends State<TodaysDream> {
                         child: Center(
                           child: SizedBox(
                             width: 200,
-                            child: Autocomplete<String>(
-                              optionsBuilder:
-                                  (TextEditingValue textEditingValue) {
-                                    if (textEditingValue.text == "") {
-                                      return const Iterable.empty();
-                                    }
-                                    return emotionList.where((String option) {
-                                      return option.contains(
-                                        textEditingValue.text.toLowerCase(),
-                                      );
-                                    });
-                                  },
+                            child: Autocomplete<Emotion>(
+                              optionsBuilder: (TextEditingValue userInput) {
+                                if (userInput.text == "") {
+                                  return const Iterable<Emotion>.empty();
+                                }
+                                return emotions.where((emotions) {
+                                  return emotions.name.toLowerCase().contains(
+                                    userInput.text.toLowerCase(),
+                                  );
+                                });
+                              },
+                              onSelected: (Emotion emotion) {
+                                print(emotion.name);
+                              },
+                              displayStringForOption: (Emotion emotion) =>
+                                  emotion.name,
+
                               fieldViewBuilder:
                                   (
                                     context,
