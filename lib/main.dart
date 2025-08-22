@@ -408,7 +408,11 @@ class Emotion {
 //
 
 final List<Emotion> emotions = [
-  Emotion(name: "Happiness", color: Colors.yellow),
+  Emotion(name: "Happiness", color: Color.fromARGB(255, 255, 255, 0)),
+  Emotion(name: "Love", color: Color.fromARGB(255, 255, 0, 0)),
+  Emotion(name: "Calm", color: Color.fromARGB(255, 0, 0, 255)),
+  Emotion(name: "Harmony", color: Color.fromARGB(255, 0, 255, 0)),
+  Emotion(name: "Warmth", color: Color.fromARGB(255, 255, 165, 0)),
 ];
 
 //
@@ -429,6 +433,26 @@ class TodaysDream extends StatefulWidget {
 //
 
 class _TodaysDreamState extends State<TodaysDream> {
+  List<Color> sphereColors = List.generate(6, (_) => Colors.white10);
+
+  void newEmotionChoise(Emotion emotion) {
+    int index = nextIndex(sphereColors);
+    if (index != -1) {
+      setState(() {
+        sphereColors[index] = emotion.color;
+      });
+    }
+  }
+
+  int nextIndex(List listOfColors) {
+    for (int i = 0; i < listOfColors.length; i++) {
+      if (listOfColors[i] == Colors.white10) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -460,7 +484,7 @@ class _TodaysDreamState extends State<TodaysDream> {
                                 });
                               },
                               onSelected: (Emotion emotion) {
-                                print(emotion.name);
+                                newEmotionChoise(emotion);
                               },
                               displayStringForOption: (Emotion emotion) =>
                                   emotion.name,
@@ -499,6 +523,7 @@ class _TodaysDreamState extends State<TodaysDream> {
                                           ),
                                         ),
                                       ),
+                                      onSubmitted: (value) {},
                                     );
                                   },
                             ),
@@ -520,14 +545,10 @@ class _TodaysDreamState extends State<TodaysDream> {
                   child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                      /*crossAxisAlignment: CrossAxisAlignment.center,*/
                       children: [
-                        Icon(Icons.circle, color: Colors.white10),
-                        Icon(Icons.circle, color: Colors.white10),
-                        Icon(Icons.circle, color: Colors.white10),
-                        Icon(Icons.circle, color: Colors.white10),
-                        Icon(Icons.circle, color: Colors.white10),
-                        Icon(Icons.circle, color: Colors.white10),
+                        for (int i = 0; i < 6; i++)
+                          Icon(Icons.circle, color: sphereColors[i]),
                         Icon(
                           Icons.keyboard_double_arrow_down_rounded,
                           color: Colors.white10,
