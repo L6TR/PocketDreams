@@ -366,6 +366,32 @@ class _SettingsState extends State<Settings> {
 }
 
 //
+// class for making  Emotional Buttons
+//
+
+class EmotionButton extends StatelessWidget {
+  final String label;
+  final Color color;
+  final VoidCallback onPressed;
+
+  const EmotionButton({
+    super.key,
+    required this.label,
+    required this.color,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(backgroundColor: color),
+      onPressed: onPressed,
+      child: Text(label),
+    );
+  }
+}
+
+//
 // TodaysDream widget
 // Base for _TodaysDreamState
 //
@@ -383,7 +409,7 @@ class TodaysDream extends StatefulWidget {
 //
 
 class _TodaysDreamState extends State<TodaysDream> {
-  static const List<String> emotionList = <String>["ooo", "bob"];
+  static const List<String> emotionList = <String>["happy", "sad"];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
