@@ -548,7 +548,20 @@ class _TodaysDreamState extends State<TodaysDream> {
                       /*crossAxisAlignment: CrossAxisAlignment.center,*/
                       children: [
                         for (int i = 0; i < 6; i++)
-                          Icon(Icons.circle, color: sphereColors[i]),
+                          Container(
+                            width: 20,
+                            height: 20,
+                            margin: EdgeInsets.symmetric(vertical: 4),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: sphereColors[i],
+                              border: Border.all(
+                                color: Colors.white70,
+                                width: 3,
+                              ),
+                            ),
+                          ),
+
                         Icon(
                           Icons.keyboard_double_arrow_down_rounded,
                           color: Colors.white10,
