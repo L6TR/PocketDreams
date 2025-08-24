@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:pocket_dreams/bloc/backend_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -416,6 +418,22 @@ final List<Emotion> emotions = [
 ];
 
 //
+//class for Dreams
+//
+
+class Dream {
+  final String date;
+  final Color emotionColor;
+  final String describe;
+
+  Dream({
+    required this.date,
+    required this.emotionColor,
+    required this.describe,
+  });
+}
+
+//
 // TodaysDream widget
 // Base for _TodaysDreamState
 //
@@ -435,11 +453,23 @@ class TodaysDream extends StatefulWidget {
 class _TodaysDreamState extends State<TodaysDream> {
   List<Color> sphereColors = List.generate(6, (_) => Colors.white10);
 
+  List<EmotionButton> chosenEmotionButtons = [];
+
   void newEmotionChoise(Emotion emotion) {
     int index = nextIndex(sphereColors);
     if (index != -1) {
       setState(() {
         sphereColors[index] = emotion.color;
+
+        chosenEmotionButtons.add(
+          EmotionButton(
+            label: emotion.name,
+            color: emotion.color,
+            onPressed: () {
+              print("Clicked ${emotion.name}");
+            },
+          ),
+        );
       });
     }
   }
@@ -485,6 +515,11 @@ class _TodaysDreamState extends State<TodaysDream> {
                               },
                               onSelected: (Emotion emotion) {
                                 newEmotionChoise(emotion);
+                                EmotionButton(
+                                  color: emotion.color,
+                                  label: emotion.name,
+                                  onPressed: () => Void,
+                                );
                               },
                               displayStringForOption: (Emotion emotion) =>
                                   emotion.name,
@@ -534,7 +569,16 @@ class _TodaysDreamState extends State<TodaysDream> {
                         flex: 8,
                         child: SizedBox(
                           width: 200,
-                          child: Text("zde budou Key words"),
+                          child: Column(
+                            children: [
+                              Center(
+                                child: Wrap(
+                                  spacing: 8,
+                                  children: chosenEmotionButtons,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -554,10 +598,19 @@ class _TodaysDreamState extends State<TodaysDream> {
                             margin: EdgeInsets.symmetric(vertical: 4),
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: sphereColors[i],
-                              border: Border.all(
-                                color: Colors.white70,
-                                width: 3,
+                              border: Border.all(color: Colors.white, width: 3),
+                            ),
+                            child: Container(
+                              width: 5,
+                              height: 5,
+                              margin: EdgeInsets.symmetric(vertical: 1),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: sphereColors[i],
+                                border: Border.all(
+                                  color: Colors.black,
+                                  width: 1,
+                                ),
                               ),
                             ),
                           ),
