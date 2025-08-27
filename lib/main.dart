@@ -500,8 +500,10 @@ class _TodaysDreamState extends State<TodaysDream> {
   // function for deleting Emotion
   void removeEmotion(int index) {
     setState(() {
+      final removedColor = sphereColors[index];
       sphereColors[index] = Colors.white10;
-      chosenSphereColors.removeAt(index);
+
+      chosenSphereColors.remove(removedColor);
       chosenEmotionButtons.removeWhere((btn) => btn.index == index);
     });
   }
