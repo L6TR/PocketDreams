@@ -539,8 +539,11 @@ class _TodaysDreamState extends State<TodaysDream> {
     return -1;
   }
 
+  final TextEditingController _dateController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
+    var chosenDate = DateTime.now();
     return Scaffold(
       backgroundColor: Colors.black,
       body: Column(
@@ -705,6 +708,34 @@ class _TodaysDreamState extends State<TodaysDream> {
             ),
           ),
           Expanded(
+            flex: 2,
+            child: Center(
+              child: SizedBox(
+                width: 110,
+                child: TextField(
+                  textAlign: TextAlign.center,
+                  controller: _dateController,
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: chosenDate.toString().split(" ")[0],
+                    focusedBorder: OutlineInputBorder(
+                      // color of the border
+                      borderSide: BorderSide(
+                        color: Color.fromARGB(255, 250, 175, 195),
+                      ),
+                    ),
+                  ),
+                  readOnly: true,
+                  onTap: () {
+                    _selectDate();
+                  },
+                ),
+              ),
+            ),
+          ),
+
+          Expanded(
             flex: 1,
             child: Center(
               child: SizedBox(
@@ -722,8 +753,16 @@ class _TodaysDreamState extends State<TodaysDream> {
                     "Add a dream to the Calendar",
                     style: TextStyle(color: Colors.black),
                   ),
+
+                  //
+                  // important!!!
+                  //
                   onPressed: () {
-                    addDream(mixedColor(chosenSphereColors), "idk", "idk");
+                    addDream(
+                      mixedColor(chosenSphereColors),
+                      _dateController,
+                      "idk",
+                    );
                   },
                 ),
               ),
@@ -732,5 +771,25 @@ class _TodaysDreamState extends State<TodaysDream> {
         ],
       ),
     );
+  }
+
+  //
+  // Future
+  // (something after the widget was built)
+  //
+
+  Future<void> _selectDate() async {
+    DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+
+    if (pickedDate != null) {
+      setState(() {
+        _dateController.text = pickedDate.toString().split(" ")[0];
+      });
+    }
   }
 }
