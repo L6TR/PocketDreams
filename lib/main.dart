@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:pocket_dreams/bloc/backend_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -374,10 +372,12 @@ class _SettingsState extends State<Settings> {
 class EmotionButton extends StatelessWidget {
   final String label;
   final Color color;
+  final int index;
   final VoidCallback onPressed;
 
   const EmotionButton({
     super.key,
+    required this.index,
     required this.label,
     required this.color,
     required this.onPressed,
@@ -494,6 +494,15 @@ class _TodaysDreamState extends State<TodaysDream> {
     );
   }
 
+  // function for deleting Emotion
+  void removeEmotion(int index) {
+    setState(() {
+      sphereColors[index] = Colors.white10;
+      chosenSphereColors.removeAt(index);
+      chosenEmotionButtons.removeWhere((btn) => btn.index == index);
+    });
+  }
+
   void newEmotionChoise(Emotion emotion) {
     int index = nextIndex(sphereColors);
     if (index != -1) {
@@ -504,10 +513,11 @@ class _TodaysDreamState extends State<TodaysDream> {
 
         chosenEmotionButtons.add(
           EmotionButton(
+            index: index,
             label: emotion.name,
             color: emotion.color,
             onPressed: () {
-              print({mixedColor(chosenSphereColors)});
+              removeEmotion(index);
             },
           ),
         );
@@ -556,11 +566,12 @@ class _TodaysDreamState extends State<TodaysDream> {
                               },
                               onSelected: (Emotion emotion) {
                                 newEmotionChoise(emotion);
-                                EmotionButton(
+                                /*EmotionButton(
+                                  index: emotion.index,
                                   color: emotion.color,
                                   label: emotion.name,
                                   onPressed: () => Void,
-                                );
+                                );*/
                               },
                               displayStringForOption: (Emotion emotion) =>
                                   emotion.name,
