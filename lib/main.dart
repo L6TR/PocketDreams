@@ -451,9 +451,48 @@ class TodaysDream extends StatefulWidget {
 //
 
 class _TodaysDreamState extends State<TodaysDream> {
+  // List for all spheres + grey
   List<Color> sphereColors = List.generate(6, (_) => Colors.white10);
 
+  // List for only chosen (i need that)
+  List<Color> chosenSphereColors = [];
+
   List<EmotionButton> chosenEmotionButtons = [];
+
+  //function for mixing collors
+  Color mixedColor(List<Color> colorList) {
+    double mixedA = 0;
+    double mixedR = 0;
+    double mixedG = 0;
+    double mixedB = 0;
+
+    if (colorList.isEmpty) return Colors.white10;
+
+    for (int i = 0; i < colorList.length; i++) {
+      mixedA += (colorList[i].a * 255.0 / colorList.length);
+
+      mixedR += (colorList[i].r * 255.0 / colorList.length);
+
+      mixedG += (colorList[i].g * 255.0 / colorList.length);
+
+      mixedB += (colorList[i].b * 255.0 / colorList.length);
+    }
+    return Color.fromARGB(
+      mixedA.round() & 0xff,
+      mixedR.round() & 0xff,
+      mixedG.round() & 0xff,
+      mixedB.round() & 0xff,
+    );
+  }
+
+  //function for adding a Dream to The Calendar
+  Dream addDream(dreamsColor, dreamsDate, dreamsDescribe) {
+    return Dream(
+      date: dreamsDate,
+      emotionColor: dreamsColor,
+      describe: dreamsDescribe,
+    );
+  }
 
   void newEmotionChoise(Emotion emotion) {
     int index = nextIndex(sphereColors);
@@ -461,12 +500,14 @@ class _TodaysDreamState extends State<TodaysDream> {
       setState(() {
         sphereColors[index] = emotion.color;
 
+        chosenSphereColors.add(emotion.color);
+
         chosenEmotionButtons.add(
           EmotionButton(
             label: emotion.name,
             color: emotion.color,
             onPressed: () {
-              print("Clicked ${emotion.name}");
+              print({mixedColor(chosenSphereColors)});
             },
           ),
         );
@@ -584,44 +625,64 @@ class _TodaysDreamState extends State<TodaysDream> {
                     ],
                   ),
                 ),
+                //Expanded(flex: 1, child: Icon(Icons.clear, color: Colors.red)),
                 Expanded(
                   flex: 1,
                   child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      /*crossAxisAlignment: CrossAxisAlignment.center,*/
-                      children: [
-                        for (int i = 0; i < 6; i++)
-                          Container(
-                            width: 20,
-                            height: 20,
-                            margin: EdgeInsets.symmetric(vertical: 4),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 3),
-                            ),
-                            child: Container(
-                              width: 5,
-                              height: 5,
-                              margin: EdgeInsets.symmetric(vertical: 1),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: sphereColors[i],
-                                border: Border.all(
-                                  color: Colors.black,
-                                  width: 1,
+                    child:
+                        // Sphere column
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            for (int i = 0; i < 6; i++)
+                              Container(
+                                width: 20,
+                                height: 20,
+                                margin: EdgeInsets.symmetric(vertical: 4),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 3,
+                                  ),
+                                ),
+                                child: Container(
+                                  width: 5,
+                                  height: 5,
+                                  margin: EdgeInsets.symmetric(vertical: 1),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: sphereColors[i],
+                                    border: Border.all(
+                                      color: Colors.black,
+                                      width: 1,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
 
-                        Icon(
-                          Icons.keyboard_double_arrow_down_rounded,
-                          color: Colors.white10,
+                            Icon(
+                              Icons.keyboard_double_arrow_down_rounded,
+                              color: chosenEmotionButtons.isNotEmpty
+                                  ? Colors.white
+                                  : Colors.white10,
+                            ),
+                            Container(
+                              margin: EdgeInsets.symmetric(vertical: 4),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(7),
+                                border: Border.all(
+                                  color: Colors.white,
+                                  width: 3,
+                                ),
+                              ),
+                              child: Icon(
+                                Icons.square_rounded,
+                                color: mixedColor(chosenSphereColors),
+                              ),
+                            ),
+                          ],
                         ),
-                        Icon(Icons.square_rounded, color: Colors.white10),
-                      ],
-                    ),
                   ),
                 ),
               ],
@@ -631,7 +692,24 @@ class _TodaysDreamState extends State<TodaysDream> {
             flex: 1,
             child: Center(
               child: SizedBox(
-                child: Text("zde bude button", style: TextStyle(fontSize: 10)),
+                child: OutlinedButton(
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStatePropertyAll(Colors.white),
+                    side: WidgetStatePropertyAll(
+                      BorderSide(
+                        color: Color.fromARGB(255, 250, 175, 195),
+                        width: 5,
+                      ),
+                    ),
+                  ),
+                  child: Text(
+                    "Add a dream to the Calendar",
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  onPressed: () {
+                    addDream(mixedColor(chosenSphereColors), "idk", "idk");
+                  },
+                ),
               ),
             ),
           ),
