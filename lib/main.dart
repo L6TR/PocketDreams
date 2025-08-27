@@ -385,10 +385,13 @@ class EmotionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(backgroundColor: color),
+    return OutlinedButton(
+      style: OutlinedButton.styleFrom(
+        backgroundColor: color,
+        side: BorderSide(color: Colors.white, width: 5),
+      ),
       onPressed: onPressed,
-      child: Text(label),
+      child: Text(label, style: TextStyle(color: Colors.black)),
     );
   }
 }
