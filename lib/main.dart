@@ -540,6 +540,7 @@ class _TodaysDreamState extends State<TodaysDream> {
   }
 
   final TextEditingController _dateController = TextEditingController();
+  String _description = "";
 
   @override
   Widget build(BuildContext context) {
@@ -708,31 +709,81 @@ class _TodaysDreamState extends State<TodaysDream> {
             ),
           ),
           Expanded(
-            flex: 2,
-            child: Center(
-              child: SizedBox(
-                width: 110,
-                child: TextField(
-                  textAlign: TextAlign.center,
-                  controller: _dateController,
-                  style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: chosenDate.toString().split(" ")[0],
-                    focusedBorder: OutlineInputBorder(
-                      // color of the border
-                      borderSide: BorderSide(
-                        color: Color.fromARGB(255, 250, 175, 195),
+            flex: 3,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 120,
+                  child: TextField(
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white),
+                    controller: TextEditingController(text: _description),
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: "Description",
+                      focusedBorder: OutlineInputBorder(
+                        // color of the border
+                        borderSide: BorderSide(
+                          color: Color.fromARGB(255, 250, 175, 195),
+                        ),
                       ),
                     ),
+                    readOnly: true,
+                    onTap: () {
+                      _writeADescription();
+                    },
                   ),
-                  readOnly: true,
-                  onTap: () {
-                    _selectDate();
-                  },
                 ),
-              ),
+
+                SizedBox(
+                  width: 110,
+                  child: TextField(
+                    textAlign: TextAlign.center,
+                    controller: _dateController,
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: chosenDate.toString().split(" ")[0],
+                      focusedBorder: OutlineInputBorder(
+                        // color of the border
+                        borderSide: BorderSide(
+                          color: Color.fromARGB(255, 250, 175, 195),
+                        ),
+                      ),
+                    ),
+                    readOnly: true,
+                    onTap: () {
+                      _selectDate();
+                    },
+                  ),
+                ),
+              ],
             ),
+
+            /* SizedBox(
+                    child: OutlinedButton(
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStatePropertyAll(Colors.white),
+                        side: WidgetStatePropertyAll(
+                          BorderSide(
+                            color: Color.fromARGB(255, 250, 175, 195),
+                            width: 5,
+                          ),
+                        ),
+                      ),
+                      child: Text(
+                        "Write",
+                        style: TextStyle(color: Colors.black),
+                      ),
+
+                      //
+                      // important!!!
+                      //
+                      onPressed: () {},
+                    ),
+                  ),*/
           ),
 
           Expanded(
@@ -761,7 +812,7 @@ class _TodaysDreamState extends State<TodaysDream> {
                     addDream(
                       mixedColor(chosenSphereColors),
                       _dateController,
-                      "idk",
+                      _description,
                     );
                   },
                 ),
@@ -790,6 +841,46 @@ class _TodaysDreamState extends State<TodaysDream> {
       setState(() {
         _dateController.text = pickedDate.toString().split(" ")[0];
       });
+    } else {
+      _dateController.text = DateTime.now().toString().split(" ")[0];
     }
+  }
+
+  Future<void> _writeADescription() async {
+    final TextEditingController descriptionController = TextEditingController();
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Colors.black,
+          title: Text("Write your dream"),
+          content: SizedBox(
+            height: 200,
+            child: TextField(
+              controller: descriptionController,
+              maxLines: null,
+              expands: true,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text("Canscel"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _description = descriptionController.text;
+                });
+              },
+              child: Text("Save"),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
