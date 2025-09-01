@@ -6,6 +6,23 @@ import 'package:http/http.dart' as http;
 import 'package:table_calendar/table_calendar.dart';
 
 //
+// global guys
+//
+Map<DateTime, List<Dream>> dreams = {};
+
+//
+// global function guys
+//
+void addDreamToCalendar(Dream dream) {
+  final day = DateTime(dream.date.year, dream.date.month, dream.date.day);
+  if (dreams[day] != null) {
+    dreams[day]!.add(dream);
+  } else {
+    dreams[day] = [dream];
+  }
+}
+
+//
 // run application
 //
 void main() {
@@ -488,15 +505,22 @@ class _TodaysDreamState extends State<TodaysDream> {
   }
 
   //function for adding a Dream to The Calendar
-  Dream addDream(dreamsColor, dreamsDate, dreamsDescribe) {
+  Dream newDream(dreamsColor, dreamsDate, dreamsDescribe) {
     //print(dreamsColor);
-    print(dreamsDate);
+    //print(dreamsDate);
     //print(dreamsDescribe);
     return Dream(
       date: dreamsDate,
       emotionColor: dreamsColor,
       describe: dreamsDescribe,
     );
+  }
+
+  List<Dream> _getDreamsForDay(DateTime day) {
+    // x ?? y
+    // means
+    // if x is null, please, use y
+    return dreams[day] ?? [];
   }
 
   // function for deleting Emotion
@@ -812,11 +836,13 @@ class _TodaysDreamState extends State<TodaysDream> {
                   // important!!!
                   //
                   onPressed: () {
-                    addDream(
+                    final dream = newDream(
                       mixedColor(chosenSphereColors),
                       _chosenDate,
                       _description,
                     );
+
+                    addDreamToCalendar(dream);
                   },
                 ),
               ),
@@ -927,21 +953,65 @@ class Calendar extends StatefulWidget {
 //
 
 class _CalendarState extends State<Calendar> {
+  DateTime _focusedDay = DateTime.now();
+
+  // x? means that x would be Null in the begining and we are ok with that
+  DateTime? _selectedDay;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Container(
-        child: TableCalendar(
-          headerStyle: HeaderStyle(
-            formatButtonVisible: false,
-            titleCentered: true,
-            titleTextStyle: TextStyle(color: Colors.white),
-          ),
-          rowHeight: 80,
-          focusedDay: DateTime.now(),
-          firstDay: DateTime(2000),
-          lastDay: DateTime(2100),
+      body: TableCalendar(
+        headerStyle: HeaderStyle(
+          formatButtonVisible: false,
+          titleCentered: true,
+          titleTextStyle: TextStyle(color: Colors.white),
+        ),
+        rowHeight: 80,
+        focusedDay: DateTime.now(),
+        firstDay: DateTime(2000),
+        lastDay: DateTime(2100),
+
+        // we need this just because "==" is not working with DateTime normaly TTnTT
+        selectedDayPredicate: (day) {
+          return isSameDay(_selectedDay, day);
+        },
+
+        // changing a day to the day what you are selecting
+        onDaySelected: (selectedDay, focusedDay) {
+          setState(() {
+            _selectedDay = selectedDay;
+            _focusedDay = focusedDay;
+          });
+        },
+
+        eventLoader: (day) => dreams[day] ?? [],
+
+        calendarBuilders: CalendarBuilders(
+          defaultBuilder: (context, day, focusedDay) {
+            final thisDreams = dreams[day] ?? [];
+            if (thisDreams.isNotEmpty) {
+              final dream = thisDreams.first;
+
+              return Center(
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: dream.emotionColor,
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    "${day.day}",
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+              );
+            }
+            return null;
+          },
         ),
       ),
     );
