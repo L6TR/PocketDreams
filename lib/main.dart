@@ -3,6 +3,7 @@ import 'package:pocket_dreams/bloc/backend_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:table_calendar/table_calendar.dart';
 
 //
 // run application
@@ -423,7 +424,7 @@ final List<Emotion> emotions = [
 //
 
 class Dream {
-  final String date;
+  final DateTime date;
   final Color emotionColor;
   final String describe;
 
@@ -488,6 +489,9 @@ class _TodaysDreamState extends State<TodaysDream> {
 
   //function for adding a Dream to The Calendar
   Dream addDream(dreamsColor, dreamsDate, dreamsDescribe) {
+    //print(dreamsColor);
+    print(dreamsDate);
+    //print(dreamsDescribe);
     return Dream(
       date: dreamsDate,
       emotionColor: dreamsColor,
@@ -539,6 +543,7 @@ class _TodaysDreamState extends State<TodaysDream> {
 
   final TextEditingController _dateController = TextEditingController();
   String _description = "";
+  DateTime _chosenDate = DateTime.now();
 
   @override
   Widget build(BuildContext context) {
@@ -809,7 +814,7 @@ class _TodaysDreamState extends State<TodaysDream> {
                   onPressed: () {
                     addDream(
                       mixedColor(chosenSphereColors),
-                      _dateController,
+                      _chosenDate,
                       _description,
                     );
                   },
@@ -837,6 +842,7 @@ class _TodaysDreamState extends State<TodaysDream> {
 
     if (pickedDate != null) {
       setState(() {
+        _chosenDate = pickedDate;
         _dateController.text = pickedDate.toString().split(" ")[0];
       });
     } else {
@@ -923,6 +929,21 @@ class Calendar extends StatefulWidget {
 class _CalendarState extends State<Calendar> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(backgroundColor: Colors.black, body: Container());
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Container(
+        child: TableCalendar(
+          headerStyle: HeaderStyle(
+            formatButtonVisible: false,
+            titleCentered: true,
+            titleTextStyle: TextStyle(color: Colors.white),
+          ),
+          rowHeight: 80,
+          focusedDay: DateTime.now(),
+          firstDay: DateTime(2000),
+          lastDay: DateTime(2100),
+        ),
+      ),
+    );
   }
 }
