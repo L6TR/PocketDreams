@@ -238,9 +238,7 @@ class _BaseState extends State<Base> {
       case 1:
         return const TodaysDream();
       case 2:
-        return Center(
-          child: Text("Calendar screen", style: TextStyle(color: Colors.white)),
-        );
+        return const Calendar();
       case 3:
         return const Settings();
       default:
@@ -854,13 +852,28 @@ class _TodaysDreamState extends State<TodaysDream> {
       builder: (context) {
         return AlertDialog(
           backgroundColor: Colors.black,
-          title: Text("Write your dream"),
+          title: Text(
+            "Write your dream",
+            style: TextStyle(color: Colors.white),
+          ),
           content: SizedBox(
             height: 200,
             child: TextField(
               controller: descriptionController,
               maxLines: null,
               expands: true,
+              style: TextStyle(color: Colors.white),
+              cursorColor: Color.fromARGB(255, 250, 175, 195),
+              decoration: InputDecoration(
+                hintText: "Describe your dream...",
+                hintStyle: TextStyle(color: Colors.white54),
+                border: OutlineInputBorder(),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Color.fromARGB(255, 250, 175, 195),
+                  ),
+                ),
+              ),
             ),
           ),
           actions: [
@@ -868,13 +881,18 @@ class _TodaysDreamState extends State<TodaysDream> {
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text("Canscel"),
+              child: Text("Cancel", style: TextStyle(color: Colors.white70)),
             ),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color.fromARGB(255, 250, 175, 195),
+                foregroundColor: Colors.black,
+              ),
               onPressed: () {
                 setState(() {
                   _description = descriptionController.text;
                 });
+                Navigator.pop(context);
               },
               child: Text("Save"),
             ),
@@ -882,5 +900,29 @@ class _TodaysDreamState extends State<TodaysDream> {
         );
       },
     );
+  }
+}
+
+//
+// TodaysDream widget
+// Base for _TodaysDreamState
+//
+
+class Calendar extends StatefulWidget {
+  const Calendar({super.key});
+
+  @override
+  State<Calendar> createState() => _CalendarState();
+}
+
+//
+// _TodaysDreamState
+// child of TodaysDream()
+//
+
+class _CalendarState extends State<Calendar> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(backgroundColor: Colors.black, body: Container());
   }
 }
