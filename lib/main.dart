@@ -15,6 +15,8 @@ Map<DateTime, List<Dream>> dreams = {};
 //
 void addDreamToCalendar(Dream dream) {
   final day = DateTime(dream.date.year, dream.date.month, dream.date.day);
+
+  //print(dreams[day]);
   if (dreams[day] != null) {
     dreams[day]!.add(dream);
   } else {
@@ -516,13 +518,6 @@ class _TodaysDreamState extends State<TodaysDream> {
     );
   }
 
-  List<Dream> _getDreamsForDay(DateTime day) {
-    // x ?? y
-    // means
-    // if x is null, please, use y
-    return dreams[day] ?? [];
-  }
-
   // function for deleting Emotion
   void removeEmotion(int index) {
     setState(() {
@@ -953,10 +948,53 @@ class Calendar extends StatefulWidget {
 //
 
 class _CalendarState extends State<Calendar> {
+  // final => const value
+  // late => variable would have a value latter, but not on the start
+  // ValueNotifier x; => doing something, when the value of x is changing
+  late final ValueNotifier<List<Dream>> _selectedDays;
+
   DateTime _focusedDay = DateTime.now();
 
   // x? means that x would be Null in the begining and we are ok with that
   DateTime? _selectedDay;
+
+  @override
+  // initState() {x}; we are doing x, one time, when we are initing a State
+  void initState() {
+    //means, we dont @override it
+    super.initState();
+
+    _selectedDay = _focusedDay;
+
+    // x! means i am sure that x wouldnt be Null
+    _selectedDays = ValueNotifier(_getDreamsForDay(_selectedDay!));
+  }
+
+  // we need this one to deleting data when we are not looking at the widget
+  @override
+  void dispose() {
+    _selectedDays.dispose();
+    super.dispose();
+  }
+
+  // return the list of Object for the specific day
+  List<Dream> _getDreamsForDay(DateTime day) {
+    // x ?? y
+    // means
+    // if x is null, please, use y
+    return dreams[DateTime(day.year, day.month, day.day)] ?? [];
+  }
+
+  void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
+    if (!isSameDay(_selectedDay, selectedDay)) {
+      setState(() {
+        _selectedDay = selectedDay;
+        _focusedDay = focusedDay;
+      });
+
+      _selectedDays.value = _getDreamsForDay(selectedDay);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -970,8 +1008,8 @@ class _CalendarState extends State<Calendar> {
         ),
         rowHeight: 80,
         focusedDay: DateTime.now(),
-        firstDay: DateTime(2000),
-        lastDay: DateTime(2100),
+        firstDay: DateTime(2000, 1, 1),
+        lastDay: DateTime(2100, 1, 1),
 
         // we need this just because "==" is not working with DateTime normaly TTnTT
         selectedDayPredicate: (day) {
@@ -985,29 +1023,25 @@ class _CalendarState extends State<Calendar> {
             _focusedDay = focusedDay;
           });
         },
-
-        eventLoader: (day) => dreams[day] ?? [],
-
+        eventLoader: (day) {
+          return _getDreamsForDay(day);
+        },
         calendarBuilders: CalendarBuilders(
-          defaultBuilder: (context, day, focusedDay) {
-            final thisDreams = dreams[day] ?? [];
-            if (thisDreams.isNotEmpty) {
-              final dream = thisDreams.first;
-
-              return Center(
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: dream.emotionColor,
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    "${day.day}",
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                ),
+          markerBuilder: (context, date, dreams) {
+            if (dreams.isNotEmpty) {
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: dreams.take(3).map((dream) {
+                  return Container(
+                    margin: EdgeInsets.symmetric(horizontal: 1.5),
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: (dream as Dream).emotionColor,
+                    ),
+                  );
+                }).toList(),
               );
             }
             return null;
