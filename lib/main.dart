@@ -878,7 +878,7 @@ class _TodaysDreamState extends State<TodaysDream> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: Colors.black,
+          backgroundColor: Color.fromARGB(255, 5, 5, 5),
           title: Text(
             "Write your dream",
             style: TextStyle(color: Colors.white),
@@ -891,6 +891,7 @@ class _TodaysDreamState extends State<TodaysDream> {
               expands: true,
               style: TextStyle(color: Colors.white),
               cursorColor: Color.fromARGB(255, 250, 175, 195),
+
               decoration: InputDecoration(
                 hintText: "Describe your dream...",
                 hintStyle: TextStyle(color: Colors.white54),
@@ -985,7 +986,7 @@ class _CalendarState extends State<Calendar> {
     return dreams[DateTime(day.year, day.month, day.day)] ?? [];
   }
 
-  void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
+  /*void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
     if (!isSameDay(_selectedDay, selectedDay)) {
       setState(() {
         _selectedDay = selectedDay;
@@ -994,13 +995,14 @@ class _CalendarState extends State<Calendar> {
 
       _selectedDays.value = _getDreamsForDay(selectedDay);
     }
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
       body: TableCalendar(
+        calendarStyle: CalendarStyle(outsideDaysVisible: false),
         headerStyle: HeaderStyle(
           formatButtonVisible: false,
           titleCentered: true,
@@ -1032,13 +1034,33 @@ class _CalendarState extends State<Calendar> {
               return Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: dreams.take(3).map((dream) {
-                  return Container(
-                    margin: EdgeInsets.symmetric(horizontal: 1.5),
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: (dream as Dream).emotionColor,
+                  //
+                  // now we can use onTap
+                  return GestureDetector(
+                    onTap: () {
+                      showDialog(
+                        context: (context),
+                        builder: (context) => AlertDialog(
+                          backgroundColor: Colors.black,
+                          title: Text(
+                            "Dream on ${date.toString().split(" ")[0]}",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          content: Text(
+                            (dream).describe,
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      margin: EdgeInsets.symmetric(horizontal: 1.5),
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: (dream as Dream).emotionColor,
+                      ),
                     ),
                   );
                 }).toList(),
