@@ -47,7 +47,7 @@ class PocketDreams extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "Pocket Dreams",
-      home: const /*LoginScreen*/ Base(),
+      home: const /*LoginScreen()*/ Base(),
     );
   }
 }
@@ -70,6 +70,31 @@ class RegisterScreen extends StatefulWidget {
 //
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  final nicknameController = TextEditingController();
+  final passwordController = TextEditingController();
+  String message = "";
+
+  Future<void> register() async {
+    final response = await http.post(
+      Uri.parse("http://10.0.1.12:5000/api/register"),
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({
+        "nickname": nicknameController.text,
+        "password": passwordController.text,
+      }),
+    );
+
+    final data = json.decode(response.body);
+
+    setState(() {
+      message = data["message"];
+    });
+
+    if (data["success"]) {
+      /*Navigator.push(context, MaterialPageRoute(builder: (context) => Base()));*/
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold();
@@ -95,7 +120,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool isRemembered = false;
-  final emailController = TextEditingController();
+  final nicknameController = TextEditingController();
   final passwordController = TextEditingController();
   String message = "";
 
@@ -104,7 +129,7 @@ class _LoginScreenState extends State<LoginScreen> {
       Uri.parse("http://10.0.1.12:5000/api/login"),
       headers: {"Content-Type": "application/json"},
       body: json.encode({
-        "email": emailController.text,
+        "nickname": nicknameController.text,
         "password": passwordController.text,
       }),
     );
@@ -157,7 +182,7 @@ class _LoginScreenState extends State<LoginScreen> {
             SizedBox(
               width: 250,
               child: TextField(
-                controller: emailController,
+                controller: nicknameController,
                 style: TextStyle(color: Colors.white),
 
                 // color of blinking |
