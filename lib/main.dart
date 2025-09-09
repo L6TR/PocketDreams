@@ -53,6 +53,30 @@ class PocketDreams extends StatelessWidget {
 }
 
 //
+// Register widget
+// Base for register
+//
+
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
+
+  @override
+  State<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+//
+// _RegisterScreenState widget
+// child of Login()
+//
+
+class _RegisterScreenState extends State<RegisterScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold();
+  }
+}
+
+//
 // Login widget
 // Base for login
 //
@@ -65,7 +89,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 //
-// _LoginScreenState
+// _LoginScreenState widget
+// child of Login()
 //
 
 class _LoginScreenState extends State<LoginScreen> {

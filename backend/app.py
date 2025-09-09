@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 conn = sqlite3.connect("pocketdreams.db") # connection to the databse
 cursor = conn.cursor() # we need this one for our SQL commands
-cursor.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, email TEXT, password TEXT)")
+cursor.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, nickname TEXT, password TEXT)")
 #making a table if it doesnt exist
 
 
@@ -14,20 +14,29 @@ conn.close() # ending our connection
 
 @app.route("/api/register", methods=["POST"])
 def register():
-    data = request.json
+    conn = sqlite3.connect("pocketdreams.db")
+    cursor = conn.cursor()
+
+    nickname = "merunka"
+    password = "4321"
+
+    cursor.execute("INSERT INTO users (nickname, password) VALUES (?, ?)", (nickname,password))
     
+    conn.commit()
+    conn.close
+
 @app.route("/api/login", methods=["POST"])
 def login():
     data = request.json
-    email = data.get("email")
+    nickname = data.get("nickname")
     password = data.get("password")
 
     conn = sqlite3.connect("pocketdreams.db")
     cursor = conn.cursor()
 
-    # "email = ?", (email) 
-    # means that email would change on (email) and ? is just placeholder
-    cursor.execute("SELECT password FROM users WHERE email = ?", (email))
+    # "nickname = ?", (nickname) 
+    # means that nickname would change on (nickname) and ? is just placeholder
+    cursor.execute("SELECT password FROM users WHERE nickname = ?", (nickname))
 
     # fetchone means chose first in our cursor or return None 
     row = cursor.fetchone()
