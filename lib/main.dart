@@ -47,8 +47,10 @@ class PocketDreams extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "Pocket Dreams",
-      home: const LoginScreen(),
-      /*Base()*/
+      home:
+          const
+          /*LoginScreen(),*/
+          Base(),
     );
   }
 }
