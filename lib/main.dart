@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:table_calendar/table_calendar.dart';
+import 'package:flutter/services.dart';
+//https://stackoverflow.com/questions/49418332/flutter-how-to-prevent-device-orientation-changes-and-force-portrait
 
 //
 // global guys
@@ -27,12 +29,16 @@ void addDreamToCalendar(Dream dream) {
 //
 // run application
 //
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
   runApp(
     BlocProvider(
       create: (context) => BackendBloc(),
       child: const PocketDreams(),
-    ) /*const PocketDreams()*/,
+    ),
   );
 }
 
@@ -513,29 +519,6 @@ class _BaseState extends State<Base> {
 
       backgroundColor: Colors.black,
       body: _buildBody(),
-
-      /*Stack(
-        children: [
-          Container(
-            color: Colors.grey,
-            child: SizedBox(
-              width: 100,
-              height: 100,
-              child: const Text("Dreams"),
-            ),
-          ),
-
-// 
-// BlocBuilder !!!
-//
-
-          BlocBuilder<BackendBloc, String>(
-            builder: (context, state) {
-              return Text(state);
-            },
-          ),
-        ],
-      ),*/
       bottomNavigationBar: NavigationBar(
         destinations: [
           NavigationDestination(
