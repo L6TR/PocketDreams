@@ -12,6 +12,7 @@ cursor.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, nickna
 conn.commit() # saving changes in our database
 conn.close() # ending our connection
 
+
 @app.route("/api/register", methods=["POST"])
 def register():
     conn = sqlite3.connect("pocketdreams.db")
@@ -23,7 +24,10 @@ def register():
     cursor.execute("INSERT INTO users (nickname, password) VALUES (?, ?)", (nickname,password))
     
     conn.commit()
-    conn.close
+    conn.close()
+
+    return jsonify({"success": True, "message": "User registered"})
+
 
 @app.route("/api/login", methods=["POST"])
 def login():
@@ -36,13 +40,13 @@ def login():
 
     # "nickname = ?", (nickname) 
     # means that nickname would change on (nickname) and ? is just placeholder
-    cursor.execute("SELECT password FROM users WHERE nickname = ?", (nickname))
+    cursor.execute("SELECT password FROM users WHERE nickname = ?", (nickname,))
 
     # fetchone means chose first in our cursor or return None 
     row = cursor.fetchone()
 
 
-    conn.close
+    conn.close()
 
     if row and row[0] == password:
         return jsonify({"success":True, "message": "Welcome back"})

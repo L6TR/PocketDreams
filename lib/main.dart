@@ -653,6 +653,12 @@ final List<Emotion> emotions = [
   Emotion(name: "Love", color: Color.fromARGB(255, 255, 0, 0)),
   Emotion(name: "Calm", color: Color.fromARGB(255, 0, 0, 255)),
   Emotion(name: "Harmony", color: Color.fromARGB(255, 0, 255, 0)),
+  Emotion(name: "Harmony", color: Color.fromARGB(255, 0, 255, 255)),
+  Emotion(name: "idk0", color: Color.fromARGB(255, 255, 0, 255)),
+
+  Emotion(name: "idk", color: Color.fromARGB(255, 255, 255, 255)),
+  Emotion(name: "idk2", color: Color.fromARGB(255, 0, 0, 0)),
+
   Emotion(name: "Warmth", color: Color.fromARGB(255, 255, 165, 0)),
 ];
 
@@ -698,29 +704,30 @@ class _TodaysDreamState extends State<TodaysDream> {
 
   List<EmotionButton> chosenEmotionButtons = [];
 
-  //function for mixing collors
+  //function for mixing colors
   Color mixedColor(List<Color> colorList) {
-    double mixedA = 0;
+    if (colorList.isEmpty) return Colors.white10;
+
     double mixedR = 0;
     double mixedG = 0;
     double mixedB = 0;
 
-    if (colorList.isEmpty) return Colors.white10;
-
     for (int i = 0; i < colorList.length; i++) {
-      mixedA += (colorList[i].a * 255.0 / colorList.length);
+      mixedR += (colorList[i].r * 255.0);
 
-      mixedR += (colorList[i].r * 255.0 / colorList.length);
+      mixedG += (colorList[i].g * 255.0);
 
-      mixedG += (colorList[i].g * 255.0 / colorList.length);
-
-      mixedB += (colorList[i].b * 255.0 / colorList.length);
+      mixedB += (colorList[i].b * 255.0);
     }
+
+    int len = colorList.length;
+    print(colorList);
+    print(Color.fromARGB(255, mixedR.round(), mixedG.round(), mixedB.round()));
     return Color.fromARGB(
-      mixedA.round() & 0xff,
-      mixedR.round() & 0xff,
-      mixedG.round() & 0xff,
-      mixedB.round() & 0xff,
+      255,
+      (mixedR / len).round(),
+      (mixedG / len).round(),
+      (mixedB / len).round(),
     );
   }
 
@@ -1025,7 +1032,7 @@ class _TodaysDreamState extends State<TodaysDream> {
                     ),
                   ),*/
           ),
-
+          /*Expanded(flex: 1, child: Text("ok")),*/
           Expanded(
             flex: 1,
             child: Center(
@@ -1220,7 +1227,13 @@ class _CalendarState extends State<Calendar> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: TableCalendar(
-        calendarStyle: CalendarStyle(outsideDaysVisible: false),
+        calendarStyle: CalendarStyle(
+          outsideDaysVisible: false,
+          selectedDecoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(500),
+            border: Border.all(width: 2, color: Colors.white),
+          ),
+        ),
         headerStyle: HeaderStyle(
           formatButtonVisible: false,
           titleCentered: true,
@@ -1229,7 +1242,7 @@ class _CalendarState extends State<Calendar> {
         rowHeight: 80,
         focusedDay: DateTime.now(),
         firstDay: DateTime(2000, 1, 1),
-        lastDay: DateTime(2100, 1, 1),
+        lastDay: DateTime.now(),
 
         // we need this just because "==" is not working with DateTime normaly TTnTT
         selectedDayPredicate: (day) {
@@ -1246,47 +1259,6 @@ class _CalendarState extends State<Calendar> {
         eventLoader: (day) {
           return _getDreamsForDay(day);
         },
-        calendarBuilders: CalendarBuilders(
-          markerBuilder: (context, date, dreams) {
-            if (dreams.isNotEmpty) {
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: dreams.take(3).map((dream) {
-                  //
-                  // now we can use onTap
-                  return GestureDetector(
-                    onTap: () {
-                      showDialog(
-                        context: (context),
-                        builder: (context) => AlertDialog(
-                          backgroundColor: Colors.black,
-                          title: Text(
-                            "Dream on ${date.toString().split(" ")[0]}",
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          content: Text(
-                            (dream).describe,
-                            style: TextStyle(color: Colors.white70),
-                          ),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      margin: EdgeInsets.symmetric(horizontal: 1.5),
-                      width: 10,
-                      height: 10,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: (dream as Dream).emotionColor,
-                      ),
-                    ),
-                  );
-                }).toList(),
-              );
-            }
-            return null;
-          },
-        ),
       ),
     );
   }
