@@ -5,28 +5,42 @@ app = Flask(__name__)
 
 conn = sqlite3.connect("pocketdreams.db") # connection to the databse
 cursor = conn.cursor() # we need this one for our SQL commands
+
 cursor.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, nickname TEXT, password TEXT)")
 #making a table if it doesnt exist
 
 
-conn.commit() # saving changes in our database
-conn.close() # ending our connection
+#conn.commit() # saving changes in our database
+#conn.close() # ending our connection
+
 
 
 @app.route("/api/register", methods=["POST"])
 def register():
+    data = request.json
+    nickname = data.get("nickname")
+    password = data.get("password")
+
+    # if a nick or a password is empty
+    if not nickname or not password:
+        return jsonify({"success": False, "message": "Nickname and password required"}), 400
+
     conn = sqlite3.connect("pocketdreams.db")
     cursor = conn.cursor()
 
-    nickname = "merunka"
-    password = "4321"
+    # if user is alredy exist
+    cursor.execute("SELECT id FROM users WHERE nickname = ?", (nickname,))
+    if cursor.fetchone():
+        conn.close()
+        return jsonify({"success": False, "message": "User is already exist"}), 400
 
-    cursor.execute("INSERT INTO users (nickname, password) VALUES (?, ?)", (nickname,password))
-    
+    # and now we can add a new user
+    cursor.execute("INSERT INTO users (nickname, password) VALUES (?, ?)", (nickname, password))
     conn.commit()
     conn.close()
 
     return jsonify({"success": True, "message": "User registered"})
+
 
 
 @app.route("/api/login", methods=["POST"])
@@ -45,7 +59,8 @@ def login():
     # fetchone means chose first in our cursor or return None 
     row = cursor.fetchone()
 
-
+    
+    conn.commit()
     conn.close()
 
     if row and row[0] == password:

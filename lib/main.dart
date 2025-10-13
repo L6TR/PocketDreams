@@ -85,7 +85,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> register() async {
     final response = await http.post(
-      Uri.parse("http://10.0.1.12:5000/api/register"),
+      Uri.parse("http://192.168.0.233:5000/api/register"),
       headers: {"Content-Type": "application/json"},
       body: json.encode({
         "nickname": nicknameController.text,
@@ -100,7 +100,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     if (data["success"]) {
-      /*Navigator.push(context, MaterialPageRoute(builder: (context) => Base()));*/
+      /*Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => Base()),
+      );*/
     }
   }
 
@@ -192,7 +195,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       "Register",
                       style: TextStyle(color: Colors.black),
                     ),
-                    onPressed: () {},
+                    onPressed: () {
+                      register();
+                    },
                   ),
                   SizedBox(height: 10),
                   Text(message, style: TextStyle(color: Colors.red)),
