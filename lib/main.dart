@@ -88,7 +88,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> register() async {
     final response = await http.post(
-      Uri.parse("http://192.168.0.233:5000/api/register"),
+      Uri.parse("http://10.1.240.99:5000/api/register"),
       headers: {"Content-Type": "application/json"},
       body: json.encode({
         "nickname": nicknameController.text,
@@ -103,16 +103,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     if (data["success"]) {
-      /*Navigator.pushReplacement(
+      Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => Base()),
-      );*/
+        MaterialPageRoute(builder: (context) => LoginScreen()),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 250, 175, 195),
         title: const Text("Pocket Dreams"),
@@ -278,7 +279,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> login() async {
     final response = await http.post(
-      Uri.parse("http://10.0.1.12:5000/api/login"),
+      Uri.parse("http://10.1.240.99:5000/api/login"),
       headers: {"Content-Type": "application/json"},
       body: json.encode({
         "nickname": nicknameController.text,
@@ -293,7 +294,10 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     if (data["success"]) {
-      Navigator.push(context, MaterialPageRoute(builder: (context) => Base()));
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => Base()),
+      );
     }
   }
 
@@ -312,6 +316,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 250, 175, 195),
         title: const Text("Pocket Dreams"),
@@ -729,8 +734,6 @@ class _TodaysDreamState extends State<TodaysDream> {
     }
 
     int len = colorList.length;
-    print(colorList);
-    print(Color.fromARGB(255, mixedR.round(), mixedG.round(), mixedB.round()));
     return Color.fromARGB(
       255,
       (mixedR / len).round(),

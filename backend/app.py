@@ -6,7 +6,7 @@ app = Flask(__name__)
 conn = sqlite3.connect("pocketdreams.db") # connection to the databse
 cursor = conn.cursor() # we need this one for our SQL commands
 
-cursor.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, nickname TEXT, password TEXT)")
+cursor.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, nickname TEXT, password TEXT,)")
 #making a table if it doesnt exist
 
 
@@ -49,6 +49,10 @@ def login():
     nickname = data.get("nickname")
     password = data.get("password")
 
+    # if a nick or a password is empty
+    if not nickname or not password:
+        return jsonify({"success": False, "message": "Nickname and password required"}), 400
+
     conn = sqlite3.connect("pocketdreams.db")
     cursor = conn.cursor()
 
@@ -59,14 +63,14 @@ def login():
     # fetchone means chose first in our cursor or return None 
     row = cursor.fetchone()
 
+
+    if row and row[0] != password:
+        return jsonify({"success":False, "message": "Invalid login or password"}), 401
     
     conn.commit()
     conn.close()
 
-    if row and row[0] == password:
-        return jsonify({"success":True, "message": "Welcome back"})
-    else:
-        return jsonify({"success":False, "message": "Invalid login or password"}), 401
+    return jsonify({"success":True, "message": "Welcome back"})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
