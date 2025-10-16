@@ -3,7 +3,10 @@ import 'package:pocket_dreams/bloc/backend_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:table_calendar/table_calendar.dart';
+import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart';
+import 'package:flutter_calendar_carousel/classes/event.dart';
+import 'package:flutter_calendar_carousel/classes/event_list.dart';
+
 import 'package:flutter/services.dart';
 //https://stackoverflow.com/questions/49418332/flutter-how-to-prevent-device-orientation-changes-and-force-portrait
 
@@ -1184,6 +1187,10 @@ class _CalendarState extends State<Calendar> {
   // ValueNotifier x; => doing something, when the value of x is changing
   late final ValueNotifier<List<Dream>> _selectedDays;
 
+  DateTime _currentDate = DateTime.now();
+
+  late EventList<Event> _markedDateMap;
+
   DateTime _focusedDay = DateTime.now();
 
   // x? means that x would be Null in the begining and we are ok with that
@@ -1195,10 +1202,30 @@ class _CalendarState extends State<Calendar> {
     //means, we dont @override it
     super.initState();
 
-    _selectedDay = _focusedDay;
+    @override
+    void initState() {
+      super.initState();
 
-    // x! means i am sure that x wouldnt be Null
-    _selectedDays = ValueNotifier(_getDreamsForDay(_selectedDay!));
+      _markedDateMap = EventList<Event>(
+        events: dreams.map((date, dreamList) {
+          return MapEntry(
+            date,
+            dreamList.map((d) {
+              return Event(
+                date: date,
+                title: d.describe,
+                dot: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 1.0),
+                  color: d.emotionColor,
+                  height: 5.0,
+                  width: 5.0,
+                ),
+              );
+            }).toList(),
+          );
+        }),
+      );
+    }
   }
 
   // we need this one to deleting data when we are not looking at the widget
@@ -1231,39 +1258,50 @@ class _CalendarState extends State<Calendar> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: TableCalendar(
-        calendarStyle: CalendarStyle(
-          outsideDaysVisible: false,
-          selectedDecoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(500),
-            border: Border.all(width: 2, color: Colors.white),
-          ),
-        ),
-        headerStyle: HeaderStyle(
-          formatButtonVisible: false,
-          titleCentered: true,
-          titleTextStyle: TextStyle(color: Colors.white),
-        ),
-        rowHeight: 80,
-        focusedDay: DateTime.now(),
-        firstDay: DateTime(2000, 1, 1),
-        lastDay: DateTime.now(),
-
-        // we need this just because "==" is not working with DateTime normaly TTnTT
-        selectedDayPredicate: (day) {
-          return isSameDay(_selectedDay, day);
-        },
-
-        // changing a day to the day what you are selecting
-        onDaySelected: (selectedDay, focusedDay) {
+      body: CalendarCarousel<Event>(
+        height: 420,
+        daysHaveCircularBorder: false,
+        weekendTextStyle: const TextStyle(color: Colors.red),
+        weekdayTextStyle: const TextStyle(color: Colors.white),
+        thisMonthDayBorderColor: Colors.grey,
+        selectedDateTime: _currentDate,
+        markedDatesMap: _markedDateMap,
+        selectedDayButtonColor: const Color.fromARGB(255, 250, 175, 195),
+        todayButtonColor: Colors.blueAccent,
+        todayBorderColor: Colors.transparent,
+        selectedDayBorderColor: Colors.white,
+        onDayPressed: (DateTime date, List<Event> events) {
           setState(() {
-            _selectedDay = selectedDay;
-            _focusedDay = focusedDay;
+            _currentDate = date;
           });
+          for (var e in events) {
+            print(e.title);
+          }
         },
-        eventLoader: (day) {
-          return _getDreamsForDay(day);
-        },
+        daysTextStyle: const TextStyle(color: Colors.white),
+        headerTextStyle: const TextStyle(color: Colors.white, fontSize: 20),
+        showHeaderButton: true,
+        minSelectedDate: DateTime(2020),
+        maxSelectedDate:
+            DateTime.now(), // 🔹 ограничиваем календарь до сегодняшнего дня
+        customDayBuilder:
+            (
+              bool isSelectable,
+              int index,
+              bool isSelectedDay,
+              bool isToday,
+              bool isPrevMonthDay,
+              TextStyle textStyle,
+              bool isNextMonthDay,
+              bool isThisMonthDay,
+              DateTime day,
+            ) {
+              // 🔹 Скрываем дни после сегодняшнего
+              if (day.isAfter(DateTime.now())) {
+                return const SizedBox.shrink();
+              }
+              return null;
+            },
       ),
     );
   }
