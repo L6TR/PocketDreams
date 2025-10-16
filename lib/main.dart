@@ -658,7 +658,7 @@ final List<Emotion> emotions = [
   Emotion(name: "Love", color: Color.fromARGB(255, 255, 0, 0)),
   Emotion(name: "Calm", color: Color.fromARGB(255, 0, 0, 255)),
   Emotion(name: "Harmony", color: Color.fromARGB(255, 0, 255, 0)),
-  Emotion(name: "Harmony", color: Color.fromARGB(255, 0, 255, 255)),
+  Emotion(name: "Harmony2", color: Color.fromARGB(255, 0, 255, 255)),
   Emotion(name: "idk0", color: Color.fromARGB(255, 255, 0, 255)),
 
   Emotion(name: "idk", color: Color.fromARGB(255, 255, 255, 255)),
@@ -726,8 +726,6 @@ class _TodaysDreamState extends State<TodaysDream> {
     }
 
     int len = colorList.length;
-    print(colorList);
-    print(Color.fromARGB(255, mixedR.round(), mixedG.round(), mixedB.round()));
     return Color.fromARGB(
       255,
       (mixedR / len).round(),
@@ -738,9 +736,6 @@ class _TodaysDreamState extends State<TodaysDream> {
 
   //function for adding a Dream to The Calendar
   Dream newDream(dreamsColor, dreamsDate, dreamsDescribe) {
-    //print(dreamsColor);
-    //print(dreamsDate);
-    //print(dreamsDescribe);
     return Dream(
       date: dreamsDate,
       emotionColor: dreamsColor,
@@ -1162,8 +1157,8 @@ class _TodaysDreamState extends State<TodaysDream> {
 }
 
 //
-// TodaysDream widget
-// Base for _TodaysDreamState
+// Calendar widget
+// Base for _CalendarState
 //
 
 class Calendar extends StatefulWidget {
@@ -1174,8 +1169,8 @@ class Calendar extends StatefulWidget {
 }
 
 //
-// _TodaysDreamState
-// child of TodaysDream()
+// _CalendarState
+// child of Calendar()
 //
 
 class _CalendarState extends State<Calendar> {
@@ -1234,15 +1229,14 @@ class _CalendarState extends State<Calendar> {
       body: TableCalendar(
         calendarStyle: CalendarStyle(
           outsideDaysVisible: false,
-          selectedDecoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(500),
-            border: Border.all(width: 2, color: Colors.white),
-          ),
+          defaultTextStyle: TextStyle(color: Colors.white),
         ),
         headerStyle: HeaderStyle(
-          formatButtonVisible: false,
           titleCentered: true,
-          titleTextStyle: TextStyle(color: Colors.white),
+          formatButtonVisible: false,
+          titleTextStyle: TextStyle(color: Colors.white, fontSize: 18),
+          leftChevronIcon: Icon(Icons.chevron_left, color: Colors.white),
+          rightChevronIcon: Icon(Icons.chevron_right, color: Colors.white),
         ),
         rowHeight: 80,
         focusedDay: DateTime.now(),
@@ -1253,6 +1247,31 @@ class _CalendarState extends State<Calendar> {
         selectedDayPredicate: (day) {
           return isSameDay(_selectedDay, day);
         },
+
+        calendarBuilders: CalendarBuilders(
+          defaultBuilder: (context, day, focusedDay) {
+            final normalizedTime = DateTime(day.year, day.month, day.day);
+
+            if (dreams.containsKey(normalizedTime) &&
+                dreams[normalizedTime]!.isNotEmpty) {
+              final dream = dreams[normalizedTime]!.last;
+              return Container(
+                margin: const EdgeInsets.all(4.0),
+                decoration: BoxDecoration(
+                  color: dream.emotionColor,
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  '${day.day}',
+                  style: const TextStyle(color: Colors.white),
+                ),
+              );
+            }
+
+            return null;
+          },
+        ),
 
         // changing a day to the day what you are selecting
         onDaySelected: (selectedDay, focusedDay) {
