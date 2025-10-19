@@ -28,6 +28,21 @@ void addDreamToCalendar(Dream dream) {
   }
 }
 
+OutlinedButton clowdyButton(String myText, doSomething) {
+  return OutlinedButton(
+    style: ButtonStyle(
+      backgroundColor: WidgetStatePropertyAll(Colors.white),
+      side: WidgetStatePropertyAll(
+        BorderSide(color: Color.fromARGB(255, 250, 175, 195), width: 5),
+      ),
+    ),
+    child: Text(myText, style: TextStyle(color: Colors.black)),
+    onPressed: () {
+      doSomething;
+    },
+  );
+}
+
 //
 // run application
 //
@@ -183,6 +198,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                     ),
                   ),
+
+                  clowdyButton("Register", register()),
 
                   OutlinedButton(
                     style: ButtonStyle(
