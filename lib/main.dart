@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:pocket_dreams/bloc/backend_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -56,7 +58,8 @@ class PocketDreams extends StatelessWidget {
       home:
           const
           /*LoginScreen(),*/
-          Base(),
+          /*Base(),*/
+          TagScreen(),
     );
   }
 }
@@ -100,10 +103,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     if (data["success"]) {
-      /*Navigator.pushReplacement(
+      Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => Base()),
-      );*/
+        MaterialPageRoute(builder: (context) => TagScreen()),
+      );
     }
   }
 
@@ -251,6 +254,118 @@ class _RegisterScreenState extends State<RegisterScreen> {
 }
 
 //
+// Tag widget
+// Base for Tags
+//
+
+class TagScreen extends StatefulWidget {
+  const TagScreen({super.key});
+
+  @override
+  State<TagScreen> createState() => _TagScreenState();
+}
+
+class _TagScreenState extends State<TagScreen> {
+  // list of Tags for database
+  static const tagList = [
+    "Nightmare",
+    "Future",
+    "Family",
+    "Fantasy",
+    "Unreal",
+    "Love",
+    "Tag1",
+    "Tag2",
+    "Tag3",
+  ];
+
+  List<String> shuffledTags = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    List<String> tagsCopy = List.from(tagList);
+    for (int i = 0; i < 6; i++) {
+      String randomTag = tagsCopy[Random().nextInt(tagsCopy.length)];
+
+      shuffledTags.add(randomTag);
+      tagsCopy.remove(randomTag);
+    }
+  }
+
+  OutlinedButton buttonGenerator(name) {
+    return OutlinedButton(
+      style: ButtonStyle(
+        backgroundColor: WidgetStatePropertyAll(Colors.white),
+        side: WidgetStatePropertyAll(
+          BorderSide(color: Color.fromARGB(255, 250, 175, 195), width: 5),
+        ),
+      ),
+      onPressed: () {},
+      child: (Text(name, style: TextStyle(color: Colors.black))),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 250, 175, 195),
+        title: const Text("Pocket Dreams"),
+        foregroundColor: Colors.white,
+      ),
+
+      backgroundColor: Colors.black,
+      body: Column(
+        children: [
+          Expanded(
+            flex: 2,
+            child: Center(
+              child: Text(
+                "Choose, what do you want to see more",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: Text("Text", style: TextStyle(color: Colors.white)),
+          ),
+          Expanded(
+            flex: 3,
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: Column(
+                    children: [
+                      buttonGenerator(shuffledTags[0]),
+                      buttonGenerator(shuffledTags[1]),
+                      buttonGenerator(shuffledTags[2]),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Column(
+                    children: [
+                      buttonGenerator(shuffledTags[3]),
+                      buttonGenerator(shuffledTags[4]),
+                      buttonGenerator(shuffledTags[5]),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+//
 // Login widget
 // Base for login
 //
@@ -297,7 +412,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     // function for coloring the CheckBox
-    // becouse it doesn't allow just a fixed color...
+    // because it doesn't allow just a fixed color...
     // it want to be depended on the state of the checkbox
     // (-_-)
 
