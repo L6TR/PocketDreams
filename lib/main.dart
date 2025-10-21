@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -26,6 +27,10 @@ void addDreamToCalendar(Dream dream) {
   } else {
     dreams[day] = [dream];
   }
+}
+
+Color cloudPink() {
+  return Color.fromARGB(255, 250, 175, 195);
 }
 
 OutlinedButton clowdyButton(String myText, doSomething) {
@@ -200,25 +205,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
 
                   clowdyButton("Register", register()),
-
-                  OutlinedButton(
-                    style: ButtonStyle(
-                      backgroundColor: WidgetStatePropertyAll(Colors.white),
-                      side: WidgetStatePropertyAll(
-                        BorderSide(
-                          color: Color.fromARGB(255, 250, 175, 195),
-                          width: 5,
-                        ),
-                      ),
-                    ),
-                    child: Text(
-                      "Register",
-                      style: TextStyle(color: Colors.black),
-                    ),
-                    onPressed: () {
-                      register();
-                    },
-                  ),
                   SizedBox(height: 10),
                   Text(message, style: TextStyle(color: Colors.red)),
                 ],
@@ -296,32 +282,53 @@ class _TagScreenState extends State<TagScreen> {
     "Tag3",
   ];
 
-  List<String> shuffledTags = [];
+  // container with Tag and Done Square
+  Container tagChoosing(tag) {
+    return Container(
+      padding: EdgeInsets.all(5),
+      margin: EdgeInsets.all(9),
+
+      width: 109,
+      height: 40,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: cloudPink()),
+      ),
+
+      child: InkWell(
+        onTap: () {
+          print("ok");
+        },
+
+        child: Row(
+          children: [
+            // pink square
+            Container(
+              margin: EdgeInsets.all(2),
+              width: 25,
+              height: 25,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: cloudPink()),
+                borderRadius: BorderRadius.circular(2),
+              ),
+              child: Visibility(visible: false, child: Icon(Icons.done)),
+            ),
+            Text(tag, style: TextStyle(color: cloudPink())),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void chooseATag(tag) {}
+
+  List<String> chosenTags = [];
 
   @override
   void initState() {
     super.initState();
-
-    List<String> tagsCopy = List.from(tagList);
-    for (int i = 0; i < 6; i++) {
-      String randomTag = tagsCopy[Random().nextInt(tagsCopy.length)];
-
-      shuffledTags.add(randomTag);
-      tagsCopy.remove(randomTag);
-    }
-  }
-
-  OutlinedButton buttonGenerator(name) {
-    return OutlinedButton(
-      style: ButtonStyle(
-        backgroundColor: WidgetStatePropertyAll(Colors.white),
-        side: WidgetStatePropertyAll(
-          BorderSide(color: Color.fromARGB(255, 250, 175, 195), width: 5),
-        ),
-      ),
-      onPressed: () {},
-      child: (Text(name, style: TextStyle(color: Colors.black))),
-    );
   }
 
   @override
@@ -346,35 +353,38 @@ class _TagScreenState extends State<TagScreen> {
             ),
           ),
           Expanded(
-            flex: 1,
-            child: Text("Text", style: TextStyle(color: Colors.white)),
+            flex: 3,
+            child: Center(
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      tagChoosing(tagList[0]),
+                      tagChoosing(tagList[1]),
+                      tagChoosing(tagList[2]),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      tagChoosing(tagList[3]),
+                      tagChoosing(tagList[4]),
+                      tagChoosing(tagList[5]),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      tagChoosing(tagList[6]),
+                      tagChoosing(tagList[7]),
+                      tagChoosing(tagList[8]),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
           Expanded(
-            flex: 3,
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: Column(
-                    children: [
-                      buttonGenerator(shuffledTags[0]),
-                      buttonGenerator(shuffledTags[1]),
-                      buttonGenerator(shuffledTags[2]),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Column(
-                    children: [
-                      buttonGenerator(shuffledTags[3]),
-                      buttonGenerator(shuffledTags[4]),
-                      buttonGenerator(shuffledTags[5]),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+            flex: 1,
+            child: Center(child: clowdyButton("Send", context)),
           ),
         ],
       ),
@@ -954,12 +964,6 @@ class _TodaysDreamState extends State<TodaysDream> {
                               },
                               onSelected: (Emotion emotion) {
                                 newEmotionChoise(emotion);
-                                /*EmotionButton(
-                                  index: emotion.index,
-                                  color: emotion.color,
-                                  label: emotion.name,
-                                  onPressed: () => Void,
-                                );*/
                               },
                               displayStringForOption: (Emotion emotion) =>
                                   emotion.name,
@@ -1024,7 +1028,6 @@ class _TodaysDreamState extends State<TodaysDream> {
                     ],
                   ),
                 ),
-                //Expanded(flex: 1, child: Icon(Icons.clear, color: Colors.red)),
                 Expanded(
                   flex: 1,
                   child: Center(
@@ -1140,31 +1143,7 @@ class _TodaysDreamState extends State<TodaysDream> {
                 ),
               ],
             ),
-
-            /* SizedBox(
-                    child: OutlinedButton(
-                      style: ButtonStyle(
-                        backgroundColor: WidgetStatePropertyAll(Colors.white),
-                        side: WidgetStatePropertyAll(
-                          BorderSide(
-                            color: Color.fromARGB(255, 250, 175, 195),
-                            width: 5,
-                          ),
-                        ),
-                      ),
-                      child: Text(
-                        "Write",
-                        style: TextStyle(color: Colors.black),
-                      ),
-
-                      //
-                      // important!!!
-                      //
-                      onPressed: () {},
-                    ),
-                  ),*/
           ),
-          /*Expanded(flex: 1, child: Text("ok")),*/
           Expanded(
             flex: 1,
             child: Center(
