@@ -6,12 +6,54 @@ app = Flask(__name__)
 conn = sqlite3.connect("pocketdreams.db") # connection to the databse
 cursor = conn.cursor() # we need this one for our SQL commands
 
-cursor.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, nickname TEXT, password TEXT)")
-#making a table if it doesnt exist
+
+#cursor.execute("DROP TABLE IF EXISTS Tags;")
+#cursor.execute("DROP TABLE IF EXISTS Users;")
+#cursor.execute("DROP TABLE IF EXISTS Dreams;")
+#cursor.execute("DROP TABLE IF EXISTS Likes;")
+#cursor.execute("DROP TABLE IF EXISTS Emotions;")
+#cursor.execute("DROP TABLE IF EXISTS Comments;")
+#cursor.execute("DROP TABLE IF EXISTS Reports;")
+#cursor.execute("DROP TABLE IF EXISTS Friendship;")
+#cursor.execute("DROP TABLE IF EXISTS DreamReports;")
+#cursor.execute("DROP TABLE IF EXISTS DreamTags;")
+#cursor.execute("DROP TABLE IF EXISTS DreamEmotions;")
+#cursor.execute("DROP TABLE IF EXISTS UserTags;")
 
 
-#conn.commit() # saving changes in our database
-#conn.close() # ending our connection
+
+cursor.execute("CREATE TABLE IF NOT EXISTS Tags (ID INTEGER PRIMARY KEY, Name TEXT)")
+#cursor.execute("INSERT INTO Tags (Name) VALUES ('Nightmare'), ('Future'), ('Family'), ('Fantasy'), ('Unreal'), ('Love'), ('Traveling'), ('Nostalgia'),('Nature');")
+
+cursor.execute("CREATE TABLE IF NOT EXISTS Users (ID INTEGER PRIMARY KEY, Username TEXT, HashPassword TEXT)")
+cursor.execute("CREATE TABLE IF NOT EXISTS Emotions (ID INTEGER PRIMARY KEY, Name TEXT)")
+
+
+cursor.execute("CREATE TABLE IF NOT EXISTS Dreams (ID INTEGER PRIMARY KEY, Name TEXT, Description TEXT, Date INTEGER, IsPrivate INTEGER, User INTEGER, FOREIGN KEY (User) REFERENCES Users(ID));")
+
+
+cursor.execute("CREATE TABLE IF NOT EXISTS Comments (ID INTEGER PRIMARY KEY, CommentedText TEXT, CreatedAt INTEGER, CommentedBy INTEGER, CommentedDream INTEGER, FOREIGN KEY (CommentedBy) REFERENCES Users(ID), FOREIGN KEY (CommentedDream) REFERENCES Dreams(ID))")
+cursor.execute("CREATE TABLE IF NOT EXISTS Reports (ID INTEGER PRIMARY KEY, Type TEXT, CreatedBy INTEGER, FOREIGN KEY (CreatedBy) REFERENCES Users(ID))")
+cursor.execute("CREATE TABLE IF NOT EXISTS Likes (ID INTEGER PRIMARY KEY, LikedBy INTEGER, LikedDream INTEGER, FOREIGN KEY (LikedDream) REFERENCES Dreams(ID), FOREIGN KEY (LikedBy) REFERENCES Users(ID))")
+cursor.execute("CREATE TABLE IF NOT EXISTS Friendship (ID INTEGER PRIMARY KEY, UserID INTEGER, FriendID INTEGER, FOREIGN KEY (UserID) REFERENCES Users(ID), FOREIGN KEY (FriendID) REFERENCES Users(ID))")
+
+
+cursor.execute("CREATE TABLE IF NOT EXISTS DreamReports (DreamID INTEGER, ReportID INTEGER, FOREIGN KEY (DreamID) REFERENCES Dreams(ID), FOREIGN KEY (ReportID) REFERENCES Reports(ID));")
+cursor.execute("CREATE TABLE IF NOT EXISTS DreamTags (DreamID INTEGER, TagID INTEGER, FOREIGN KEY (DreamID) REFERENCES Dreams(ID), FOREIGN KEY (TagID) REFERENCES Tags(ID));")
+cursor.execute("CREATE TABLE IF NOT EXISTS DreamEmotions (DreamID INTEGER, EmotionID INTEGER, FOREIGN KEY (DreamID) REFERENCES Dreams(ID), FOREIGN KEY (EmotionID) REFERENCES Emotions(ID));")
+cursor.execute("CREATE TABLE IF NOT EXISTS UserTags (UserID INTEGER, TagID INTEGER, FOREIGN KEY (UserID) REFERENCES Users(ID), FOREIGN KEY (TagID) REFERENCES Tags(ID));")
+
+
+
+
+
+
+#making a table if it does not exist
+
+
+
+conn.commit() # saving changes in our database
+conn.close() # ending our connection
 
 
 

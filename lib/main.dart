@@ -270,18 +270,28 @@ class TagScreen extends StatefulWidget {
 
 class _TagScreenState extends State<TagScreen> {
   // list of Tags for database
-  static const tagList = [
+  static const List<String> tagList = [
     "Nightmare",
     "Future",
     "Family",
     "Fantasy",
     "Unreal",
     "Love",
-    "Tag1",
-    "Tag2",
-    "Tag3",
+    "Traveling",
+    "Nostalgia",
+    "Nature",
   ];
 
+  Map<String, bool> tagVisibility = {for (var tag in tagList) tag: false};
+
+  void changeStatus(tag) {
+    setState(() {
+      tagVisibility[tag] = !(tagVisibility[tag] ?? false);
+      print(tagVisibility);
+    });
+  }
+
+  bool visibility = false;
   // container with Tag and Done Square
   Container tagChoosing(tag) {
     return Container(
@@ -298,7 +308,7 @@ class _TagScreenState extends State<TagScreen> {
 
       child: InkWell(
         onTap: () {
-          print("ok");
+          changeStatus(tag);
         },
 
         child: Row(
@@ -313,7 +323,10 @@ class _TagScreenState extends State<TagScreen> {
                 border: Border.all(color: cloudPink()),
                 borderRadius: BorderRadius.circular(2),
               ),
-              child: Visibility(visible: false, child: Icon(Icons.done)),
+              child: Visibility(
+                visible: tagVisibility[tag] ?? false,
+                child: Icon(Icons.done),
+              ),
             ),
             Text(tag, style: TextStyle(color: cloudPink())),
           ],
