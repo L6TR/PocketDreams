@@ -2,6 +2,7 @@ import 'dart:ffi';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:pocket_dreams/bloc/backend_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:convert';
@@ -75,11 +76,9 @@ class PocketDreams extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "Pocket Dreams",
-      home:
-          const
-          /*LoginScreen(),*/
-          /*Base(),*/
-          TagScreen(),
+      home: const LoginScreen(),
+      /*Base(),*/
+      /*TagScreen(),*/
     );
   }
 }
@@ -108,10 +107,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> register() async {
     final response = await http.post(
-      Uri.parse("http://192.168.0.233:5000/api/register"),
+      Uri.parse("http://10.0.1.12:5000/api/register"),
       headers: {"Content-Type": "application/json"},
       body: json.encode({
-        "nickname": nicknameController.text,
+        "Username": nicknameController.text,
         "password": passwordController.text,
       }),
     );
@@ -133,6 +132,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // no boottom overflowed by xx pixels
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 250, 175, 195),
         title: const Text("Pocket Dreams"),
@@ -141,116 +142,137 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       backgroundColor: Colors.black,
 
-      body: Column(
-        children: [
-          Expanded(
-            flex: 9,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    child: Text(
-                      "How can we call you?",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                  SizedBox(
-                    width: 250,
-                    child: TextField(
-                      controller: nicknameController,
-                      style: TextStyle(color: Colors.white),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: IntrinsicHeight(
+                child: Column(
+                  children: [
+                    Expanded(
+                      flex: 9,
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              child: Text(
+                                "How can we call you?",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 250,
+                              child: TextField(
+                                controller: nicknameController,
+                                style: TextStyle(color: Colors.white),
 
-                      // color of blinking |
-                      cursorColor: Color.fromARGB(255, 250, 175, 195),
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        hintText: "Name",
-                        focusedBorder: OutlineInputBorder(
-                          // color of the border
-                          borderSide: BorderSide(
-                            color: Color.fromARGB(255, 250, 175, 195),
-                          ),
+                                // color of blinking |
+                                cursorColor: Color.fromARGB(255, 250, 175, 195),
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  hintText: "Name",
+                                  focusedBorder: OutlineInputBorder(
+                                    // color of the border
+                                    borderSide: BorderSide(
+                                      color: Color.fromARGB(255, 250, 175, 195),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              child: Text(
+                                "Keep your secrets safe",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 250,
+                              child: TextField(
+                                controller: passwordController,
+                                style: TextStyle(color: Colors.white),
+                                obscureText: true,
+
+                                // color of blinking |
+                                cursorColor: Color.fromARGB(255, 250, 175, 195),
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  hintText: "Password",
+                                  focusedBorder: OutlineInputBorder(
+                                    // color of the border
+                                    borderSide: BorderSide(
+                                      color: Color.fromARGB(255, 250, 175, 195),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            clowdyButton("Register", register),
+                            SizedBox(height: 10),
+                            Text(message, style: TextStyle(color: Colors.red)),
+                          ],
                         ),
                       ),
                     ),
-                  ),
-                  SizedBox(
-                    child: Text(
-                      "Keep your secrets safe",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                  SizedBox(
-                    width: 250,
-                    child: TextField(
-                      controller: passwordController,
-                      style: TextStyle(color: Colors.white),
-                      obscureText: true,
-
-                      // color of blinking |
-                      cursorColor: Color.fromARGB(255, 250, 175, 195),
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        hintText: "Password",
-                        focusedBorder: OutlineInputBorder(
-                          // color of the border
-                          borderSide: BorderSide(
-                            color: Color.fromARGB(255, 250, 175, 195),
-                          ),
+                    Expanded(
+                      flex: 1,
+                      child: Center(
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text("or do we "),
+                                Text(
+                                  "already know ",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                Text("you?"),
+                              ],
+                            ),
+                            OutlinedButton(
+                              style: ButtonStyle(
+                                backgroundColor: WidgetStatePropertyAll(
+                                  Colors.white,
+                                ),
+                                side: WidgetStatePropertyAll(
+                                  BorderSide(
+                                    color: Color.fromARGB(255, 250, 175, 195),
+                                    width: 5,
+                                  ),
+                                ),
+                              ),
+                              onPressed: () {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => LoginScreen(),
+                                  ),
+                                );
+                              },
+                              child: Text(
+                                "Login",
+                                style: TextStyle(color: Colors.black),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                  ),
-
-                  clowdyButton("Register", register()),
-                  SizedBox(height: 10),
-                  Text(message, style: TextStyle(color: Colors.red)),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Center(
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text("or do we "),
-                      Text(
-                        "already know ",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      Text("you?"),
-                    ],
-                  ),
-                  OutlinedButton(
-                    style: ButtonStyle(
-                      backgroundColor: WidgetStatePropertyAll(Colors.white),
-                      side: WidgetStatePropertyAll(
-                        BorderSide(
-                          color: Color.fromARGB(255, 250, 175, 195),
-                          width: 5,
-                        ),
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => LoginScreen()),
-                      );
-                    },
-                    child: Text("Login", style: TextStyle(color: Colors.black)),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
@@ -287,7 +309,6 @@ class _TagScreenState extends State<TagScreen> {
   void changeStatus(tag) {
     setState(() {
       tagVisibility[tag] = !(tagVisibility[tag] ?? false);
-      print(tagVisibility);
     });
   }
 
@@ -472,152 +493,178 @@ class _LoginScreenState extends State<LoginScreen> {
 
       backgroundColor: Colors.black,
 
-      body: Column(
-        children: [
-          Expanded(
-            flex: 9,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    child: Text(
-                      "How can we call you?",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                  SizedBox(
-                    width: 250,
-                    child: TextField(
-                      controller: nicknameController,
-                      style: TextStyle(color: Colors.white),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: IntrinsicHeight(
+                child: Column(
+                  children: [
+                    Expanded(
+                      flex: 9,
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              child: Text(
+                                "How can we call you?",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 250,
+                              child: TextField(
+                                controller: nicknameController,
+                                style: TextStyle(color: Colors.white),
 
-                      // color of blinking |
-                      cursorColor: Color.fromARGB(255, 250, 175, 195),
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        hintText: "Name",
-                        focusedBorder: OutlineInputBorder(
-                          // color of the border
-                          borderSide: BorderSide(
-                            color: Color.fromARGB(255, 250, 175, 195),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    child: Text(
-                      "Keep your secrets safe",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                  SizedBox(
-                    width: 250,
-                    child: TextField(
-                      controller: passwordController,
-                      style: TextStyle(color: Colors.white),
-                      obscureText: true,
+                                // color of blinking |
+                                cursorColor: Color.fromARGB(255, 250, 175, 195),
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  hintText: "Name",
+                                  focusedBorder: OutlineInputBorder(
+                                    // color of the border
+                                    borderSide: BorderSide(
+                                      color: Color.fromARGB(255, 250, 175, 195),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              child: Text(
+                                "Keep your secrets safe",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 250,
+                              child: TextField(
+                                controller: passwordController,
+                                style: TextStyle(color: Colors.white),
+                                obscureText: true,
 
-                      // color of blinking |
-                      cursorColor: Color.fromARGB(255, 250, 175, 195),
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        hintText: "Password",
-                        focusedBorder: OutlineInputBorder(
-                          // color of the border
-                          borderSide: BorderSide(
-                            color: Color.fromARGB(255, 250, 175, 195),
-                          ),
+                                // color of blinking |
+                                cursorColor: Color.fromARGB(255, 250, 175, 195),
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  hintText: "Password",
+                                  focusedBorder: OutlineInputBorder(
+                                    // color of the border
+                                    borderSide: BorderSide(
+                                      color: Color.fromARGB(255, 250, 175, 195),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Checkbox(
+                                  fillColor: WidgetStateProperty.resolveWith(
+                                    getColor,
+                                  ),
+                                  value: isRemembered,
+                                  onChanged: (bool? value) {
+                                    setState(() {
+                                      isRemembered = value!;
+                                    });
+                                  },
+                                ),
+                                Text("can we "),
+                                Text(
+                                  "remember ",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                Text("you?"),
+                              ],
+                            ),
+                            OutlinedButton(
+                              style: ButtonStyle(
+                                backgroundColor: WidgetStatePropertyAll(
+                                  Colors.white,
+                                ),
+                                side: WidgetStatePropertyAll(
+                                  BorderSide(
+                                    color: Color.fromARGB(255, 250, 175, 195),
+                                    width: 5,
+                                  ),
+                                ),
+                              ),
+                              child: Text(
+                                "Login",
+                                style: TextStyle(color: Colors.black),
+                              ),
+                              onPressed: () {
+                                login();
+                              },
+                            ),
+                            SizedBox(height: 10),
+                            Text(message, style: TextStyle(color: Colors.red)),
+                          ],
                         ),
                       ),
                     ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Checkbox(
-                        fillColor: WidgetStateProperty.resolveWith(getColor),
-                        value: isRemembered,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            isRemembered = value!;
-                          });
-                        },
-                      ),
-                      Text("can we "),
-                      Text("remember ", style: TextStyle(color: Colors.white)),
-                      Text("you?"),
-                    ],
-                  ),
-                  OutlinedButton(
-                    style: ButtonStyle(
-                      backgroundColor: WidgetStatePropertyAll(Colors.white),
-                      side: WidgetStatePropertyAll(
-                        BorderSide(
-                          color: Color.fromARGB(255, 250, 175, 195),
-                          width: 5,
+                    Expanded(
+                      flex: 1,
+                      child: Center(
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text("or you are "),
+                                Text(
+                                  "first time ",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                Text("here?"),
+                              ],
+                            ),
+                            OutlinedButton(
+                              style: ButtonStyle(
+                                backgroundColor: WidgetStatePropertyAll(
+                                  Colors.white,
+                                ),
+                                side: WidgetStatePropertyAll(
+                                  BorderSide(
+                                    color: Color.fromARGB(255, 250, 175, 195),
+                                    width: 5,
+                                  ),
+                                ),
+                              ),
+                              onPressed: () {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => RegisterScreen(),
+                                  ),
+                                );
+                              },
+                              child: Text(
+                                "Register",
+                                style: TextStyle(color: Colors.black),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                    child: Text("Login", style: TextStyle(color: Colors.black)),
-                    onPressed: () {
-                      login();
-                    },
-                  ),
-                  SizedBox(height: 10),
-                  Text(message, style: TextStyle(color: Colors.red)),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Center(
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text("or you are "),
-                      Text(
-                        "first time ",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      Text("here?"),
-                    ],
-                  ),
-                  OutlinedButton(
-                    style: ButtonStyle(
-                      backgroundColor: WidgetStatePropertyAll(Colors.white),
-                      side: WidgetStatePropertyAll(
-                        BorderSide(
-                          color: Color.fromARGB(255, 250, 175, 195),
-                          width: 5,
-                        ),
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => RegisterScreen(),
-                        ),
-                      );
-                    },
-                    child: Text(
-                      "Register",
-                      style: TextStyle(color: Colors.black),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }

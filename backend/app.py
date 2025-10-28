@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 import sqlite3
+import bcrypt
 
 app = Flask(__name__)
 
@@ -8,7 +9,7 @@ cursor = conn.cursor() # we need this one for our SQL commands
 
 
 #cursor.execute("DROP TABLE IF EXISTS Tags;")
-#cursor.execute("DROP TABLE IF EXISTS Users;")
+cursor.execute("DROP TABLE IF EXISTS Users;")
 #cursor.execute("DROP TABLE IF EXISTS Dreams;")
 #cursor.execute("DROP TABLE IF EXISTS Likes;")
 #cursor.execute("DROP TABLE IF EXISTS Emotions;")
@@ -60,24 +61,26 @@ conn.close() # ending our connection
 @app.route("/api/register", methods=["POST"])
 def register():
     data = request.json
-    nickname = data.get("nickname")
-    password = data.get("password")
+    Username = data.get("Username")
+    password = data.get("password").encode("utf-8")
 
     # if a nick or a password is empty
-    if not nickname or not password:
-        return jsonify({"success": False, "message": "Nickname and password required"}), 400
+    if not Username or not password:
+        return jsonify({"success": False, "message": "Username and password required"}), 400
+
+    hashPassword = bcrypt.hashpw(password, bcrypt.gensalt())
 
     conn = sqlite3.connect("pocketdreams.db")
     cursor = conn.cursor()
 
     # if user is alredy exist
-    cursor.execute("SELECT id FROM users WHERE nickname = ?", (nickname,))
+    cursor.execute("SELECT ID FROM Users WHERE Username = ?", (Username,))
     if cursor.fetchone():
         conn.close()
         return jsonify({"success": False, "message": "User is already exist"}), 400
 
     # and now we can add a new user
-    cursor.execute("INSERT INTO users (nickname, password) VALUES (?, ?)", (nickname, password))
+    cursor.execute("INSERT INTO Users (Username, HashPassword) VALUES (?, ?)", (Username, hashPassword))
     conn.commit()
     conn.close()
 
