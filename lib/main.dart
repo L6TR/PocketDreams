@@ -1,8 +1,4 @@
-import 'dart:ffi';
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:pocket_dreams/bloc/backend_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:convert';
@@ -123,6 +119,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     if (data["success"]) {
+      setState(() {
+        user = nicknameController.text;
+      });
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => TagScreen()),
@@ -509,6 +509,10 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     if (data["success"]) {
+      setState(() {
+        user = nicknameController.text;
+      });
+
       Navigator.push(context, MaterialPageRoute(builder: (context) => Base()));
     }
   }
@@ -742,11 +746,14 @@ class _BaseState extends State<Base> {
 
   @override
   Widget build(BuildContext context) {
-    final backendBloc = BlocProvider.of<BackendBloc>(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 250, 175, 195),
         title: const Text("Pocket Dreams"),
+        actions: [
+          Text(user),
+          SizedBox(width: 40, height: 40, child: Icon(Icons.account_circle)),
+        ],
         foregroundColor: Colors.white,
       ),
 
@@ -950,6 +957,43 @@ class TodaysDream extends StatefulWidget {
 //
 
 class _TodaysDreamState extends State<TodaysDream> {
+  var message = "";
+  Future<void> addDream() async {
+    final dream = newDream(
+      mixedColor(chosenSphereColors),
+      _chosenDate,
+      _description,
+    );
+
+    print(_description);
+    addDreamToCalendar(dream);
+
+    final response = await http.post(
+      Uri.parse("$server/api/login"),
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({
+        /*"Username": nicknameController.text,
+        "Password": passwordController.text,*/
+        // Write your dream
+        //"Name":
+        "Description": _description,
+        "Date": _chosenDate,
+        //"IsPrivate":
+        "User": user,
+      }),
+    );
+
+    final data = json.decode(response.body);
+
+    setState(() {
+      message = data["message"];
+    });
+
+    /*if (data["success"]) {
+
+    }*/
+  }
+
   // List for all spheres + grey
   List<Color> sphereColors = List.generate(6, (_) => Colors.white10);
 
@@ -1274,13 +1318,7 @@ class _TodaysDreamState extends State<TodaysDream> {
                   // important!!!
                   //
                   onPressed: () {
-                    final dream = newDream(
-                      mixedColor(chosenSphereColors),
-                      _chosenDate,
-                      _description,
-                    );
-
-                    addDreamToCalendar(dream);
+                    addDream();
                   },
                 ),
               ),
@@ -1322,31 +1360,63 @@ class _TodaysDreamState extends State<TodaysDream> {
       builder: (context) {
         return AlertDialog(
           backgroundColor: Color.fromARGB(255, 5, 5, 5),
-          title: Text(
-            "Write your dream",
-            style: TextStyle(color: Colors.white),
-          ),
-          content: SizedBox(
-            height: 200,
-            child: TextField(
-              controller: descriptionController,
-              maxLines: null,
-              expands: true,
-              style: TextStyle(color: Colors.white),
-              cursorColor: Color.fromARGB(255, 250, 175, 195),
 
-              decoration: InputDecoration(
-                hintText: "Describe your dream...",
-                hintStyle: TextStyle(color: Colors.white54),
-                border: OutlineInputBorder(),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                    color: Color.fromARGB(255, 250, 175, 195),
+          content: SizedBox(
+            height: 300,
+            child: Column(
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: SizedBox(
+                    width: 150,
+                    child: TextField(
+                      controller: descriptionController,
+                      maxLines: null,
+                      expands: true,
+                      style: TextStyle(color: Colors.white),
+                      cursorColor: Color.fromARGB(255, 250, 175, 195),
+
+                      decoration: InputDecoration(
+                        hintText: "Add a name",
+                        hintStyle: TextStyle(color: Colors.white54),
+                        border: OutlineInputBorder(),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Color.fromARGB(255, 250, 175, 195),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                SizedBox(height: 16),
+                Expanded(
+                  flex: 4,
+                  child: SizedBox(
+                    child: TextField(
+                      controller: descriptionController,
+                      maxLines: null,
+                      expands: true,
+                      style: TextStyle(color: Colors.white),
+                      cursorColor: Color.fromARGB(255, 250, 175, 195),
+
+                      decoration: InputDecoration(
+                        hintText: "Describe your dream...",
+                        hintStyle: TextStyle(color: Colors.white54),
+                        border: OutlineInputBorder(),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Color.fromARGB(255, 250, 175, 195),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
+
           actions: [
             TextButton(
               onPressed: () {
