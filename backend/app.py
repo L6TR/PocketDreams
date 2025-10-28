@@ -9,7 +9,7 @@ cursor = conn.cursor() # we need this one for our SQL commands
 
 
 #cursor.execute("DROP TABLE IF EXISTS Tags;")
-cursor.execute("DROP TABLE IF EXISTS Users;")
+#cursor.execute("DROP TABLE IF EXISTS Users;")
 #cursor.execute("DROP TABLE IF EXISTS Dreams;")
 #cursor.execute("DROP TABLE IF EXISTS Likes;")
 #cursor.execute("DROP TABLE IF EXISTS Emotions;")
@@ -62,13 +62,14 @@ conn.close() # ending our connection
 def register():
     data = request.json
     Username = data.get("Username")
-    password = data.get("password").encode("utf-8")
+    Password = data.get("Password")
 
     # if a nick or a password is empty
-    if not Username or not password:
+    if not Username or not Password:
         return jsonify({"success": False, "message": "Username and password required"}), 400
 
-    hashPassword = bcrypt.hashpw(password, bcrypt.gensalt())
+
+    hashPassword = bcrypt.hashpw(Password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
     conn = sqlite3.connect("pocketdreams.db")
     cursor = conn.cursor()
@@ -91,27 +92,60 @@ def register():
 @app.route("/api/login", methods=["POST"])
 def login():
     data = request.json
-    nickname = data.get("nickname")
-    password = data.get("password")
+    Username = data.get("Username")
+    Password = data.get("Password")
 
     conn = sqlite3.connect("pocketdreams.db")
     cursor = conn.cursor()
 
     # "nickname = ?", (nickname) 
     # means that nickname would change on (nickname) and ? is just placeholder
-    cursor.execute("SELECT password FROM users WHERE nickname = ?", (nickname,))
+
+    cursor.execute("SELECT HashPassword FROM Users WHERE Username = ?", (Username,))
 
     # fetchone means chose first in our cursor or return None 
-    row = cursor.fetchone()
-
-    
-    conn.commit()
+    result = cursor.fetchone()
     conn.close()
 
-    if row and row[0] == password:
-        return jsonify({"success":True, "message": "Welcome back"})
+    if not result:
+        return jsonify({"success": False, "message": "User not found"}), 400
+
+    stored_hash = result[0].encode("utf-8")
+
+    if bcrypt.checkpw(Password.encode("utf-8"), stored_hash):
+        return jsonify({"success": True, "message": "Login successful"})
     else:
-        return jsonify({"success":False, "message": "Invalid login or password"}), 401
+        return jsonify({"success": False, "message": "Invalid password"}), 401
+
+@app.route("/api/chooseTags", methods=["POST"])
+def chooseTags():
+    data = request.json
+    Username = data.get("Username")
+    Tags = data.get("Tags")
+
+    conn = sqlite3.connect("pocketdreams.db")
+    cursor = conn.cursor()
+
+    # "nickname = ?", (nickname) 
+    # means that nickname would change on (nickname) and ? is just placeholder
+
+    #cursor.execute("SELECT ID FROM Tags WHERE Name = ?", (Tags[0],))
+
+    for i in range(len(Tags)):
+        cursor.execute("SELECT ID FROM Tags WHERE Name = ?", (Tags[i],))
+        result = cursor.fetchone()
+        print(result)
+        cursor.execute("SELECT ID FROM Users WHERE Username = ?", (Username,))
+        result = cursor.fetchone()
+        print(result)
+    conn.close()
+
+    
+
+
+
+
+    return jsonify({"success": False, "message": "Login successful"})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

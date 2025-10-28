@@ -16,6 +16,8 @@ import 'package:flutter/services.dart';
 //
 Map<DateTime, List<Dream>> dreams = {};
 
+String user = "merunka";
+String server = "http://10.0.1.12:5000";
 //
 // global function guys
 //
@@ -44,7 +46,7 @@ OutlinedButton clowdyButton(String myText, doSomething) {
     ),
     child: Text(myText, style: TextStyle(color: Colors.black)),
     onPressed: () {
-      doSomething;
+      doSomething();
     },
   );
 }
@@ -76,9 +78,10 @@ class PocketDreams extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "Pocket Dreams",
-      home: const LoginScreen(),
-      /*Base(),*/
-      /*TagScreen(),*/
+      home:
+          const /*LoginScreen(),*/
+          /*Base(),*/
+          TagScreen(),
     );
   }
 }
@@ -107,11 +110,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> register() async {
     final response = await http.post(
-      Uri.parse("http://10.0.1.12:5000/api/register"),
+      Uri.parse("$server/api/register"),
       headers: {"Content-Type": "application/json"},
       body: json.encode({
         "Username": nicknameController.text,
-        "password": passwordController.text,
+        "Password": passwordController.text,
       }),
     );
 
@@ -291,6 +294,28 @@ class TagScreen extends StatefulWidget {
 }
 
 class _TagScreenState extends State<TagScreen> {
+  String message = "";
+  Future<void> chooseTags() async {
+    final response = await http.post(
+      Uri.parse("$server/api/chooseTags"),
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({"Username": user, "Tags": chosenTags}),
+    );
+
+    final data = json.decode(response.body);
+
+    setState(() {
+      message = data["message"];
+    });
+
+    if (data["success"]) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => Base()),
+      );
+    }
+  }
+
   // list of Tags for database
   static const List<String> tagList = [
     "Nightmare",
@@ -304,12 +329,30 @@ class _TagScreenState extends State<TagScreen> {
     "Nature",
   ];
 
+  List<String> chosenTags = [];
+
   Map<String, bool> tagVisibility = {for (var tag in tagList) tag: false};
 
   void changeStatus(tag) {
     setState(() {
       tagVisibility[tag] = !(tagVisibility[tag] ?? false);
     });
+  }
+
+  void confimTags() {
+    for (int i = 0; i < tagList.length; i++) {
+      if (tagVisibility[tagList[i]] == true) {
+        chosenTags.add(tagList[i]);
+      }
+    }
+
+    setState(() {
+      message = (chosenTags.length < 3) ? "choose at least 3" : "";
+    });
+    if (chosenTags.length >= 3) {
+      chooseTags();
+    }
+    chosenTags = [];
   }
 
   bool visibility = false;
@@ -355,10 +398,6 @@ class _TagScreenState extends State<TagScreen> {
       ),
     );
   }
-
-  void chooseATag(tag) {}
-
-  List<String> chosenTags = [];
 
   @override
   void initState() {
@@ -418,7 +457,13 @@ class _TagScreenState extends State<TagScreen> {
           ),
           Expanded(
             flex: 1,
-            child: Center(child: clowdyButton("Send", context)),
+            child: Column(
+              children: [
+                Center(child: clowdyButton("Confim", confimTags)),
+                SizedBox(height: 10),
+                Text(message, style: TextStyle(color: Colors.red)),
+              ],
+            ),
           ),
         ],
       ),
@@ -451,11 +496,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> login() async {
     final response = await http.post(
-      Uri.parse("http://10.0.1.12:5000/api/login"),
+      Uri.parse("$server/api/login"),
       headers: {"Content-Type": "application/json"},
       body: json.encode({
-        "nickname": nicknameController.text,
-        "password": passwordController.text,
+        "Username": nicknameController.text,
+        "Password": passwordController.text,
       }),
     );
 
@@ -564,6 +609,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ),
                             ),
+                            // remember me
+                            /*
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.center,
@@ -586,27 +633,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 Text("you?"),
                               ],
-                            ),
-                            OutlinedButton(
-                              style: ButtonStyle(
-                                backgroundColor: WidgetStatePropertyAll(
-                                  Colors.white,
-                                ),
-                                side: WidgetStatePropertyAll(
-                                  BorderSide(
-                                    color: Color.fromARGB(255, 250, 175, 195),
-                                    width: 5,
-                                  ),
-                                ),
-                              ),
-                              child: Text(
-                                "Login",
-                                style: TextStyle(color: Colors.black),
-                              ),
-                              onPressed: () {
-                                login();
-                              },
-                            ),
+                            ),*/
+                            clowdyButton("Login", login),
                             SizedBox(height: 10),
                             Text(message, style: TextStyle(color: Colors.red)),
                           ],
