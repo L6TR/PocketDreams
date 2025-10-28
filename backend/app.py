@@ -19,7 +19,7 @@ cursor = conn.cursor() # we need this one for our SQL commands
 #cursor.execute("DROP TABLE IF EXISTS DreamReports;")
 #cursor.execute("DROP TABLE IF EXISTS DreamTags;")
 #cursor.execute("DROP TABLE IF EXISTS DreamEmotions;")
-#cursor.execute("DROP TABLE IF EXISTS UserTags;")
+cursor.execute("DROP TABLE IF EXISTS UserTags;")
 
 
 
@@ -117,7 +117,8 @@ def login():
     else:
         return jsonify({"success": False, "message": "Invalid password"}), 401
 
-@app.route("/api/chooseTags", methods=["POST"])
+
+@app.route("/api/chooseTags", methods=["POST", "DELETE"])
 def chooseTags():
     data = request.json
     Username = data.get("Username")
@@ -125,27 +126,26 @@ def chooseTags():
 
     conn = sqlite3.connect("pocketdreams.db")
     cursor = conn.cursor()
+    
+    # now we know users id
+    cursor.execute("SELECT ID FROM Users WHERE Username = ?", (Username,))
+    resultUser = cursor.fetchone()
+    UserID = resultUser[0]
 
-    # "nickname = ?", (nickname) 
-    # means that nickname would change on (nickname) and ? is just placeholder
+    # clearing the UserTags table 
+    cursor.execute("DELETE FROM UserTags WHERE UserID = ?", (UserID,))
 
-    #cursor.execute("SELECT ID FROM Tags WHERE Name = ?", (Tags[0],))
-
+    # adding a all tags ID to the same user ID in the UserTags
     for i in range(len(Tags)):
         cursor.execute("SELECT ID FROM Tags WHERE Name = ?", (Tags[i],))
-        result = cursor.fetchone()
-        print(result)
-        cursor.execute("SELECT ID FROM Users WHERE Username = ?", (Username,))
-        result = cursor.fetchone()
-        print(result)
+        resultTag = cursor.fetchone()
+        TagID = resultTag[0]
+        cursor.execute("INSERT INTO UserTags (UserID, TagID) VALUES (?, ?)", (UserID, TagID))
+    
+    conn.commit()
     conn.close()
 
-    
-
-
-
-
-    return jsonify({"success": False, "message": "Login successful"})
+    return jsonify({"success": True, "message": "Login successful"})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
