@@ -78,10 +78,8 @@ class PocketDreams extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "Pocket Dreams",
-      home:
-          const /*LoginScreen(),*/
-          /*Base(),*/
-          TagScreen(),
+      home: const /*LoginScreen(),*/ Base(),
+      /*TagScreen(),*/
     );
   }
 }
@@ -812,6 +810,27 @@ class _SettingsState extends State<Settings> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            OutlinedButton(
+              style: ButtonStyle(
+                backgroundColor: WidgetStatePropertyAll(Colors.white),
+                side: WidgetStatePropertyAll(
+                  BorderSide(
+                    color: Color.fromARGB(255, 250, 175, 195),
+                    width: 5,
+                  ),
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => const TagScreen()),
+                );
+              },
+              child: Text(
+                "Change my interests",
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+
             OutlinedButton(
               style: ButtonStyle(
                 backgroundColor: WidgetStatePropertyAll(Colors.white),

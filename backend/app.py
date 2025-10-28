@@ -19,7 +19,7 @@ cursor = conn.cursor() # we need this one for our SQL commands
 #cursor.execute("DROP TABLE IF EXISTS DreamReports;")
 #cursor.execute("DROP TABLE IF EXISTS DreamTags;")
 #cursor.execute("DROP TABLE IF EXISTS DreamEmotions;")
-cursor.execute("DROP TABLE IF EXISTS UserTags;")
+#cursor.execute("DROP TABLE IF EXISTS UserTags;")
 
 
 
@@ -145,7 +145,7 @@ def chooseTags():
     conn.commit()
     conn.close()
 
-    return jsonify({"success": True, "message": "Login successful"})
+    return jsonify({"success": True, "message": "Confirmed"})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
