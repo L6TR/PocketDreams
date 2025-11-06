@@ -15,6 +15,18 @@ Map<DateTime, List<Dream>> dreams = {};
 String user = "merunka";
 String server = "http://10.1.79.137:5000";
 
+const List<String> tagList = [
+  "Nightmare",
+  "Future",
+  "Family",
+  "Fantasy",
+  "Unreal",
+  "Love",
+  "Traveling",
+  "Nostalgia",
+  "Nature",
+];
+
 //
 // global function guys
 //
@@ -316,17 +328,6 @@ class _TagScreenState extends State<TagScreen> {
   }
 
   // list of Tags for database
-  static const List<String> tagList = [
-    "Nightmare",
-    "Future",
-    "Family",
-    "Fantasy",
-    "Unreal",
-    "Love",
-    "Traveling",
-    "Nostalgia",
-    "Nature",
-  ];
 
   List<String> chosenTags = [];
 
@@ -1525,59 +1526,61 @@ class _TodaysDreamState extends State<TodaysDream> {
     );
   }
 
+  StatefulBuilder tagButton(tag) {
+    bool chosen = false;
+
+    Color insideC = Colors.white;
+    Color borderC = Colors.grey;
+
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return OutlinedButton(
+          style: ButtonStyle(
+            side: WidgetStatePropertyAll(BorderSide(color: borderC, width: 5)),
+            backgroundColor: WidgetStatePropertyAll(insideC),
+          ),
+
+          onPressed: () {
+            chosen = !chosen;
+            setState(() {
+              insideC = (insideC == Color.fromARGB(255, 125, 87, 98))
+                  ? Colors.white
+                  : Color.fromARGB(255, 125, 87, 98);
+              borderC = (borderC == Colors.grey) ? cloudPink() : Colors.grey;
+            });
+
+            print(chosen);
+          },
+          child: Text(tag, style: TextStyle(color: Colors.black)),
+        );
+      },
+    );
+  }
+
   Future<void> _chooseTags() async {
     await showDialog(
       context: context,
       builder: (context) {
-        Color tagButtonColor = Colors.white;
-        Color tagButtonBorderColor = Colors.grey;
-
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              backgroundColor: const Color.fromARGB(255, 5, 5, 5),
-              content: SizedBox(
-                child: Row(
-                  children: [
-                    OutlinedButton(
-                      style: ButtonStyle(
-                        side: WidgetStatePropertyAll(
-                          BorderSide(color: tagButtonBorderColor, width: 5),
-                        ),
-                        backgroundColor: WidgetStatePropertyAll(tagButtonColor),
-                      ),
-
-                      onPressed: () {
-                        setState(() {
-                          tagButtonColor =
-                              (tagButtonColor ==
-                                  Color.fromARGB(255, 125, 87, 98))
-                              ? Colors.white
-                              : Color.fromARGB(255, 125, 87, 98);
-                          tagButtonBorderColor =
-                              (tagButtonBorderColor == Colors.grey)
-                              ? cloudPink()
-                              : Colors.grey;
-                        });
-                      },
-                      child: Text("hi", style: TextStyle(color: Colors.black)),
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text(
-                    "Cancel",
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                ),
+        return AlertDialog(
+          backgroundColor: const Color.fromARGB(255, 5, 5, 5),
+          content: SizedBox(
+            child: Column(
+              children: [
+                Row(children: [tagButton(tagList[0]), tagButton(tagList[1])]),
               ],
-            );
-          },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text(
+                "Cancel",
+                style: TextStyle(color: Colors.white70),
+              ),
+            ),
+          ],
         );
       },
     );
