@@ -13,7 +13,8 @@ import 'package:flutter/services.dart';
 Map<DateTime, List<Dream>> dreams = {};
 
 String user = "merunka";
-String server = "http://10.0.1.12:5000";
+String server = "http://10.1.79.137:5000";
+
 //
 // global function guys
 //
@@ -929,11 +930,17 @@ final List<Emotion> emotions = [
 
 class Dream {
   final DateTime date;
+  final String name;
   final Color emotionColor;
   final String describe;
+  final int isPrivate;
+  //final List<String> tags;
 
   Dream({
+    //required this.tags,
+    required this.name,
     required this.date,
+    required this.isPrivate,
     required this.emotionColor,
     required this.describe,
   });
@@ -958,27 +965,32 @@ class TodaysDream extends StatefulWidget {
 
 class _TodaysDreamState extends State<TodaysDream> {
   var message = "";
+  var _name = "";
+  bool isPrivate = true;
+
+  int _isPrivate = 1;
+  //List<String> _tags = [""];
   Future<void> addDream() async {
+    _isPrivate = (isPrivate) ? 1 : 0;
+    _name = (_name == "") ? "$_chosenDate dream" : _name;
     final dream = newDream(
       mixedColor(chosenSphereColors),
+      _name,
       _chosenDate,
       _description,
+      _isPrivate,
+      //_tags,
     );
+    //addDreamToCalendar(dream);
 
-    print(_description);
-    addDreamToCalendar(dream);
-
-    final response = await http.post(
-      Uri.parse("$server/api/login"),
+    /*final response = await http.post(
+      Uri.parse("$server/api/addDream"),
       headers: {"Content-Type": "application/json"},
       body: json.encode({
-        /*"Username": nicknameController.text,
-        "Password": passwordController.text,*/
-        // Write your dream
-        //"Name":
+        "Name": _name,
         "Description": _description,
         "Date": _chosenDate,
-        //"IsPrivate":
+        "IsPrivate": _isPrivate,
         "User": user,
       }),
     );
@@ -987,7 +999,7 @@ class _TodaysDreamState extends State<TodaysDream> {
 
     setState(() {
       message = data["message"];
-    });
+    });*/
 
     /*if (data["success"]) {
 
@@ -1028,9 +1040,19 @@ class _TodaysDreamState extends State<TodaysDream> {
   }
 
   //function for adding a Dream to The Calendar
-  Dream newDream(dreamsColor, dreamsDate, dreamsDescribe) {
+  Dream newDream(
+    dreamsColor,
+    dreamName,
+    dreamsDate,
+    dreamsDescribe,
+    dreamIsPrivate,
+    //dreamTags,
+  ) {
     return Dream(
+      //tags: dreamTags,
+      isPrivate: dreamIsPrivate,
       date: dreamsDate,
+      name: dreamName,
       emotionColor: dreamsColor,
       describe: dreamsDescribe,
     );
@@ -1077,6 +1099,8 @@ class _TodaysDreamState extends State<TodaysDream> {
     }
     return -1;
   }
+
+  String status = "can";
 
   final TextEditingController _dateController = TextEditingController();
   String _description = "";
@@ -1244,52 +1268,108 @@ class _TodaysDreamState extends State<TodaysDream> {
           Expanded(
             flex: 3,
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 SizedBox(
-                  width: 120,
-                  child: TextField(
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white),
-                    controller: TextEditingController(text: _description),
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: "Description",
-                      focusedBorder: OutlineInputBorder(
-                        // color of the border
-                        borderSide: BorderSide(
-                          color: Color.fromARGB(255, 250, 175, 195),
+                  width: 180,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 120,
+                        child: TextField(
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.white),
+                          controller: TextEditingController(text: _description),
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            hintText: "Description",
+                            focusedBorder: OutlineInputBorder(
+                              // color of the border
+                              borderSide: BorderSide(
+                                color: Color.fromARGB(255, 250, 175, 195),
+                              ),
+                            ),
+                          ),
+                          readOnly: true,
+                          onTap: () {
+                            _writeADescription();
+                          },
                         ),
                       ),
-                    ),
-                    readOnly: true,
-                    onTap: () {
-                      _writeADescription();
-                    },
+
+                      SizedBox(height: 15),
+
+                      SizedBox(
+                        height: 60,
+                        width: 120,
+                        child: TextField(
+                          textAlign: TextAlign.center,
+                          controller: _dateController,
+                          style: TextStyle(color: Colors.white),
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            hintText: chosenDate.toString().split(" ")[0],
+                            focusedBorder: OutlineInputBorder(
+                              // color of the border
+                              borderSide: BorderSide(
+                                color: Color.fromARGB(255, 250, 175, 195),
+                              ),
+                            ),
+                          ),
+                          readOnly: true,
+                          onTap: () {
+                            _selectDate();
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-
+                SizedBox(width: 15),
                 SizedBox(
-                  width: 110,
-                  child: TextField(
-                    textAlign: TextAlign.center,
-                    controller: _dateController,
-                    style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: chosenDate.toString().split(" ")[0],
-                      focusedBorder: OutlineInputBorder(
-                        // color of the border
-                        borderSide: BorderSide(
-                          color: Color.fromARGB(255, 250, 175, 195),
+                  width: 180,
+                  child: Column(
+                    children: [
+                      Center(
+                        child: Text(
+                          "Is your dream private?",
+                          style: TextStyle(color: Colors.white),
                         ),
                       ),
-                    ),
-                    readOnly: true,
-                    onTap: () {
-                      _selectDate();
-                    },
+                      Switch(
+                        activeThumbColor: cloudPink(),
+                        value: isPrivate,
+                        onChanged: (value) {
+                          setState(() {
+                            isPrivate = value;
+                          });
+                        },
+                      ),
+                      SizedBox(height: 10),
+                      SizedBox(
+                        width: 140,
+                        child: TextField(
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.white),
+                          controller: TextEditingController(text: _description),
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            hintText: "Choose tags",
+                            focusedBorder: OutlineInputBorder(
+                              // color of the border
+                              borderSide: BorderSide(
+                                color: Color.fromARGB(255, 250, 175, 195),
+                              ),
+                            ),
+                          ),
+                          readOnly: true,
+                          onTap: () {
+                            _chooseTags();
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -1339,7 +1419,7 @@ class _TodaysDreamState extends State<TodaysDream> {
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
+      lastDate: DateTime.now(),
     );
 
     if (pickedDate != null) {
@@ -1354,6 +1434,7 @@ class _TodaysDreamState extends State<TodaysDream> {
 
   Future<void> _writeADescription() async {
     final TextEditingController descriptionController = TextEditingController();
+    final TextEditingController nameController = TextEditingController();
 
     await showDialog(
       context: context,
@@ -1370,7 +1451,7 @@ class _TodaysDreamState extends State<TodaysDream> {
                   child: SizedBox(
                     width: 150,
                     child: TextField(
-                      controller: descriptionController,
+                      controller: nameController,
                       maxLines: null,
                       expands: true,
                       style: TextStyle(color: Colors.white),
@@ -1431,6 +1512,7 @@ class _TodaysDreamState extends State<TodaysDream> {
               ),
               onPressed: () {
                 setState(() {
+                  _name = nameController.text;
                   _description = descriptionController.text;
                 });
                 Navigator.pop(context);
@@ -1438,6 +1520,64 @@ class _TodaysDreamState extends State<TodaysDream> {
               child: Text("Save"),
             ),
           ],
+        );
+      },
+    );
+  }
+
+  Future<void> _chooseTags() async {
+    await showDialog(
+      context: context,
+      builder: (context) {
+        Color tagButtonColor = Colors.white;
+        Color tagButtonBorderColor = Colors.grey;
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor: const Color.fromARGB(255, 5, 5, 5),
+              content: SizedBox(
+                child: Row(
+                  children: [
+                    OutlinedButton(
+                      style: ButtonStyle(
+                        side: WidgetStatePropertyAll(
+                          BorderSide(color: tagButtonBorderColor, width: 5),
+                        ),
+                        backgroundColor: WidgetStatePropertyAll(tagButtonColor),
+                      ),
+
+                      onPressed: () {
+                        setState(() {
+                          tagButtonColor =
+                              (tagButtonColor ==
+                                  Color.fromARGB(255, 125, 87, 98))
+                              ? Colors.white
+                              : Color.fromARGB(255, 125, 87, 98);
+                          tagButtonBorderColor =
+                              (tagButtonBorderColor == Colors.grey)
+                              ? cloudPink()
+                              : Colors.grey;
+                        });
+                      },
+                      child: Text("hi", style: TextStyle(color: Colors.black)),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text(
+                    "Cancel",
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                ),
+              ],
+            );
+          },
         );
       },
     );
