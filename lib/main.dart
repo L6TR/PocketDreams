@@ -1338,6 +1338,8 @@ class _TodaysDreamState extends State<TodaysDream> {
                           style: TextStyle(color: Colors.white),
                         ),
                       ),
+
+                      // Private switch
                       Switch(
                         activeThumbColor: cloudPink(),
                         value: isPrivate,
@@ -1415,6 +1417,7 @@ class _TodaysDreamState extends State<TodaysDream> {
   // (something after the widget was built)
   //
 
+  // select date for dream
   Future<void> _selectDate() async {
     DateTime? pickedDate = await showDatePicker(
       context: context,
@@ -1433,6 +1436,7 @@ class _TodaysDreamState extends State<TodaysDream> {
     }
   }
 
+  // description for dreams
   Future<void> _writeADescription() async {
     final TextEditingController descriptionController = TextEditingController();
     final TextEditingController nameController = TextEditingController();
@@ -1508,7 +1512,7 @@ class _TodaysDreamState extends State<TodaysDream> {
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color.fromARGB(255, 250, 175, 195),
+                backgroundColor: Color.fromARGB(255, 125, 87, 98),
                 foregroundColor: Colors.black,
               ),
               onPressed: () {
@@ -1526,11 +1530,15 @@ class _TodaysDreamState extends State<TodaysDream> {
     );
   }
 
-  StatefulBuilder tagButton(tag) {
-    bool chosen = false;
+  // mapping String to bool for all tags in tagList
+  Map<String, bool> chosenDreamTags = {for (var tag in tagList) tag: false};
 
-    Color insideC = Colors.white;
-    Color borderC = Colors.grey;
+  // button for choosing tags for dream
+  StatefulBuilder tagButton(tag) {
+    bool chosen = chosenDreamTags[tag] ?? false;
+
+    Color insideC = !chosen ? Colors.white : cloudPink();
+    Color borderC = !chosen ? Colors.grey : Color.fromARGB(255, 125, 87, 98);
 
     return StatefulBuilder(
       builder: (context, setState) {
@@ -1542,14 +1550,15 @@ class _TodaysDreamState extends State<TodaysDream> {
 
           onPressed: () {
             chosen = !chosen;
+            chosenDreamTags[tag] = chosen;
             setState(() {
-              insideC = (insideC == Color.fromARGB(255, 125, 87, 98))
+              insideC = (insideC == Color.fromARGB(255, 250, 175, 195))
                   ? Colors.white
-                  : Color.fromARGB(255, 125, 87, 98);
-              borderC = (borderC == Colors.grey) ? cloudPink() : Colors.grey;
+                  : Color.fromARGB(255, 250, 175, 195);
+              borderC = (borderC == Colors.grey)
+                  ? Color.fromARGB(255, 125, 87, 98)
+                  : Colors.grey;
             });
-
-            print(chosen);
           },
           child: Text(tag, style: TextStyle(color: Colors.black)),
         );
@@ -1557,6 +1566,7 @@ class _TodaysDreamState extends State<TodaysDream> {
     );
   }
 
+  // choose tag dialog for dreams
   Future<void> _chooseTags() async {
     await showDialog(
       context: context,
@@ -1564,9 +1574,38 @@ class _TodaysDreamState extends State<TodaysDream> {
         return AlertDialog(
           backgroundColor: const Color.fromARGB(255, 5, 5, 5),
           content: SizedBox(
+            height: 250,
             child: Column(
               children: [
-                Row(children: [tagButton(tagList[0]), tagButton(tagList[1])]),
+                Row(
+                  children: [
+                    tagButton(tagList[0]),
+                    SizedBox(width: 15),
+                    tagButton(tagList[1]),
+                  ],
+                ),
+                Row(
+                  children: [
+                    tagButton(tagList[2]),
+                    SizedBox(width: 15),
+                    tagButton(tagList[3]),
+                  ],
+                ),
+                Row(
+                  children: [
+                    tagButton(tagList[4]),
+                    SizedBox(width: 15),
+                    tagButton(tagList[5]),
+                  ],
+                ),
+                Row(
+                  children: [
+                    tagButton(tagList[6]),
+                    SizedBox(width: 15),
+                    tagButton(tagList[7]),
+                  ],
+                ),
+                tagButton(tagList[8]),
               ],
             ),
           ),
@@ -1579,6 +1618,24 @@ class _TodaysDreamState extends State<TodaysDream> {
                 "Cancel",
                 style: TextStyle(color: Colors.white70),
               ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: cloudPink(),
+                foregroundColor: Colors.black,
+              ),
+              onPressed: () {
+                for (int i = 0; i < chosenDreamTags.length; i++) {
+                  if (chosenDreamTags[tagList[i]] == true) {
+                    print(tagList[i]);
+                  }
+                }
+
+                if (!isPrivate) {
+                  Navigator.pop(context);
+                }
+              },
+              child: Text("Save"),
             ),
           ],
         );
