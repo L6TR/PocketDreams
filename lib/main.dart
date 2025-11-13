@@ -935,10 +935,10 @@ class Dream {
   final Color emotionColor;
   final String describe;
   final int isPrivate;
-  //final List<String> tags;
+  final List<String> tags;
 
   Dream({
-    //required this.tags,
+    required this.tags,
     required this.name,
     required this.date,
     required this.isPrivate,
@@ -968,6 +968,7 @@ class _TodaysDreamState extends State<TodaysDream> {
   var message = "";
   var _name = "";
   bool isPrivate = true;
+  final List<String> _tags = [];
 
   int _isPrivate = 1;
   //List<String> _tags = [""];
@@ -980,7 +981,7 @@ class _TodaysDreamState extends State<TodaysDream> {
       _chosenDate,
       _description,
       _isPrivate,
-      //_tags,
+      _tags,
     );
     //addDreamToCalendar(dream);
 
@@ -1047,10 +1048,10 @@ class _TodaysDreamState extends State<TodaysDream> {
     dreamsDate,
     dreamsDescribe,
     dreamIsPrivate,
-    //dreamTags,
+    dreamTags,
   ) {
     return Dream(
-      //tags: dreamTags,
+      tags: dreamTags,
       isPrivate: dreamIsPrivate,
       date: dreamsDate,
       name: dreamName,
@@ -1101,7 +1102,7 @@ class _TodaysDreamState extends State<TodaysDream> {
     return -1;
   }
 
-  String status = "can";
+  String error = "";
 
   final TextEditingController _dateController = TextEditingController();
   String _description = "";
@@ -1267,6 +1268,10 @@ class _TodaysDreamState extends State<TodaysDream> {
             ),
           ),
           Expanded(
+            flex: 1,
+            child: Text(error, style: TextStyle(color: Colors.red)),
+          ),
+          Expanded(
             flex: 3,
             child: Row(
               children: [
@@ -1401,7 +1406,12 @@ class _TodaysDreamState extends State<TodaysDream> {
                   // important!!!
                   //
                   onPressed: () {
-                    addDream();
+                    if (!isPrivate && _tags.isNotEmpty) {
+                      error = "You must to choose tags for the public dream";
+                    } else {
+                      error = "Your dream was added";
+                      addDream();
+                    }
                   },
                 ),
               ),
@@ -1625,15 +1635,14 @@ class _TodaysDreamState extends State<TodaysDream> {
                 foregroundColor: Colors.black,
               ),
               onPressed: () {
+                if (_tags.isNotEmpty) _tags.clear();
                 for (int i = 0; i < chosenDreamTags.length; i++) {
                   if (chosenDreamTags[tagList[i]] == true) {
-                    print(tagList[i]);
+                    _tags.add(tagList[i]);
                   }
                 }
 
-                if (!isPrivate) {
-                  Navigator.pop(context);
-                }
+                Navigator.pop(context);
               },
               child: Text("Save"),
             ),
