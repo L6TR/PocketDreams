@@ -1112,6 +1112,7 @@ class _TodaysDreamState extends State<TodaysDream> {
   Widget build(BuildContext context) {
     var chosenDate = DateTime.now();
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: Colors.black,
       body: Column(
         children: [
@@ -1269,7 +1270,10 @@ class _TodaysDreamState extends State<TodaysDream> {
           ),
           Expanded(
             flex: 1,
-            child: Text(error, style: TextStyle(color: Colors.red)),
+            child: SizedBox(
+              width: 240,
+              child: Text(error, style: TextStyle(color: Colors.red)),
+            ),
           ),
           Expanded(
             flex: 3,
@@ -1355,12 +1359,13 @@ class _TodaysDreamState extends State<TodaysDream> {
                         },
                       ),
                       SizedBox(height: 10),
+
+                      // Choose tags box
                       SizedBox(
                         width: 140,
                         child: TextField(
                           textAlign: TextAlign.center,
                           style: TextStyle(color: Colors.white),
-                          controller: TextEditingController(text: _description),
                           decoration: InputDecoration(
                             border: OutlineInputBorder(),
                             hintText: "Choose tags",
@@ -1403,13 +1408,27 @@ class _TodaysDreamState extends State<TodaysDream> {
                   ),
 
                   //
-                  // important!!!
+                  // error logic and adding the dream
                   //
                   onPressed: () {
-                    if (!isPrivate && _tags.isNotEmpty) {
-                      error = "You must to choose tags for the public dream";
+                    if (!isPrivate && _tags.isEmpty && _description.isEmpty) {
+                      setState(() {
+                        error =
+                            "You must to choose tags and write the description for the public dream";
+                      });
+                    } else if (!isPrivate && _tags.isEmpty) {
+                      setState(() {
+                        error = "You must to choose tags for the public dream";
+                      });
+                    } else if (!isPrivate && _description.isEmpty) {
+                      setState(() {
+                        error =
+                            "You must to write the description for the public dream";
+                      });
                     } else {
-                      error = "Your dream was added";
+                      setState(() {
+                        error = "Your dream was added";
+                      });
                       addDream();
                     }
                   },
@@ -1634,6 +1653,7 @@ class _TodaysDreamState extends State<TodaysDream> {
                 backgroundColor: cloudPink(),
                 foregroundColor: Colors.black,
               ),
+              // clears tags and adding a tag to the tagList[]
               onPressed: () {
                 if (_tags.isNotEmpty) _tags.clear();
                 for (int i = 0; i < chosenDreamTags.length; i++) {
