@@ -13,7 +13,7 @@ import 'package:flutter/services.dart';
 Map<DateTime, List<Dream>> dreams = {};
 
 String user = "merunka";
-String server = "http://10.1.79.137:5000";
+String server = "http://10.0.1.12:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -525,13 +525,6 @@ class _LoginScreenState extends State<LoginScreen> {
     // because it doesn't allow just a fixed color...
     // it want to be depended on the state of the checkbox
     // (-_-)
-
-    Color getColor(Set<WidgetState> states) {
-      if (states.contains(WidgetState.selected)) {
-        return Color.fromARGB(255, 250, 175, 195);
-      }
-      return Colors.transparent;
-    }
 
     return Scaffold(
       appBar: AppBar(
@@ -1112,171 +1105,201 @@ class _TodaysDreamState extends State<TodaysDream> {
   Widget build(BuildContext context) {
     var chosenDate = DateTime.now();
     return Scaffold(
-      resizeToAvoidBottomInset: true,
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.black,
+
       body: Column(
         children: [
           Expanded(
-            flex: 9,
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 9,
-                  child: Column(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
                     children: [
+                      // center part
                       Expanded(
-                        flex: 2,
-                        child: Center(
-                          child: SizedBox(
-                            width: 200,
-                            child: Autocomplete<Emotion>(
-                              optionsBuilder: (TextEditingValue userInput) {
-                                if (userInput.text == "") {
-                                  return const Iterable<Emotion>.empty();
-                                }
-                                return emotions.where((emotions) {
-                                  return emotions.name.toLowerCase().contains(
-                                    userInput.text.toLowerCase(),
-                                  );
-                                });
-                              },
-                              onSelected: (Emotion emotion) {
-                                newEmotionChoise(emotion);
-                              },
-                              displayStringForOption: (Emotion emotion) =>
-                                  emotion.name,
+                        flex: 9,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Dream emotion text box
+                            SizedBox(
+                              height: 100,
+                              child: Center(
+                                child: SizedBox(
+                                  width: 200,
+                                  child: Autocomplete<Emotion>(
+                                    optionsBuilder:
+                                        (TextEditingValue userInput) {
+                                          if (userInput.text == "") {
+                                            return const Iterable<
+                                              Emotion
+                                            >.empty();
+                                          }
+                                          return emotions.where((emotions) {
+                                            return emotions.name
+                                                .toLowerCase()
+                                                .contains(
+                                                  userInput.text.toLowerCase(),
+                                                );
+                                          });
+                                        },
+                                    onSelected: (Emotion emotion) {
+                                      newEmotionChoise(emotion);
+                                    },
+                                    displayStringForOption: (Emotion emotion) =>
+                                        emotion.name,
 
-                              fieldViewBuilder:
-                                  (
-                                    context,
-                                    textEditingController,
-                                    focusNode,
-                                    onFieldSubmitted,
-                                  ) {
-                                    return TextField(
-                                      controller: textEditingController,
-                                      focusNode: focusNode,
-                                      style: TextStyle(color: Colors.white),
+                                    fieldViewBuilder:
+                                        (
+                                          context,
+                                          textEditingController,
+                                          focusNode,
+                                          onFieldSubmitted,
+                                        ) {
+                                          return TextField(
+                                            controller: textEditingController,
+                                            focusNode: focusNode,
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                            ),
 
-                                      // color of blinking |
-                                      cursorColor: Color.fromARGB(
-                                        255,
-                                        250,
-                                        175,
-                                        195,
-                                      ),
-                                      decoration: InputDecoration(
-                                        border: OutlineInputBorder(),
-                                        hintText: "Find key words",
-                                        focusedBorder: OutlineInputBorder(
-                                          // color of the border
-                                          borderSide: BorderSide(
-                                            color: Color.fromARGB(
+                                            // color of blinking |
+                                            cursorColor: Color.fromARGB(
                                               255,
                                               250,
                                               175,
                                               195,
                                             ),
-                                          ),
+                                            decoration: InputDecoration(
+                                              border: OutlineInputBorder(),
+                                              hintText: "Find key words",
+                                              focusedBorder: OutlineInputBorder(
+                                                // color of the border
+                                                borderSide: BorderSide(
+                                                  color: Color.fromARGB(
+                                                    255,
+                                                    250,
+                                                    175,
+                                                    195,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            onSubmitted: (value) {},
+                                          );
+                                        },
+                                  ),
+                                ),
+                              ),
+                            ),
+                            // part with emotion buttons
+                            Container(
+                              constraints: BoxConstraints(minHeight: 200),
+                              child: SizedBox(
+                                width: 200,
+                                child: SingleChildScrollView(
+                                  child: Column(
+                                    children: [
+                                      Center(
+                                        child: Wrap(
+                                          spacing: 8,
+                                          children: chosenEmotionButtons,
                                         ),
                                       ),
-                                      onSubmitted: (value) {},
-                                    );
-                                  },
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 8,
-                        child: SizedBox(
-                          width: 200,
-                          child: Column(
-                            children: [
-                              Center(
-                                child: Wrap(
-                                  spacing: 8,
-                                  children: chosenEmotionButtons,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Center(
-                    child:
-                        // Sphere column
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            for (int i = 0; i < 6; i++)
-                              Container(
-                                width: 20,
-                                height: 20,
-                                margin: EdgeInsets.symmetric(vertical: 4),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: Colors.white,
-                                    width: 3,
+                                    ],
                                   ),
                                 ),
-                                child: Container(
-                                  width: 5,
-                                  height: 5,
-                                  margin: EdgeInsets.symmetric(vertical: 1),
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: sphereColors[i],
-                                    border: Border.all(
-                                      color: Colors.black,
-                                      width: 1,
-                                    ),
-                                  ),
-                                ),
-                              ),
-
-                            Icon(
-                              Icons.keyboard_double_arrow_down_rounded,
-                              color: chosenEmotionButtons.isNotEmpty
-                                  ? Colors.white
-                                  : Colors.white10,
-                            ),
-                            Container(
-                              margin: EdgeInsets.symmetric(vertical: 4),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(7),
-                                border: Border.all(
-                                  color: Colors.white,
-                                  width: 3,
-                                ),
-                              ),
-                              child: Icon(
-                                Icons.square_rounded,
-                                color: mixedColor(chosenSphereColors),
                               ),
                             ),
                           ],
                         ),
+                      ),
+                      // right part
+                      // mixing emotions
+                      Expanded(
+                        flex: 1,
+                        child: Center(
+                          child:
+                              // Sphere column
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  for (int i = 0; i < 6; i++)
+                                    Container(
+                                      width: 20,
+                                      height: 20,
+                                      margin: EdgeInsets.symmetric(vertical: 4),
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: Colors.white,
+                                          width: 3,
+                                        ),
+                                      ),
+                                      child: Container(
+                                        width: 5,
+                                        height: 5,
+                                        margin: EdgeInsets.symmetric(
+                                          vertical: 1,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: sphereColors[i],
+                                          border: Border.all(
+                                            color: Colors.black,
+                                            width: 1,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+
+                                  Icon(
+                                    Icons.keyboard_double_arrow_down_rounded,
+                                    color: chosenEmotionButtons.isNotEmpty
+                                        ? Colors.white
+                                        : Colors.white10,
+                                  ),
+                                  Container(
+                                    margin: EdgeInsets.symmetric(vertical: 4),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(7),
+                                      border: Border.all(
+                                        color: Colors.white,
+                                        width: 3,
+                                      ),
+                                    ),
+                                    child: Icon(
+                                      Icons.square_rounded,
+                                      color: mixedColor(chosenSphereColors),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-          Expanded(
-            flex: 1,
+          // error text
+          SizedBox(
+            height: 40,
             child: SizedBox(
               width: 240,
-              child: Text(error, style: TextStyle(color: Colors.red)),
+              child: Text(
+                error, // that would be our text
+                style: TextStyle(color: Colors.red),
+                textAlign: TextAlign.center,
+              ),
             ),
           ),
-          Expanded(
-            flex: 3,
+          // description textbox
+          SizedBox(
+            height: 160,
             child: Row(
               children: [
                 SizedBox(
@@ -1285,6 +1308,7 @@ class _TodaysDreamState extends State<TodaysDream> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      // description Text box
                       SizedBox(
                         width: 120,
                         child: TextField(
@@ -1310,6 +1334,7 @@ class _TodaysDreamState extends State<TodaysDream> {
 
                       SizedBox(height: 15),
 
+                      // Date text box
                       SizedBox(
                         height: 60,
                         width: 120,
@@ -1337,14 +1362,21 @@ class _TodaysDreamState extends State<TodaysDream> {
                   ),
                 ),
                 SizedBox(width: 15),
+
+                // swith part
                 SizedBox(
                   width: 180,
                   child: Column(
                     children: [
-                      Center(
-                        child: Text(
-                          "Is your dream private?",
-                          style: TextStyle(color: Colors.white),
+                      // Swith text
+                      SizedBox(
+                        height: 28,
+                        child: Center(
+                          child: Text(
+                            "Is your dream private?",
+                            style: TextStyle(color: Colors.white),
+                            textAlign: TextAlign.center,
+                          ),
                         ),
                       ),
 
@@ -1362,6 +1394,7 @@ class _TodaysDreamState extends State<TodaysDream> {
 
                       // Choose tags box
                       SizedBox(
+                        height: 60,
                         width: 140,
                         child: TextField(
                           textAlign: TextAlign.center,
@@ -1388,18 +1421,17 @@ class _TodaysDreamState extends State<TodaysDream> {
               ],
             ),
           ),
-          Expanded(
-            flex: 1,
+
+          // add dream button
+          SizedBox(
+            height: 80,
             child: Center(
               child: SizedBox(
                 child: OutlinedButton(
                   style: ButtonStyle(
                     backgroundColor: WidgetStatePropertyAll(Colors.white),
                     side: WidgetStatePropertyAll(
-                      BorderSide(
-                        color: Color.fromARGB(255, 250, 175, 195),
-                        width: 5,
-                      ),
+                      BorderSide(color: cloudPink(), width: 5),
                     ),
                   ),
                   child: Text(
@@ -1453,6 +1485,21 @@ class _TodaysDreamState extends State<TodaysDream> {
       initialDate: DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            primaryColor: cloudPink(),
+            colorScheme: ColorScheme.light(
+              primary: cloudPink(),
+              onPrimary: Colors.white,
+              surface: Color.fromARGB(255, 5, 5, 5),
+              onSurface: Colors.white,
+            ),
+            dialogTheme: DialogThemeData(backgroundColor: Colors.black),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (pickedDate != null) {

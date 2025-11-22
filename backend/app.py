@@ -65,8 +65,12 @@ def register():
     Password = data.get("Password")
 
     # if a nick or a password is empty
-    if not Username or not Password:
-        return jsonify({"success": False, "message": "Username and password required"}), 400
+    if not Username and not Password:
+        return jsonify({"success": False, "message": "A username and a password are required"}), 400
+    elif not Username:
+        return jsonify({"success": False, "message": "A username is required"}), 400
+    elif not Password:
+        return jsonify({"success": False, "message": "A password is required"}), 400
 
 
     hashPassword = bcrypt.hashpw(Password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
@@ -78,14 +82,14 @@ def register():
     cursor.execute("SELECT ID FROM Users WHERE Username = ?", (Username,))
     if cursor.fetchone():
         conn.close()
-        return jsonify({"success": False, "message": "User is already exist"}), 400
+        return jsonify({"success": False, "message": "The username is alredy taken"}), 400
 
     # and now we can add a new user
     cursor.execute("INSERT INTO Users (Username, HashPassword) VALUES (?, ?)", (Username, hashPassword))
     conn.commit()
     conn.close()
 
-    return jsonify({"success": True, "message": "User registered"})
+    return jsonify({"success": True, "message": "The user has been registered"}), 200
 
 
 
