@@ -57,7 +57,7 @@ conn.commit() # saving changes in our database
 conn.close() # ending our connection
 
 
-
+# Register function
 @app.route("/api/register", methods=["POST"])
 def register():
     data = request.json
@@ -92,7 +92,7 @@ def register():
     return jsonify({"success": True, "message": "The user has been registered"}), 200
 
 
-
+# Login function
 @app.route("/api/login", methods=["POST"])
 def login():
     data = request.json
@@ -121,7 +121,7 @@ def login():
     else:
         return jsonify({"success": False, "message": "Invalid password"}), 401
 
-
+# Tag Screen Function
 @app.route("/api/chooseTags", methods=["POST", "DELETE"])
 def chooseTags():
     data = request.json
@@ -151,6 +151,26 @@ def chooseTags():
 
     return jsonify({"success": True, "message": "Confirmed"})
 
+@app.route("/api/addDream", methods=["POST", "DELETE"])
+def addDream():
+    data = request.json
+    DreamName = data.get("Name")
+    Description = data.get("Description")
+    Date = data.get("Date")
+    IsPrivate = data.get("IsPrivate")
+    Tags = data.get("Tags")
+    User = data.get("User")
+    PublicationDate = data.get("PublicationDate")
+    Emotions = data.get("Emotions")
+    print(f"Name: {DreamName}")
+    print(f"Description: {Description}")
+    print(f"Date: {Date}")
+    print(f"IsPrivate: {IsPrivate}")
+    print(f"Tags: {Tags}")
+    print(f"User: {User}")
+    print(f"Emotions: {Emotions}")
+    print(f"PublicationDate: {PublicationDate}")
+    return jsonify({"success": True, "message": " "})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

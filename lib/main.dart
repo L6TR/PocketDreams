@@ -909,11 +909,11 @@ final List<Emotion> emotions = [
   Emotion(name: "Love", color: Color.fromARGB(255, 255, 0, 0)),
   Emotion(name: "Calm", color: Color.fromARGB(255, 0, 0, 255)),
   Emotion(name: "Harmony", color: Color.fromARGB(255, 0, 255, 0)),
-  Emotion(name: "Harmony2", color: Color.fromARGB(255, 0, 255, 255)),
-  Emotion(name: "idk0", color: Color.fromARGB(255, 255, 0, 255)),
+  Emotion(name: "Freedom", color: Color.fromARGB(255, 0, 255, 255)),
+  Emotion(name: "Creativity", color: Color.fromARGB(255, 255, 0, 255)),
 
-  Emotion(name: "idk", color: Color.fromARGB(255, 255, 255, 255)),
-  Emotion(name: "idk2", color: Color.fromARGB(255, 0, 0, 0)),
+  Emotion(name: "Purity", color: Color.fromARGB(255, 255, 255, 255)),
+  Emotion(name: "Depth", color: Color.fromARGB(255, 0, 0, 0)),
 
   Emotion(name: "Warmth", color: Color.fromARGB(255, 255, 165, 0)),
 ];
@@ -958,46 +958,69 @@ class TodaysDream extends StatefulWidget {
 //
 
 class _TodaysDreamState extends State<TodaysDream> {
+  // creating variables for our future work with json
   var message = "";
   var _name = "";
   bool isPrivate = true;
   final List<String> _tags = [];
-
+  //final List<double> _mixedColor = [255, 96, 106, 116];
+  final List<String> _emotions = [];
+  bool colorWasChosen = false;
   int _isPrivate = 1;
-  //List<String> _tags = [""];
+
   Future<void> addDream() async {
     _isPrivate = (isPrivate) ? 1 : 0;
     _name = (_name == "") ? "$_chosenDate dream" : _name;
-    final dream = newDream(
+
+    // working in cycle with sphere colors
+    for (int i = 0; i < chosenSphereColors.length; i++) {
+      // working in cycke with all emotions (final list)
+      for (int a = 0; a < emotions.length; a++) {
+        // compare our sphere colors with emotion color
+        if (emotions[a].color == chosenSphereColors[i]) {
+          // if emotion color is ok, adding it to the _emotions list (need for json)
+          _emotions.add(emotions[a].name);
+        }
+      }
+    }
+    print(_emotions);
+    _emotions.clear();
+
+    /*final dream = newDream(
       mixedColor(chosenSphereColors),
       _name,
       _chosenDate,
       _description,
       _isPrivate,
       _tags,
-    );
+    );*/
+
     //addDreamToCalendar(dream);
 
+    //
     /*final response = await http.post(
       Uri.parse("$server/api/addDream"),
       headers: {"Content-Type": "application/json"},
       body: json.encode({
         "Name": _name,
         "Description": _description,
-        "Date": _chosenDate,
+        "Date": _chosenDate.toIso8601String(),
         "IsPrivate": _isPrivate,
+        "Tags": _tags,
         "User": user,
+        "PublicationDate": DateTime.now().toIso8601String(),
+        "Emotions": _emotions,
       }),
-    );
+    );*/
 
-    final data = json.decode(response.body);
+    //final data = json.decode(response.body);
 
-    setState(() {
+    /*setState(() {
       message = data["message"];
-    });*/
+    });
 
-    /*if (data["success"]) {
-
+    if (data["success"]) {
+      print(message);
     }*/
   }
 
@@ -1008,6 +1031,8 @@ class _TodaysDreamState extends State<TodaysDream> {
   List<Color> chosenSphereColors = [];
 
   List<EmotionButton> chosenEmotionButtons = [];
+
+  List<String> chosenEmotions = [];
 
   //function for mixing colors
   Color mixedColor(List<Color> colorList) {
@@ -1026,6 +1051,7 @@ class _TodaysDreamState extends State<TodaysDream> {
     }
 
     int len = colorList.length;
+    colorWasChosen = chosenSphereColors.isNotEmpty;
     return Color.fromARGB(
       255,
       (mixedR / len).round(),
@@ -1064,14 +1090,20 @@ class _TodaysDreamState extends State<TodaysDream> {
     });
   }
 
+  //
+  //adding a new emotion to the our list
+  //
   void newEmotionChoise(Emotion emotion) {
     int index = nextIndex(sphereColors);
     if (index != -1) {
       setState(() {
+        //remembering our index
         sphereColors[index] = emotion.color;
 
+        //add a new color to our right side
         chosenSphereColors.add(emotion.color);
 
+        //adding a button in the middle
         chosenEmotionButtons.add(
           EmotionButton(
             index: index,
@@ -1443,7 +1475,15 @@ class _TodaysDreamState extends State<TodaysDream> {
                   // error logic and adding the dream
                   //
                   onPressed: () {
-                    if (!isPrivate && _tags.isEmpty && _description.isEmpty) {
+                    if (_tags.isEmpty &&
+                        _description.isEmpty &&
+                        !colorWasChosen) {
+                      setState(() {
+                        error = "You must to choose at least something";
+                      });
+                    } else if (!isPrivate &&
+                        _tags.isEmpty &&
+                        _description.isEmpty) {
                       setState(() {
                         error =
                             "You must to choose tags and write the description for the public dream";
@@ -1461,6 +1501,8 @@ class _TodaysDreamState extends State<TodaysDream> {
                       setState(() {
                         error = "Your dream was added";
                       });
+                      //print(chosenSphereColors);
+
                       addDream();
                     }
                   },
