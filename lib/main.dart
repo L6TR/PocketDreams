@@ -13,7 +13,7 @@ import 'package:flutter/services.dart';
 Map<DateTime, List<Dream>> dreams = {};
 
 String user = "merunka";
-String server = "http://10.1.6.250:5000";
+String server = "http://192.168.0.233:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -606,31 +606,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ),
                             ),
+
                             // remember me
-                            /*
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Checkbox(
-                                  fillColor: WidgetStateProperty.resolveWith(
-                                    getColor,
-                                  ),
-                                  value: isRemembered,
-                                  onChanged: (bool? value) {
-                                    setState(() {
-                                      isRemembered = value!;
-                                    });
-                                  },
-                                ),
-                                Text("can we "),
-                                Text(
-                                  "remember ",
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                                Text("you?"),
-                              ],
-                            ),*/
                             cloudyButton("Login", login),
                             SizedBox(height: 10),
                             Text(message, style: TextStyle(color: Colors.red)),
@@ -973,7 +950,9 @@ class _TodaysDreamState extends State<TodaysDream> {
 
   Future<void> addDream() async {
     _isPrivate = (isPrivate) ? 1 : 0;
-    _name = (_name == "") ? "$_chosenDate dream" : _name;
+    _name = (_name == "")
+        ? "${_chosenDate.year}.${_chosenDate.month}.${_chosenDate.day} dream"
+        : _name;
 
     // working in cycle with sphere colors
     for (int i = 0; i < chosenSphereColors.length; i++) {

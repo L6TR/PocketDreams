@@ -30,7 +30,7 @@ cursor = conn.cursor() # we need this one for our SQL commands
 #cursor.execute("CREATE TABLE IF NOT EXISTS Emotions (ID INTEGER PRIMARY KEY, Name TEXT)")
 
 
-#cursor.execute("CREATE TABLE IF NOT EXISTS Dreams (ID INTEGER PRIMARY KEY, Name TEXT, Description TEXT, Date INTEGER, IsPrivate INTEGER, User INTEGER, FOREIGN KEY (User) REFERENCES Users(ID));")
+#cursor.execute("CREATE TABLE IF NOT EXISTS Dreams (ID INTEGER PRIMARY KEY, Name TEXT, Description TEXT, Date INTEGER, IsPrivate INTEGER, PublicationDate INTEGER, User INTEGER, FOREIGN KEY (User) REFERENCES Users(ID));")
 
 
 #cursor.execute("CREATE TABLE IF NOT EXISTS Comments (ID INTEGER PRIMARY KEY, CommentedText TEXT, CreatedAt INTEGER, CommentedBy INTEGER, CommentedDream INTEGER, FOREIGN KEY (CommentedBy) REFERENCES Users(ID), FOREIGN KEY (CommentedDream) REFERENCES Dreams(ID))")
@@ -163,14 +163,32 @@ def addDream():
     User = data.get("User")
     PublicationDate = data.get("PublicationDate")
     Emotions = data.get("Emotions")
-    print(f"Name: {DreamName}")
-    print(f"Description: {Description}")
-    print(f"Date: {Date}")
-    print(f"IsPrivate: {IsPrivate}")
-    print(f"Tags: {Tags}")
-    print(f"User: {User}")
-    print(f"Emotions: {Emotions}")
-    print(f"PublicationDate: {PublicationDate}")
+
+    conn = sqlite3.connect("pocketdreams.db")
+    cursor = conn.cursor()
+    
+    # now we know users id
+    cursor.execute("SELECT ID FROM Users WHERE Username = ?", (User,))
+    UserID = cursor.fetchone()[0]
+    cursor.execute("SELECT ID FROM Dreams WHERE Date = ?",(Date,))
+    if cursor.fetchall():   
+        conn.commit()
+        conn.close()
+        return jsonify({"success": False, "message": "You had already wrote a dream for this day"})
+    cursor.execute("INSERT INTO Dreams (Name, Description, Date, IsPrivate, PublicationDate, User) VALUES (?, ?, ?, ?, ?, ?)", (DreamName, Description,Date,IsPrivate,PublicationDate,UserID))
+
+
+    conn.commit()
+    conn.close()
+
+    #print(f"Name: {DreamName}")
+    #print(f"Description: {Description}")
+    #print(f"Date: {Date}")
+    #print(f"IsPrivate: {IsPrivate}")
+    #print(f"Tags: {Tags}")
+    #print(f"User: {User}")
+    #print(f"Emotions: {Emotions}")
+    #print(f"PublicationDate: {PublicationDate}")
     return jsonify({"success": True, "message": "Your dream was added"})
 
 if __name__ == "__main__":
