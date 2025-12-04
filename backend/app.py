@@ -153,6 +153,7 @@ def chooseTags():
 
 @app.route("/api/addDream", methods=["POST", "DELETE"])
 def addDream():
+    #here we have all variables what we would upload to our database 
     data = request.json
     DreamName = data.get("Name")
     Description = data.get("Description")
@@ -170,7 +171,7 @@ def addDream():
     print(f"User: {User}")
     print(f"Emotions: {Emotions}")
     print(f"PublicationDate: {PublicationDate}")
-    return jsonify({"success": True, "message": " "})
+    return jsonify({"success": True, "message": "Your dream was added"})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

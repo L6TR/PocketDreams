@@ -13,7 +13,7 @@ import 'package:flutter/services.dart';
 Map<DateTime, List<Dream>> dreams = {};
 
 String user = "merunka";
-String server = "http://10.0.1.12:5000";
+String server = "http://10.1.6.250:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -45,7 +45,7 @@ Color cloudPink() {
   return Color.fromARGB(255, 250, 175, 195);
 }
 
-OutlinedButton clowdyButton(String myText, doSomething) {
+OutlinedButton cloudyButton(String myText, doSomething) {
   return OutlinedButton(
     style: ButtonStyle(
       backgroundColor: WidgetStatePropertyAll(Colors.white),
@@ -228,7 +228,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ),
                             ),
 
-                            clowdyButton("Register", register),
+                            cloudyButton("Register", register),
                             SizedBox(height: 10),
                             Text(message, style: TextStyle(color: Colors.red)),
                           ],
@@ -459,7 +459,7 @@ class _TagScreenState extends State<TagScreen> {
             flex: 1,
             child: Column(
               children: [
-                Center(child: clowdyButton("Confim", confimTags)),
+                Center(child: cloudyButton("Confim", confimTags)),
                 SizedBox(height: 10),
                 Text(message, style: TextStyle(color: Colors.red)),
               ],
@@ -631,7 +631,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 Text("you?"),
                               ],
                             ),*/
-                            clowdyButton("Login", login),
+                            cloudyButton("Login", login),
                             SizedBox(height: 10),
                             Text(message, style: TextStyle(color: Colors.red)),
                           ],
@@ -958,6 +958,9 @@ class TodaysDream extends StatefulWidget {
 //
 
 class _TodaysDreamState extends State<TodaysDream> {
+  //
+  Color errorColor = Colors.red;
+
   // creating variables for our future work with json
   var message = "";
   var _name = "";
@@ -984,7 +987,21 @@ class _TodaysDreamState extends State<TodaysDream> {
       }
     }
     print(_emotions);
-    _emotions.clear();
+
+    // make from date format in integer like yearmonthday
+    // like if we have 2025.12.04 we create 20251204
+    int rightDateFormat(date) {
+      // if we have for example 4 month we need 04, that means if we have month < 10 we are adding 0
+      String month = date.month < 10
+          ? "0${date.month.toString()}"
+          : date.month.toString();
+      // same logic as in month
+      String day = date.day < 10
+          ? "0${date.day.toString()}"
+          : date.day.toString();
+      date = date.year.toString() + month + day;
+      return int.parse(date);
+    }
 
     /*final dream = newDream(
       mixedColor(chosenSphereColors),
@@ -997,31 +1014,32 @@ class _TodaysDreamState extends State<TodaysDream> {
 
     //addDreamToCalendar(dream);
 
-    //
-    /*final response = await http.post(
+    final response = await http.post(
       Uri.parse("$server/api/addDream"),
       headers: {"Content-Type": "application/json"},
       body: json.encode({
         "Name": _name,
         "Description": _description,
-        "Date": _chosenDate.toIso8601String(),
+        "Date": rightDateFormat(_chosenDate),
         "IsPrivate": _isPrivate,
         "Tags": _tags,
         "User": user,
-        "PublicationDate": DateTime.now().toIso8601String(),
+        "PublicationDate": rightDateFormat(DateTime.now()),
         "Emotions": _emotions,
       }),
-    );*/
+    );
 
-    //final data = json.decode(response.body);
+    //clearing list with emotion what we had sended to the backend
+    _emotions.clear();
+    final data = json.decode(response.body);
 
-    /*setState(() {
+    setState(() {
       message = data["message"];
     });
 
     if (data["success"]) {
-      print(message);
-    }*/
+      //print(message);
+    }
   }
 
   // List for all spheres + grey
@@ -1324,7 +1342,7 @@ class _TodaysDreamState extends State<TodaysDream> {
               width: 240,
               child: Text(
                 error, // that would be our text
-                style: TextStyle(color: Colors.red),
+                style: TextStyle(color: errorColor),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -1479,29 +1497,33 @@ class _TodaysDreamState extends State<TodaysDream> {
                         _description.isEmpty &&
                         !colorWasChosen) {
                       setState(() {
+                        errorColor = Colors.red;
                         error = "You must to choose at least something";
                       });
                     } else if (!isPrivate &&
                         _tags.isEmpty &&
                         _description.isEmpty) {
                       setState(() {
+                        errorColor = Colors.red;
                         error =
                             "You must to choose tags and write the description for the public dream";
                       });
                     } else if (!isPrivate && _tags.isEmpty) {
                       setState(() {
+                        errorColor = Colors.red;
                         error = "You must to choose tags for the public dream";
                       });
                     } else if (!isPrivate && _description.isEmpty) {
                       setState(() {
+                        errorColor = Colors.red;
                         error =
                             "You must to write the description for the public dream";
                       });
                     } else {
                       setState(() {
+                        errorColor = Colors.green;
                         error = "Your dream was added";
                       });
-                      //print(chosenSphereColors);
 
                       addDream();
                     }
@@ -1630,7 +1652,7 @@ class _TodaysDreamState extends State<TodaysDream> {
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color.fromARGB(255, 125, 87, 98),
+                backgroundColor: cloudPink(),
                 foregroundColor: Colors.black,
               ),
               onPressed: () {
