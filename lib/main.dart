@@ -13,7 +13,7 @@ import 'package:flutter/services.dart';
 Map<DateTime, List<Dream>> dreams = {};
 
 String user = "merunka";
-String server = "http://192.168.0.233:5000";
+String server = "http://10.0.1.12:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -948,11 +948,16 @@ class _TodaysDreamState extends State<TodaysDream> {
   bool colorWasChosen = false;
   int _isPrivate = 1;
 
-  Future<void> addDream() async {
-    _isPrivate = (isPrivate) ? 1 : 0;
-    _name = (_name == "")
+  String rightDreamNameFormat(name) {
+    print("Name is ${name}, Chosen Date is: ${_chosenDate}");
+    return name = (name == "")
         ? "${_chosenDate.year}.${_chosenDate.month}.${_chosenDate.day} dream"
-        : _name;
+        : name;
+  }
+
+  Future<void> addDream() async {
+    _name = rightDreamNameFormat(_name);
+    _isPrivate = (isPrivate) ? 1 : 0;
 
     // working in cycle with sphere colors
     for (int i = 0; i < chosenSphereColors.length; i++) {
@@ -992,7 +997,6 @@ class _TodaysDreamState extends State<TodaysDream> {
     );*/
 
     //addDreamToCalendar(dream);
-
     final response = await http.post(
       Uri.parse("$server/api/addDream"),
       headers: {"Content-Type": "application/json"},
@@ -1523,6 +1527,7 @@ class _TodaysDreamState extends State<TodaysDream> {
 
   // select date for dream
   Future<void> _selectDate() async {
+    rightDreamNameFormat(_name);
     DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -1557,6 +1562,7 @@ class _TodaysDreamState extends State<TodaysDream> {
 
   // description for dreams
   Future<void> _writeADescription() async {
+    _name = "";
     final TextEditingController descriptionController = TextEditingController();
     final TextEditingController nameController = TextEditingController();
 
@@ -1638,6 +1644,7 @@ class _TodaysDreamState extends State<TodaysDream> {
                 setState(() {
                   _name = nameController.text;
                   _description = descriptionController.text;
+                  rightDreamNameFormat(_name);
                 });
                 Navigator.pop(context);
               },

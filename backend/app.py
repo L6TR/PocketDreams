@@ -10,14 +10,14 @@ cursor = conn.cursor() # we need this one for our SQL commands
 
 #cursor.execute("DROP TABLE IF EXISTS Tags;")
 #cursor.execute("DROP TABLE IF EXISTS Users;")
-#cursor.execute("DROP TABLE IF EXISTS Dreams;")
+cursor.execute("DROP TABLE IF EXISTS Dreams;")
 #cursor.execute("DROP TABLE IF EXISTS Likes;")
 #cursor.execute("DROP TABLE IF EXISTS Emotions;")
 #cursor.execute("DROP TABLE IF EXISTS Comments;")
 #cursor.execute("DROP TABLE IF EXISTS Reports;")
 #cursor.execute("DROP TABLE IF EXISTS Friendship;")
 #cursor.execute("DROP TABLE IF EXISTS DreamReports;")
-#cursor.execute("DROP TABLE IF EXISTS DreamTags;")
+cursor.execute("DROP TABLE IF EXISTS DreamTags;")
 #cursor.execute("DROP TABLE IF EXISTS DreamEmotions;")
 #cursor.execute("DROP TABLE IF EXISTS UserTags;")
 
@@ -30,7 +30,7 @@ cursor = conn.cursor() # we need this one for our SQL commands
 #cursor.execute("CREATE TABLE IF NOT EXISTS Emotions (ID INTEGER PRIMARY KEY, Name TEXT)")
 
 
-#cursor.execute("CREATE TABLE IF NOT EXISTS Dreams (ID INTEGER PRIMARY KEY, Name TEXT, Description TEXT, Date INTEGER, IsPrivate INTEGER, PublicationDate INTEGER, User INTEGER, FOREIGN KEY (User) REFERENCES Users(ID));")
+cursor.execute("CREATE TABLE IF NOT EXISTS Dreams (ID INTEGER PRIMARY KEY, Name TEXT, Description TEXT, Date INTEGER, IsPrivate INTEGER, PublicationDate INTEGER, User INTEGER, FOREIGN KEY (User) REFERENCES Users(ID));")
 
 
 #cursor.execute("CREATE TABLE IF NOT EXISTS Comments (ID INTEGER PRIMARY KEY, CommentedText TEXT, CreatedAt INTEGER, CommentedBy INTEGER, CommentedDream INTEGER, FOREIGN KEY (CommentedBy) REFERENCES Users(ID), FOREIGN KEY (CommentedDream) REFERENCES Dreams(ID))")
@@ -40,12 +40,9 @@ cursor = conn.cursor() # we need this one for our SQL commands
 
 
 #cursor.execute("CREATE TABLE IF NOT EXISTS DreamReports (DreamID INTEGER, ReportID INTEGER, FOREIGN KEY (DreamID) REFERENCES Dreams(ID), FOREIGN KEY (ReportID) REFERENCES Reports(ID));")
-#cursor.execute("CREATE TABLE IF NOT EXISTS DreamTags (DreamID INTEGER, TagID INTEGER, FOREIGN KEY (DreamID) REFERENCES Dreams(ID), FOREIGN KEY (TagID) REFERENCES Tags(ID));")
+cursor.execute("CREATE TABLE IF NOT EXISTS DreamTags (DreamID INTEGER, TagID INTEGER, FOREIGN KEY (DreamID) REFERENCES Dreams(ID), FOREIGN KEY (TagID) REFERENCES Tags(ID));")
 #cursor.execute("CREATE TABLE IF NOT EXISTS DreamEmotions (DreamID INTEGER, EmotionID INTEGER, FOREIGN KEY (DreamID) REFERENCES Dreams(ID), FOREIGN KEY (EmotionID) REFERENCES Emotions(ID));")
 #cursor.execute("CREATE TABLE IF NOT EXISTS UserTags (UserID INTEGER, TagID INTEGER, FOREIGN KEY (UserID) REFERENCES Users(ID), FOREIGN KEY (TagID) REFERENCES Tags(ID));")
-
-
-
 
 
 
@@ -174,8 +171,18 @@ def addDream():
     if cursor.fetchall():   
         conn.commit()
         conn.close()
-        return jsonify({"success": False, "message": "You had already wrote a dream for this day"})
+        return jsonify({"success": False, "message": "You had already wrote a dream for this day"}), 403
     cursor.execute("INSERT INTO Dreams (Name, Description, Date, IsPrivate, PublicationDate, User) VALUES (?, ?, ?, ?, ?, ?)", (DreamName, Description,Date,IsPrivate,PublicationDate,UserID))
+    cursor.execute("SELECT ID FROM Dreams WHERE Name = ?", (DreamName,))
+    dreamID = cursor.fetchone()[0]
+    for i in range(len(Tags)):
+        cursor.execute("SELECT ID FROM Tags WHERE Name = ?", (Tags[i],))
+        tagID = cursor.fetchone()[0]
+        cursor.execute("INSERT INTO DreamTags (DreamID, TagID) VALUES (?,?)", (dreamID,tagID))
+    for e in range(len(Emotions)):
+        cursor.execute("SELECT ID FROM Emotions WHERE Name = ?", (Emotions[e],))
+        emotionID = cursor.fetchone()[0]
+        cursor.execute("INSERT INTO DreamEmotions (DreamID, EmotionID) VALUES (?,?)", (dreamID,emotionID))
 
 
     conn.commit()
