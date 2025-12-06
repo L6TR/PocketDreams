@@ -935,8 +935,11 @@ class TodaysDream extends StatefulWidget {
 //
 
 class _TodaysDreamState extends State<TodaysDream> {
-  //
+  // color of our errors in the middle of the screen
   Color errorColor = Colors.red;
+
+  String? lastNameUpdate;
+  String? lastDescriptionUpdate;
 
   // creating variables for our future work with json
   var message = "";
@@ -1562,9 +1565,12 @@ class _TodaysDreamState extends State<TodaysDream> {
 
   // description for dreams
   Future<void> _writeADescription() async {
-    _name = "";
-    final TextEditingController descriptionController = TextEditingController();
-    final TextEditingController nameController = TextEditingController();
+    final TextEditingController descriptionController = TextEditingController(
+      text: lastDescriptionUpdate ?? '',
+    );
+    final TextEditingController nameController = TextEditingController(
+      text: lastNameUpdate ?? '',
+    );
 
     await showDialog(
       context: context,
@@ -1586,7 +1592,6 @@ class _TodaysDreamState extends State<TodaysDream> {
                       expands: true,
                       style: TextStyle(color: Colors.white),
                       cursorColor: Color.fromARGB(255, 250, 175, 195),
-
                       decoration: InputDecoration(
                         hintText: "Add a name",
                         hintStyle: TextStyle(color: Colors.white54),
@@ -1642,9 +1647,8 @@ class _TodaysDreamState extends State<TodaysDream> {
               ),
               onPressed: () {
                 setState(() {
-                  _name = nameController.text;
-                  _description = descriptionController.text;
-                  rightDreamNameFormat(_name);
+                  lastNameUpdate = nameController.text;
+                  lastDescriptionUpdate = descriptionController.text;
                 });
                 Navigator.pop(context);
               },
