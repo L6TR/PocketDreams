@@ -18,7 +18,7 @@ cursor.execute("DROP TABLE IF EXISTS Dreams;")
 #cursor.execute("DROP TABLE IF EXISTS Friendship;")
 #cursor.execute("DROP TABLE IF EXISTS DreamReports;")
 cursor.execute("DROP TABLE IF EXISTS DreamTags;")
-#cursor.execute("DROP TABLE IF EXISTS DreamEmotions;")
+cursor.execute("DROP TABLE IF EXISTS DreamEmotions;")
 #cursor.execute("DROP TABLE IF EXISTS UserTags;")
 
 
@@ -41,7 +41,7 @@ cursor.execute("CREATE TABLE IF NOT EXISTS Dreams (ID INTEGER PRIMARY KEY, Name 
 
 #cursor.execute("CREATE TABLE IF NOT EXISTS DreamReports (DreamID INTEGER, ReportID INTEGER, FOREIGN KEY (DreamID) REFERENCES Dreams(ID), FOREIGN KEY (ReportID) REFERENCES Reports(ID));")
 cursor.execute("CREATE TABLE IF NOT EXISTS DreamTags (DreamID INTEGER, TagID INTEGER, FOREIGN KEY (DreamID) REFERENCES Dreams(ID), FOREIGN KEY (TagID) REFERENCES Tags(ID));")
-#cursor.execute("CREATE TABLE IF NOT EXISTS DreamEmotions (DreamID INTEGER, EmotionID INTEGER, FOREIGN KEY (DreamID) REFERENCES Dreams(ID), FOREIGN KEY (EmotionID) REFERENCES Emotions(ID));")
+cursor.execute("CREATE TABLE IF NOT EXISTS DreamEmotions (DreamID INTEGER, EmotionID INTEGER, FOREIGN KEY (DreamID) REFERENCES Dreams(ID), FOREIGN KEY (EmotionID) REFERENCES Emotions(ID));")
 #cursor.execute("CREATE TABLE IF NOT EXISTS UserTags (UserID INTEGER, TagID INTEGER, FOREIGN KEY (UserID) REFERENCES Users(ID), FOREIGN KEY (TagID) REFERENCES Tags(ID));")
 
 
@@ -100,7 +100,7 @@ def login():
     cursor = conn.cursor()
 
     # "nickname = ?", (nickname) 
-    # means that nickname would change on (nickname) and ? is just placeholder
+    # means that nickname would change on (nickname) and ? is just a placeholder
 
     cursor.execute("SELECT HashPassword FROM Users WHERE Username = ?", (Username,))
 
@@ -168,10 +168,19 @@ def addDream():
     cursor.execute("SELECT ID FROM Users WHERE Username = ?", (User,))
     UserID = cursor.fetchone()[0]
     cursor.execute("SELECT ID FROM Dreams WHERE Date = ?",(Date,))
+
+    # checking if we already had a dream for this day
     if cursor.fetchall():   
         conn.commit()
         conn.close()
-        return jsonify({"success": False, "message": "You had already wrote a dream for this day"}), 403
+        return jsonify({"success": False, "message": "You had already wrote a dream for this day"}), 403 
+    cursor.execute("SELECT ID FROM Dreams WHERE Name = ?",(DreamName,))
+
+    # checking if we already had a dream with this name
+    if cursor.fetchall():   
+        conn.commit()
+        conn.close()
+        return jsonify({"success": False, "message": "You had already wrote a dream with this name"}), 403 
     cursor.execute("INSERT INTO Dreams (Name, Description, Date, IsPrivate, PublicationDate, User) VALUES (?, ?, ?, ?, ?, ?)", (DreamName, Description,Date,IsPrivate,PublicationDate,UserID))
     cursor.execute("SELECT ID FROM Dreams WHERE Name = ?", (DreamName,))
     dreamID = cursor.fetchone()[0]
@@ -188,14 +197,6 @@ def addDream():
     conn.commit()
     conn.close()
 
-    #print(f"Name: {DreamName}")
-    #print(f"Description: {Description}")
-    #print(f"Date: {Date}")
-    #print(f"IsPrivate: {IsPrivate}")
-    #print(f"Tags: {Tags}")
-    #print(f"User: {User}")
-    #print(f"Emotions: {Emotions}")
-    #print(f"PublicationDate: {PublicationDate}")
     return jsonify({"success": True, "message": "Your dream was added"})
 
 if __name__ == "__main__":

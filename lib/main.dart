@@ -938,6 +938,7 @@ class _TodaysDreamState extends State<TodaysDream> {
   // color of our errors in the middle of the screen
   Color errorColor = Colors.red;
 
+  // we need that for remembering what we wrote
   String? lastNameUpdate;
   String? lastDescriptionUpdate;
 
@@ -951,15 +952,23 @@ class _TodaysDreamState extends State<TodaysDream> {
   bool colorWasChosen = false;
   int _isPrivate = 1;
 
-  String rightDreamNameFormat(name) {
-    print("Name is ${name}, Chosen Date is: ${_chosenDate}");
-    return name = (name == "")
-        ? "${_chosenDate.year}.${_chosenDate.month}.${_chosenDate.day} dream"
-        : name;
+  // if we has not chosen dream name it would be date when we had this dream
+  // Chosen name was "" --- Dream name would be "2025.12.1 dream"
+  String rightDreamNameFormat(chosenName) {
+    String month = (_chosenDate.month < 10)
+        ? "0${_chosenDate.month}"
+        : "${_chosenDate.month}";
+    String day = (_chosenDate.day < 10)
+        ? "0${_chosenDate.day}"
+        : "${_chosenDate.day}";
+    String futureName = (chosenName == "")
+        ? "${_chosenDate.year}.$month.$day dream"
+        : chosenName;
+    return futureName;
   }
 
   Future<void> addDream() async {
-    _name = rightDreamNameFormat(_name);
+    _name = rightDreamNameFormat(lastNameUpdate);
     _isPrivate = (isPrivate) ? 1 : 0;
 
     // working in cycle with sphere colors
@@ -1021,6 +1030,10 @@ class _TodaysDreamState extends State<TodaysDream> {
 
     setState(() {
       message = data["message"];
+      error = message;
+      errorColor = (error != "Your dream was added")
+          ? Colors.red
+          : Colors.green;
     });
 
     if (data["success"]) {
@@ -1134,7 +1147,7 @@ class _TodaysDreamState extends State<TodaysDream> {
   String error = "";
 
   final TextEditingController _dateController = TextEditingController();
-  String _description = "";
+  final String _description = "";
   DateTime _chosenDate = DateTime.now();
 
   @override
@@ -1507,11 +1520,8 @@ class _TodaysDreamState extends State<TodaysDream> {
                       });
                     } else {
                       setState(() {
-                        errorColor = Colors.green;
-                        error = "Your dream was added";
+                        addDream();
                       });
-
-                      addDream();
                     }
                   },
                 ),
@@ -1530,7 +1540,6 @@ class _TodaysDreamState extends State<TodaysDream> {
 
   // select date for dream
   Future<void> _selectDate() async {
-    rightDreamNameFormat(_name);
     DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
