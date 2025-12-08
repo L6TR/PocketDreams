@@ -119,7 +119,7 @@ def login():
         return jsonify({"success": False, "message": "Invalid password"}), 401
 
 # Tag Screen Function
-@app.route("/api/chooseTags", methods=["POST", "DELETE"])
+@app.route("/api/chooseTags", methods=["POST"])
 def chooseTags():
     data = request.json
     Username = data.get("Username")
@@ -148,7 +148,7 @@ def chooseTags():
 
     return jsonify({"success": True, "message": "Confirmed"})
 
-@app.route("/api/addDream", methods=["POST", "DELETE"])
+@app.route("/api/addDream", methods=["POST"])
 def addDream():
     #here we have all variables what we would upload to our database 
     data = request.json
@@ -192,12 +192,14 @@ def addDream():
         cursor.execute("SELECT ID FROM Emotions WHERE Name = ?", (Emotions[e],))
         emotionID = cursor.fetchone()[0]
         cursor.execute("INSERT INTO DreamEmotions (DreamID, EmotionID) VALUES (?,?)", (dreamID,emotionID))
-
-
     conn.commit()
     conn.close()
 
     return jsonify({"success": True, "message": "Your dream was added"})
+
+@app.route("/api/askAboutDreams/1", methods=["GET"])
+def askAboutDreams():
+    return jsonify({"success": True, "message": "You are here"})  
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

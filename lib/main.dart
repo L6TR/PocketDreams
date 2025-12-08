@@ -13,7 +13,7 @@ import 'package:flutter/services.dart';
 Map<DateTime, List<Dream>> dreams = {};
 
 String user = "merunka";
-String server = "http://10.0.1.12:5000";
+String server = "http://192.168.0.233:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -982,7 +982,6 @@ class _TodaysDreamState extends State<TodaysDream> {
         }
       }
     }
-    print(_emotions);
 
     // make from date format in integer like yearmonthday
     // like if we have 2025.12.04 we create 20251204
@@ -1801,6 +1800,20 @@ class Calendar extends StatefulWidget {
 //
 
 class _CalendarState extends State<Calendar> {
+  Future<void> askAboutDreams() async {
+    final response = await http.get(
+      Uri.parse("$server/api/askAboutDreams/$user"),
+      headers: {"Content-Type": "application/json"},
+    );
+    String message = "nok";
+    final data = json.decode(response.body);
+    setState(() {
+      message = data["message"];
+    });
+
+    print(message);
+  }
+
   // final => const value
   // late => variable would have a value latter, but not on the start
   // ValueNotifier x; => doing something, when the value of x is changing
@@ -1813,7 +1826,10 @@ class _CalendarState extends State<Calendar> {
 
   @override
   // initState() {x}; we are doing x, one time, when we are initing a State
+  // functions and other things what we need before the build
   void initState() {
+    askAboutDreams();
+
     //means, we dont @override it
     super.initState();
 
