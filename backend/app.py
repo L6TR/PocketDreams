@@ -10,15 +10,15 @@ cursor = conn.cursor() # we need this one for our SQL commands
 
 #cursor.execute("DROP TABLE IF EXISTS Tags;")
 #cursor.execute("DROP TABLE IF EXISTS Users;")
-cursor.execute("DROP TABLE IF EXISTS Dreams;")
+#cursor.execute("DROP TABLE IF EXISTS Dreams;")
 #cursor.execute("DROP TABLE IF EXISTS Likes;")
 #cursor.execute("DROP TABLE IF EXISTS Emotions;")
 #cursor.execute("DROP TABLE IF EXISTS Comments;")
 #cursor.execute("DROP TABLE IF EXISTS Reports;")
 #cursor.execute("DROP TABLE IF EXISTS Friendship;")
 #cursor.execute("DROP TABLE IF EXISTS DreamReports;")
-cursor.execute("DROP TABLE IF EXISTS DreamTags;")
-cursor.execute("DROP TABLE IF EXISTS DreamEmotions;")
+#cursor.execute("DROP TABLE IF EXISTS DreamTags;")
+#cursor.execute("DROP TABLE IF EXISTS DreamEmotions;")
 #cursor.execute("DROP TABLE IF EXISTS UserTags;")
 
 
@@ -30,7 +30,7 @@ cursor.execute("DROP TABLE IF EXISTS DreamEmotions;")
 #cursor.execute("CREATE TABLE IF NOT EXISTS Emotions (ID INTEGER PRIMARY KEY, Name TEXT)")
 
 
-cursor.execute("CREATE TABLE IF NOT EXISTS Dreams (ID INTEGER PRIMARY KEY, Name TEXT, Description TEXT, Date INTEGER, IsPrivate INTEGER, PublicationDate INTEGER, User INTEGER, FOREIGN KEY (User) REFERENCES Users(ID));")
+#cursor.execute("CREATE TABLE IF NOT EXISTS Dreams (ID INTEGER PRIMARY KEY, Name TEXT, Description TEXT, Date INTEGER, IsPrivate INTEGER, PublicationDate INTEGER, User INTEGER, FOREIGN KEY (User) REFERENCES Users(ID));")
 
 
 #cursor.execute("CREATE TABLE IF NOT EXISTS Comments (ID INTEGER PRIMARY KEY, CommentedText TEXT, CreatedAt INTEGER, CommentedBy INTEGER, CommentedDream INTEGER, FOREIGN KEY (CommentedBy) REFERENCES Users(ID), FOREIGN KEY (CommentedDream) REFERENCES Dreams(ID))")
@@ -40,8 +40,8 @@ cursor.execute("CREATE TABLE IF NOT EXISTS Dreams (ID INTEGER PRIMARY KEY, Name 
 
 
 #cursor.execute("CREATE TABLE IF NOT EXISTS DreamReports (DreamID INTEGER, ReportID INTEGER, FOREIGN KEY (DreamID) REFERENCES Dreams(ID), FOREIGN KEY (ReportID) REFERENCES Reports(ID));")
-cursor.execute("CREATE TABLE IF NOT EXISTS DreamTags (DreamID INTEGER, TagID INTEGER, FOREIGN KEY (DreamID) REFERENCES Dreams(ID), FOREIGN KEY (TagID) REFERENCES Tags(ID));")
-cursor.execute("CREATE TABLE IF NOT EXISTS DreamEmotions (DreamID INTEGER, EmotionID INTEGER, FOREIGN KEY (DreamID) REFERENCES Dreams(ID), FOREIGN KEY (EmotionID) REFERENCES Emotions(ID));")
+#cursor.execute("CREATE TABLE IF NOT EXISTS DreamTags (DreamID INTEGER, TagID INTEGER, FOREIGN KEY (DreamID) REFERENCES Dreams(ID), FOREIGN KEY (TagID) REFERENCES Tags(ID));")
+#cursor.execute("CREATE TABLE IF NOT EXISTS DreamEmotions (DreamID INTEGER, EmotionID INTEGER, FOREIGN KEY (DreamID) REFERENCES Dreams(ID), FOREIGN KEY (EmotionID) REFERENCES Emotions(ID));")
 #cursor.execute("CREATE TABLE IF NOT EXISTS UserTags (UserID INTEGER, TagID INTEGER, FOREIGN KEY (UserID) REFERENCES Users(ID), FOREIGN KEY (TagID) REFERENCES Tags(ID));")
 
 
@@ -119,7 +119,7 @@ def login():
         return jsonify({"success": False, "message": "Invalid password"}), 401
 
 # Tag Screen Function
-@app.route("/api/chooseTags", methods=["POST"])
+@app.route("/api/chooseTags", methods=["POST", "DELETE"])
 def chooseTags():
     data = request.json
     Username = data.get("Username")
@@ -148,6 +148,7 @@ def chooseTags():
 
     return jsonify({"success": True, "message": "Confirmed"})
 
+# function for adding our dream to the database
 @app.route("/api/addDream", methods=["POST"])
 def addDream():
     #here we have all variables what we would upload to our database 
@@ -197,9 +198,20 @@ def addDream():
 
     return jsonify({"success": True, "message": "Your dream was added"})
 
-@app.route("/api/askAboutDreams/1", methods=["GET"])
+# function for getting our dreams from the database to the frontend when we are opening calendar 
+@app.route("/api/askAboutDreams", methods=["GET"])
 def askAboutDreams():
-    return jsonify({"success": True, "message": "You are here"})  
+    Username = request.args.get("username")
+
+    conn = sqlite3.connect("pocketdreams.db")
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT ID FROM Users WHERE Username = ?", (Username,))
+    UserID = cursor.fetchone()[0]
+    cursor.execute("SELECT ID FROM Dreams WHERE User = ?", (UserID,))
+    UserDreamsID = cursor.fetchall()
+    dreamList = ""
+    return jsonify({"success": True, "dreamList": dreamList, "message": "You are here"})  
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

@@ -13,7 +13,7 @@ import 'package:flutter/services.dart';
 Map<DateTime, List<Dream>> dreams = {};
 
 String user = "merunka";
-String server = "http://192.168.0.233:5000";
+String server = "http://10.1.22.115:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -938,19 +938,20 @@ class _TodaysDreamState extends State<TodaysDream> {
   // color of our errors in the middle of the screen
   Color errorColor = Colors.red;
 
-  // we need that for remembering what we wrote
-  String? lastNameUpdate;
-  String? lastDescriptionUpdate;
-
   // creating variables for our future work with json
-  var message = "";
-  var _name = "";
+  String message = "";
+  String _name = "";
+  String _description = "";
   bool isPrivate = true;
   final List<String> _tags = [];
   //final List<double> _mixedColor = [255, 96, 106, 116];
   final List<String> _emotions = [];
   bool colorWasChosen = false;
   int _isPrivate = 1;
+
+  // we need that for remembering what we wrote
+  String? lastNameUpdate;
+  String? lastDescriptionUpdate;
 
   // if we has not chosen dream name it would be date when we had this dream
   // Chosen name was "" --- Dream name would be "2025.12.1 dream"
@@ -969,6 +970,7 @@ class _TodaysDreamState extends State<TodaysDream> {
 
   Future<void> addDream() async {
     _name = rightDreamNameFormat(lastNameUpdate);
+    _description = lastDescriptionUpdate ?? "";
     _isPrivate = (isPrivate) ? 1 : 0;
 
     // working in cycle with sphere colors
@@ -1146,7 +1148,6 @@ class _TodaysDreamState extends State<TodaysDream> {
   String error = "";
 
   final TextEditingController _dateController = TextEditingController();
-  final String _description = "";
   DateTime _chosenDate = DateTime.now();
 
   @override
@@ -1802,13 +1803,13 @@ class Calendar extends StatefulWidget {
 class _CalendarState extends State<Calendar> {
   Future<void> askAboutDreams() async {
     final response = await http.get(
-      Uri.parse("$server/api/askAboutDreams/$user"),
+      Uri.parse("$server/api/askAboutDreams?username=$user"),
       headers: {"Content-Type": "application/json"},
     );
     String message = "nok";
     final data = json.decode(response.body);
     setState(() {
-      message = data["message"];
+      message = data["dreamList"];
     });
 
     print(message);
