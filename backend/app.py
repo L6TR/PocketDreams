@@ -206,12 +206,35 @@ def askAboutDreams():
     conn = sqlite3.connect("pocketdreams.db")
     cursor = conn.cursor()
 
+    # now we have a user id
     cursor.execute("SELECT ID FROM Users WHERE Username = ?", (Username,))
     UserID = cursor.fetchone()[0]
+
+    # now we have an id of ours users dreams
     cursor.execute("SELECT ID FROM Dreams WHERE User = ?", (UserID,))
     UserDreamsID = cursor.fetchall()
-    dreamList = ""
-    return jsonify({"success": True, "dreamList": dreamList, "message": "You are here"})  
+
+    # all id list
+    allId = [d[0] for d in UserDreamsID]  
+    # now we have a ? foe eatch id in allId
+    placeholders = ','.join(['?'] * len(allId)) 
+    cursor.execute(f"SELECT Name, Description, Date, IsPrivate, PublicationDate FROM Dreams WHERE ID IN ({placeholders})", allId)
+    dreamsList = cursor.fetchall()
+    print(dreamsList)
+
+    dreamsListJSON = []
+    for dream in dreamsList:
+        dreamsListJSON.append({
+            "Name": dream[0],
+            "Description": dream[1],
+            "Date": dream[2],
+            "IsPrivate": dream[3],
+            "PublicationDate": dream[4]
+        })
+
+
+
+    return jsonify({"success": True, "dreamsList": dreamsListJSON, "message": "You are here"})  
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
