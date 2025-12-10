@@ -1801,23 +1801,28 @@ class Calendar extends StatefulWidget {
 //
 
 class _CalendarState extends State<Calendar> {
+  List<String> dreamStructure = [
+    "Name",
+    "Description",
+    "Date",
+    "IsPrivate",
+    "PublicationDate",
+  ];
+
   Future<void> askAboutDreams() async {
     final response = await http.get(
       Uri.parse("$server/api/askAboutDreams?username=$user"),
       headers: {"Content-Type": "application/json"},
     );
     String message = "nok";
+
     final data = json.decode(response.body);
-    print("Server response: $data");
-    final rawList = data["dreamsList"] ?? [];
-    List<Map<String, dynamic>> dreamsList = List<Map<String, dynamic>>.from(
-      rawList,
-    );
-    for (var dream in dreamsList) {
-      print(
-        "Name: ${dream['Name']}, Description: ${dream['Description']}, Date: ${dream['Date']}, Is Private: ${dream['IsPrivate']}, Publication Date: ${dream['PublicationDate']}",
-      );
+
+    // dreamsC = dreams counter
+    for (int dreamsC = 0; dreamsC < dreams.length; dreamsC++) {
+      print(data["dreamsList"][dreamsC]);
     }
+
     /*setState(() {
       message = data["dreamsList"];
     });
