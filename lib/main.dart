@@ -1801,6 +1801,8 @@ class Calendar extends StatefulWidget {
 //
 
 class _CalendarState extends State<Calendar> {
+  List _dreamsList = [];
+
   List<String> dreamStructure = [
     "Name",
     "Description",
@@ -1819,22 +1821,22 @@ class _CalendarState extends State<Calendar> {
     final data = json.decode(response.body);
     List dreamsList = data["dreamsList"];
 
-    for (int i = 0; i < dreamsList.length; i++) {
+    /*for (int i = 0; i < dreamsList.length; i++) {
       print("Dream $i");
       for (int s = 0; s < dreamStructure.length; s++) {
         print("${dreamStructure[s]}: ${dreamsList[i][dreamStructure[s]]}");
       }
       print("");
-    }
+    }*/
 
     // dreamsC = dreams counter
     //for (int dreamsC = 0; dreamsC < dreams.length; dreamsC++) {}
 
-    /*setState(() {
-      message = data["dreamsList"];
+    setState(() {
+      _dreamsList = dreamsList;
     });
 
-    print(message);*/
+    print(_dreamsList[0]["Date"]);
   }
 
   // final => const value
@@ -1859,7 +1861,7 @@ class _CalendarState extends State<Calendar> {
     _selectedDay = _focusedDay;
 
     // x! means i am sure that x wouldnt be Null
-    _selectedDays = ValueNotifier(_getDreamsForDay(_selectedDay!));
+    //_selectedDays = ValueNotifier(_getDreamsForDay(_selectedDay!));
   }
 
   // we need this one to deleting data when we are not looking at the widget
@@ -1869,34 +1871,37 @@ class _CalendarState extends State<Calendar> {
     super.dispose();
   }
 
-  // return the list of Object for the specific day
-  List<Dream> _getDreamsForDay(DateTime day) {
-    // x ?? y
-    // means
-    // if x is null, please, use y
-    return dreams[DateTime(day.year, day.month, day.day)] ?? [];
+  DateTime rightDateFormat(int intDay) {
+    return DateTime(intDay);
   }
 
-  /*void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
-    if (!isSameDay(_selectedDay, selectedDay)) {
-      setState(() {
-        _selectedDay = selectedDay;
-        _focusedDay = focusedDay;
-      });
+  //rightDateFormat();
 
-      _selectedDays.value = _getDreamsForDay(selectedDay);
-    }
-  }*/
+  final Map<DateTime, List<String>> dreams = {
+    DateTime(2025, 1, 10): ['Сон 1', 'Сон 2'],
+    DateTime(2025, 1, 11): ['Кошмар'],
+  };
+
+  // return the list of Object for the specific day
+  List<String> _getDreamsForDay(DateTime day) {
+    return dreams[DateTime(day.year, day.month, day.day)] ?? [];
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
       body: TableCalendar(
+        startingDayOfWeek: StartingDayOfWeek.monday,
         calendarStyle: CalendarStyle(
-          outsideDaysVisible: false,
+          outsideDaysVisible: true,
+          outsideTextStyle: TextStyle(
+            color: const Color.fromARGB(255, 33, 33, 33),
+          ),
           defaultTextStyle: TextStyle(color: Colors.white),
+          weekendTextStyle: TextStyle(color: cloudPink()),
         ),
+        // text on the top part
         headerStyle: HeaderStyle(
           titleCentered: true,
           formatButtonVisible: false,
@@ -1916,25 +1921,6 @@ class _CalendarState extends State<Calendar> {
 
         calendarBuilders: CalendarBuilders(
           defaultBuilder: (context, day, focusedDay) {
-            final normalizedTime = DateTime(day.year, day.month, day.day);
-
-            if (dreams.containsKey(normalizedTime) &&
-                dreams[normalizedTime]!.isNotEmpty) {
-              final dream = dreams[normalizedTime]!.last;
-              return Container(
-                margin: const EdgeInsets.all(4.0),
-                decoration: BoxDecoration(
-                  color: dream.emotionColor,
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  '${day.day}',
-                  style: const TextStyle(color: Colors.white),
-                ),
-              );
-            }
-
             return null;
           },
         ),
