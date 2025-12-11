@@ -13,7 +13,7 @@ import 'package:flutter/services.dart';
 Map<DateTime, List<Dream>> dreams = {};
 
 String user = "merunka";
-String server = "http://10.40.2.4:5000";
+String server = "http://192.168.0.233:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -1837,6 +1837,7 @@ class _CalendarState extends State<Calendar> {
     });
 
     print(_dreamsList[0]["Date"]);
+    print(cutADate(_dreamsList[0]["Date"]));
   }
 
   // final => const value
@@ -1871,8 +1872,12 @@ class _CalendarState extends State<Calendar> {
     super.dispose();
   }
 
-  DateTime rightDateFormat(int intDay) {
-    return DateTime(intDay);
+  // by this function we are getting from a Int date like 20251209 => DateTime 2025-12-09
+  DateTime cutADate(date) {
+    int year = date ~/ 10000;
+    int month = ((date % 10000) ~/ 100);
+    int day = (date % 100);
+    return DateTime.utc(year, month, day);
   }
 
   //rightDateFormat();
