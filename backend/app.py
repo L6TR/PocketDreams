@@ -232,8 +232,6 @@ def askAboutDreams():
             "PublicationDate": dream[4]
         })
 
-
-
     return jsonify({"success": True, "dreamsList": dreamsListJSON, "message": "You are here"})  
 
 if __name__ == "__main__":

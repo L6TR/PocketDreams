@@ -13,7 +13,7 @@ import 'package:flutter/services.dart';
 Map<DateTime, List<Dream>> dreams = {};
 
 String user = "merunka";
-String server = "http://192.168.0.233:5000";
+String server = "http://10.40.2.4:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -1814,14 +1814,21 @@ class _CalendarState extends State<Calendar> {
       Uri.parse("$server/api/askAboutDreams?username=$user"),
       headers: {"Content-Type": "application/json"},
     );
-    String message = "nok";
+    String message = "";
 
     final data = json.decode(response.body);
+    List dreamsList = data["dreamsList"];
+
+    for (int i = 0; i < dreamsList.length; i++) {
+      print("Dream $i");
+      for (int s = 0; s < dreamStructure.length; s++) {
+        print("${dreamStructure[s]}: ${dreamsList[i][dreamStructure[s]]}");
+      }
+      print("");
+    }
 
     // dreamsC = dreams counter
-    for (int dreamsC = 0; dreamsC < dreams.length; dreamsC++) {
-      print(data["dreamsList"][dreamsC]);
-    }
+    //for (int dreamsC = 0; dreamsC < dreams.length; dreamsC++) {}
 
     /*setState(() {
       message = data["dreamsList"];
