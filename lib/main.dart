@@ -13,7 +13,7 @@ import 'package:flutter/services.dart';
 Map<DateTime, List<Dream>> dreams = {};
 
 String user = "merunka";
-String server = "http://192.168.0.233:5000";
+String server = "http://10.0.1.12:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -1821,23 +1821,19 @@ class _CalendarState extends State<Calendar> {
     final data = json.decode(response.body);
     List dreamsList = data["dreamsList"];
 
-    /*for (int i = 0; i < dreamsList.length; i++) {
-      print("Dream $i");
-      for (int s = 0; s < dreamStructure.length; s++) {
-        print("${dreamStructure[s]}: ${dreamsList[i][dreamStructure[s]]}");
-      }
-      print("");
-    }*/
-
-    // dreamsC = dreams counter
-    //for (int dreamsC = 0; dreamsC < dreams.length; dreamsC++) {}
-
     setState(() {
       _dreamsList = dreamsList;
-    });
+      for (int c = 0; c < _dreamsList.length; c++) {
+        DateTime date = cutADate(_dreamsList[c]["Date"]);
+        final key = DateTime(date.year, date.month, date.day);
 
-    print(_dreamsList[0]["Date"]);
-    print(cutADate(_dreamsList[0]["Date"]));
+        if (dreams.containsKey(key)) {
+          dreams[key]!.add(_dreamsList[c]["Name"]);
+        } else {
+          dreams[key] = [_dreamsList[c]["Name"]];
+        }
+      }
+    });
   }
 
   // final => const value
@@ -1860,9 +1856,6 @@ class _CalendarState extends State<Calendar> {
     super.initState();
 
     _selectedDay = _focusedDay;
-
-    // x! means i am sure that x wouldnt be Null
-    //_selectedDays = ValueNotifier(_getDreamsForDay(_selectedDay!));
   }
 
   // we need this one to deleting data when we are not looking at the widget
@@ -1880,12 +1873,7 @@ class _CalendarState extends State<Calendar> {
     return DateTime.utc(year, month, day);
   }
 
-  //rightDateFormat();
-
-  final Map<DateTime, List<String>> dreams = {
-    DateTime(2025, 1, 10): ['Сон 1', 'Сон 2'],
-    DateTime(2025, 1, 11): ['Кошмар'],
-  };
+  Map<DateTime, List<String>> dreams = {};
 
   // return the list of Object for the specific day
   List<String> _getDreamsForDay(DateTime day) {
@@ -1915,7 +1903,7 @@ class _CalendarState extends State<Calendar> {
           rightChevronIcon: Icon(Icons.chevron_right, color: Colors.white),
         ),
         rowHeight: 80,
-        focusedDay: DateTime.now(),
+        focusedDay: _focusedDay,
         firstDay: DateTime(2000, 1, 1),
         lastDay: DateTime.now(),
 
