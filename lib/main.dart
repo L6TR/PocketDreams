@@ -1820,6 +1820,7 @@ class _CalendarState extends State<Calendar> {
 
     final data = json.decode(response.body);
     List dreamsList = data["dreamsList"];
+    print(dreamsList);
 
     setState(() {
       _dreamsList = dreamsList;

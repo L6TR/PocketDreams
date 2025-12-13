@@ -220,7 +220,25 @@ def askAboutDreams():
     placeholders = ','.join(['?'] * len(allId)) 
     cursor.execute(f"SELECT Name, Description, Date, IsPrivate, PublicationDate FROM Dreams WHERE ID IN ({placeholders})", allId)
     dreamsList = cursor.fetchall()
-    print(dreamsList)
+
+
+    Tags = []
+    Emotions = []
+    for dream in UserDreamsID:
+        Tags = []
+        Emotions = []
+        cursor.execute("SELECT TagID FROM DreamTags WHERE DreamID = ?", (dream[0],))
+        dreamTags = cursor.fetchall()
+        cursor.execute("SELECT EmotionID FROM DreamEmotions WHERE DreamID = ?", (dream[0],))
+        dreamEmotions = cursor.fetchall()
+        for tag in dreamTags:
+            cursor.execute("SELECT Name FROM Tags WHERE ID = ?", (tag[0],))
+            dreamTag = cursor.fetchall()
+            Tags.append(dreamTag[0][0])
+        for emotion in dreamEmotions:
+            cursor.execute("SELECT Name FROM Emotions WHERE ID = ?", (emotion[0],))
+            dreamEmotion = cursor.fetchall()
+            Emotions.append(dreamEmotion[0][0])
 
     dreamsListJSON = []
     for dream in dreamsList:
@@ -229,9 +247,11 @@ def askAboutDreams():
             "Description": dream[1],
             "Date": dream[2],
             "IsPrivate": dream[3],
-            "PublicationDate": dream[4]
+            "PublicationDate": dream[4],
+            "Tags": Tags,
+            "Emotions": Emotions,
         })
-
+    
     return jsonify({"success": True, "dreamsList": dreamsListJSON, "message": "You are here"})  
 
 if __name__ == "__main__":
