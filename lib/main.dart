@@ -13,7 +13,7 @@ import 'package:flutter/services.dart';
 Map<DateTime, List<Dream>> dreams = {};
 
 String user = "merunka";
-String server = "http://10.0.1.12:5000";
+String server = "http://192.168.0.233:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -1803,14 +1803,6 @@ class Calendar extends StatefulWidget {
 class _CalendarState extends State<Calendar> {
   List _dreamsList = [];
 
-  List<String> dreamStructure = [
-    "Name",
-    "Description",
-    "Date",
-    "IsPrivate",
-    "PublicationDate",
-  ];
-
   Future<void> askAboutDreams() async {
     final response = await http.get(
       Uri.parse("$server/api/askAboutDreams?username=$user"),
@@ -1820,19 +1812,22 @@ class _CalendarState extends State<Calendar> {
 
     final data = json.decode(response.body);
     List dreamsList = data["dreamsList"];
-    print(dreamsList);
+
+    Map<DateTime, Map<String, List<String>>> dreams = {};
 
     setState(() {
       _dreamsList = dreamsList;
       for (int c = 0; c < _dreamsList.length; c++) {
         DateTime date = cutADate(_dreamsList[c]["Date"]);
         final key = DateTime(date.year, date.month, date.day);
+        final String name = _dreamsList[c]["Name"];
 
-        if (dreams.containsKey(key)) {
-          dreams[key]!.add(_dreamsList[c]["Name"]);
-        } else {
-          dreams[key] = [_dreamsList[c]["Name"]];
-        }
+        final List<String> emotions = List<String>.from(
+          (_dreamsList[c]["Emotions"]),
+        );
+        dreams.putIfAbsent(key, () => {});
+
+        dreams[key]![name] = emotions;
       }
     });
   }
@@ -1874,12 +1869,22 @@ class _CalendarState extends State<Calendar> {
     return DateTime.utc(year, month, day);
   }
 
-  Map<DateTime, List<String>> dreams = {};
+  Color getDayColor(DateTime day) {
+    for (final entry in dreams.entries) {
+      if (isSameDay(entry.key, day)) {
+        print(entry.value);
+      }
+    }
+
+    return Colors.cyan;
+  }
+
+  DateTime normalize(DateTime d) => DateTime(d.year, d.month, d.day);
 
   // return the list of Object for the specific day
-  List<String> _getDreamsForDay(DateTime day) {
+  /*List<String> _getDreamsForDay(DateTime day) {
     return dreams[DateTime(day.year, day.month, day.day)] ?? [];
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -1914,8 +1919,62 @@ class _CalendarState extends State<Calendar> {
         },
 
         calendarBuilders: CalendarBuilders(
+          // builder for today
+          todayBuilder: (context, day, _) {
+            final hasDreams = dreams[normalize(day)]?.isNotEmpty ?? false;
+            Container(
+              margin: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.orange,
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  "${day.day}",
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+            );
+          },
+
+          // builder for a day what we selecting
+          selectedBuilder: (context, day, _) {
+            final hasDreams = dreams[normalize(day)]?.isNotEmpty ?? false;
+            getDayColor(normalize(day));
+            return Container(
+              margin: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.white, width: 3),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  '${day.day}',
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+            );
+          },
+
+          // builder for all days
           defaultBuilder: (context, day, focusedDay) {
-            return null;
+            final hasDreams = dreams[normalize(day)]?.isNotEmpty ?? false;
+            // null means clasic buider
+            if (!hasDreams) return null;
+
+            return Container(
+              margin: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.orange,
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  "${day.day}",
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+            );
           },
         ),
 
@@ -1926,9 +1985,9 @@ class _CalendarState extends State<Calendar> {
             _focusedDay = focusedDay;
           });
         },
-        eventLoader: (day) {
+        /*eventLoader: (day) {
           return _getDreamsForDay(day);
-        },
+        },*/
       ),
     );
   }
