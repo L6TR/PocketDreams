@@ -1519,9 +1519,7 @@ class _TodaysDreamState extends State<TodaysDream> {
                             "You must to write the description for the public dream";
                       });
                     } else {
-                      setState(() {
-                        addDream();
-                      });
+                      addDream();
                     }
                   },
                 ),
@@ -1802,6 +1800,7 @@ class Calendar extends StatefulWidget {
 
 class _CalendarState extends State<Calendar> {
   List _dreamsList = [];
+  Map<DateTime, Map<String, List<String>>> dreams = {};
 
   Future<void> askAboutDreams() async {
     final response = await http.get(
@@ -1813,8 +1812,6 @@ class _CalendarState extends State<Calendar> {
     final data = json.decode(response.body);
     List dreamsList = data["dreamsList"];
 
-    Map<DateTime, Map<String, List<String>>> dreams = {};
-
     setState(() {
       _dreamsList = dreamsList;
       for (int c = 0; c < _dreamsList.length; c++) {
@@ -1825,6 +1822,7 @@ class _CalendarState extends State<Calendar> {
         final List<String> emotions = List<String>.from(
           (_dreamsList[c]["Emotions"]),
         );
+
         dreams.putIfAbsent(key, () => {});
 
         dreams[key]![name] = emotions;
@@ -1869,12 +1867,10 @@ class _CalendarState extends State<Calendar> {
     return DateTime.utc(year, month, day);
   }
 
+  // day is our key
   Color getDayColor(DateTime day) {
-    for (final entry in dreams.entries) {
-      if (isSameDay(entry.key, day)) {
-        print(entry.value);
-      }
-    }
+    final List<String> emotions = dreams[day]?.values.first ?? [];
+    print(emotions);
 
     return Colors.cyan;
   }
