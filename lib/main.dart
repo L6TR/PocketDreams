@@ -12,8 +12,26 @@ import 'package:flutter/services.dart';
 //
 Map<DateTime, List<Dream>> dreams = {};
 
+//
+// list for all emotion what we have
+//
+
+final List<Emotion> emotions = [
+  Emotion(name: "Happiness", color: Color.fromARGB(255, 255, 255, 0)),
+  Emotion(name: "Love", color: Color.fromARGB(255, 255, 0, 0)),
+  Emotion(name: "Calm", color: Color.fromARGB(255, 0, 0, 255)),
+  Emotion(name: "Harmony", color: Color.fromARGB(255, 0, 255, 0)),
+  Emotion(name: "Freedom", color: Color.fromARGB(255, 0, 255, 255)),
+  Emotion(name: "Creativity", color: Color.fromARGB(255, 255, 0, 255)),
+
+  Emotion(name: "Purity", color: Color.fromARGB(255, 255, 255, 255)),
+  Emotion(name: "Depth", color: Color.fromARGB(255, 0, 0, 0)),
+
+  Emotion(name: "Warmth", color: Color.fromARGB(255, 255, 165, 0)),
+];
+
 String user = "merunka";
-String server = "http://192.168.0.233:5000";
+String server = "http://10.1.48.244:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -878,24 +896,6 @@ class Emotion {
 }
 
 //
-// list for all emotion what we have
-//
-
-final List<Emotion> emotions = [
-  Emotion(name: "Happiness", color: Color.fromARGB(255, 255, 255, 0)),
-  Emotion(name: "Love", color: Color.fromARGB(255, 255, 0, 0)),
-  Emotion(name: "Calm", color: Color.fromARGB(255, 0, 0, 255)),
-  Emotion(name: "Harmony", color: Color.fromARGB(255, 0, 255, 0)),
-  Emotion(name: "Freedom", color: Color.fromARGB(255, 0, 255, 255)),
-  Emotion(name: "Creativity", color: Color.fromARGB(255, 255, 0, 255)),
-
-  Emotion(name: "Purity", color: Color.fromARGB(255, 255, 255, 255)),
-  Emotion(name: "Depth", color: Color.fromARGB(255, 0, 0, 0)),
-
-  Emotion(name: "Warmth", color: Color.fromARGB(255, 255, 165, 0)),
-];
-
-//
 //class for Dreams
 //
 
@@ -955,17 +955,17 @@ class _TodaysDreamState extends State<TodaysDream> {
 
   // if we has not chosen dream name it would be date when we had this dream
   // Chosen name was "" --- Dream name would be "2025.12.1 dream"
-  String rightDreamNameFormat(chosenName) {
+  String rightDreamNameFormat(String? chosenName) {
     String month = (_chosenDate.month < 10)
         ? "0${_chosenDate.month}"
         : "${_chosenDate.month}";
     String day = (_chosenDate.day < 10)
         ? "0${_chosenDate.day}"
         : "${_chosenDate.day}";
-    String futureName = (chosenName == "")
-        ? "${_chosenDate.year}.$month.$day dream"
-        : chosenName;
-    return futureName;
+    if (chosenName == null || chosenName.trim().isEmpty) {
+      return "${_chosenDate.year}.$month.$day dream";
+    }
+    return chosenName.trim();
   }
 
   Future<void> addDream() async {
@@ -1000,16 +1000,6 @@ class _TodaysDreamState extends State<TodaysDream> {
       return int.parse(date);
     }
 
-    /*final dream = newDream(
-      mixedColor(chosenSphereColors),
-      _name,
-      _chosenDate,
-      _description,
-      _isPrivate,
-      _tags,
-    );*/
-
-    //addDreamToCalendar(dream);
     final response = await http.post(
       Uri.parse("$server/api/addDream"),
       headers: {"Content-Type": "application/json"},
@@ -1819,13 +1809,13 @@ class _CalendarState extends State<Calendar> {
         final key = DateTime(date.year, date.month, date.day);
         final String name = _dreamsList[c]["Name"];
 
-        final List<String> emotions = List<String>.from(
+        final List<String> dEmotions = List<String>.from(
           (_dreamsList[c]["Emotions"]),
         );
 
         dreams.putIfAbsent(key, () => {});
 
-        dreams[key]![name] = emotions;
+        dreams[key]![name] = dEmotions;
       }
     });
   }
@@ -1869,8 +1859,35 @@ class _CalendarState extends State<Calendar> {
 
   // day is our key
   Color getDayColor(DateTime day) {
-    final List<String> emotions = dreams[day]?.values.first ?? [];
-    print(emotions);
+    List<Color> colorList = [];
+    final List<String> dEmotions = dreams[day]?.values.first ?? [];
+    for (String emotionName in dEmotions) {
+      for (Emotion globalEmotionName in emotions) {
+        if (globalEmotionName.name == emotionName) {
+          colorList.add(globalEmotionName.color);
+        }
+        print(colorList);
+        double mixedR = 0;
+        double mixedG = 0;
+        double mixedB = 0;
+
+        for (int i = 0; i < colorList.length; i++) {
+          mixedR += (colorList[i].r * 255.0);
+
+          mixedG += (colorList[i].g * 255.0);
+
+          mixedB += (colorList[i].b * 255.0);
+        }
+
+        if (colorList.isEmpty) return Colors.white10;
+        return Color.fromARGB(
+          255,
+          (mixedR / colorList.length).round(),
+          (mixedG / colorList.length).round(),
+          (mixedB / colorList.length).round(),
+        );
+      }
+    }
 
     return Colors.cyan;
   }
@@ -1936,7 +1953,6 @@ class _CalendarState extends State<Calendar> {
           // builder for a day what we selecting
           selectedBuilder: (context, day, _) {
             final hasDreams = dreams[normalize(day)]?.isNotEmpty ?? false;
-            getDayColor(normalize(day));
             return Container(
               margin: const EdgeInsets.all(6),
               decoration: BoxDecoration(
@@ -1961,7 +1977,7 @@ class _CalendarState extends State<Calendar> {
             return Container(
               margin: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: Colors.orange,
+                color: getDayColor(normalize(day)),
                 shape: BoxShape.circle,
               ),
               child: Center(

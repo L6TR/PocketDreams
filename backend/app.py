@@ -157,19 +157,23 @@ def addDream():
     Description = data.get("Description")
     Date = data.get("Date")
     IsPrivate = data.get("IsPrivate")
-    Tags = data.get("Tags")
+    Tags = data.get("Tags") or []
     User = data.get("User")
     PublicationDate = data.get("PublicationDate")
-    Emotions = data.get("Emotions")
+    Emotions = data.get("Emotions") or []
 
     conn = sqlite3.connect("pocketdreams.db")
     cursor = conn.cursor()
     
     # now we know users id
     cursor.execute("SELECT ID FROM Users WHERE Username = ?", (User,))
-    UserID = cursor.fetchone()[0]
-    cursor.execute("SELECT ID FROM Dreams WHERE Date = ?",(Date,))
+    user_result = cursor.fetchone()
+    if not user_result:
+        conn.close()
+        return jsonify({"seccuess": False, "message": "User not found"}),404
+    UserID = user_result[0]
 
+    cursor.execute("SELECT ID FROM Dreams WHERE Date = ?",(Date,))
     # checking if we already had a dream for this day
     if cursor.fetchall():   
         conn.commit()
