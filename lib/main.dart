@@ -25,7 +25,7 @@ final List<Emotion> emotions = [
   Emotion(name: "Creativity", color: Color.fromARGB(255, 255, 0, 255)),
 
   Emotion(name: "Purity", color: Color.fromARGB(255, 255, 255, 255)),
-  Emotion(name: "Depth", color: Color.fromARGB(255, 0, 0, 0)),
+  Emotion(name: "Depth", color: Color.fromARGB(255, 10, 10, 10)),
 
   Emotion(name: "Warmth", color: Color.fromARGB(255, 255, 165, 0)),
 ];
@@ -1860,36 +1860,38 @@ class _CalendarState extends State<Calendar> {
   // day is our key
   Color getDayColor(DateTime day) {
     List<Color> colorList = [];
-    final List<String> dEmotions = dreams[day]?.values.first ?? [];
+    final List<String> dEmotions = List<String>.from(
+      dreams[day]?.values.first ?? [],
+    );
     for (String emotionName in dEmotions) {
       for (Emotion globalEmotionName in emotions) {
         if (globalEmotionName.name == emotionName) {
           colorList.add(globalEmotionName.color);
         }
-        print(colorList);
-        double mixedR = 0;
-        double mixedG = 0;
-        double mixedB = 0;
-
-        for (int i = 0; i < colorList.length; i++) {
-          mixedR += (colorList[i].r * 255.0);
-
-          mixedG += (colorList[i].g * 255.0);
-
-          mixedB += (colorList[i].b * 255.0);
-        }
-
-        if (colorList.isEmpty) return Colors.white10;
-        return Color.fromARGB(
-          255,
-          (mixedR / colorList.length).round(),
-          (mixedG / colorList.length).round(),
-          (mixedB / colorList.length).round(),
-        );
       }
     }
+    print(colorList);
 
-    return Colors.cyan;
+    if (colorList.isEmpty) return Colors.white;
+    double mixedR = 0;
+    double mixedG = 0;
+    double mixedB = 0;
+
+    for (int i = 0; i < colorList.length; i++) {
+      mixedR += (colorList[i].r * 255.0);
+
+      mixedG += (colorList[i].g * 255.0);
+
+      mixedB += (colorList[i].b * 255.0);
+    }
+
+    Color mixedColor = Color.fromARGB(
+      255,
+      (mixedR / colorList.length).round(),
+      (mixedG / colorList.length).round(),
+      (mixedB / colorList.length).round(),
+    );
+    return mixedColor;
   }
 
   DateTime normalize(DateTime d) => DateTime(d.year, d.month, d.day);
