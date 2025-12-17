@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pocket_dreams/bloc/backend_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:convert';
+import "dart:ui";
 import 'package:http/http.dart' as http;
 import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter/services.dart';
@@ -31,7 +32,7 @@ final List<Emotion> emotions = [
 ];
 
 String user = "merunka";
-String server = "http://10.1.48.244:5000";
+String server = "http://192.168.0.233:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -1790,7 +1791,7 @@ class Calendar extends StatefulWidget {
 
 class _CalendarState extends State<Calendar> {
   List _dreamsList = [];
-  Map<DateTime, Map<String, List<String>>> dreams = {};
+  Map<DateTime, List<String>> dreams = {};
 
   Future<void> askAboutDreams() async {
     final response = await http.get(
@@ -1813,9 +1814,9 @@ class _CalendarState extends State<Calendar> {
           (_dreamsList[c]["Emotions"]),
         );
 
-        dreams.putIfAbsent(key, () => {});
+        dreams.putIfAbsent(key, () => []);
 
-        dreams[key]![name] = dEmotions;
+        dreams[key]!.addAll(dEmotions);
       }
     });
   }
@@ -1859,20 +1860,22 @@ class _CalendarState extends State<Calendar> {
 
   // day is our key
   Color getDayColor(DateTime day) {
-    List<Color> colorList = [];
-    final List<String> dEmotions = List<String>.from(
-      dreams[day]?.values.first ?? [],
-    );
-    for (String emotionName in dEmotions) {
+    final dEmotions = dreams[day];
+    if (dEmotions == null || dEmotions.isEmpty) {
+      return Colors.grey;
+    }
+
+    final List<Color> colorList = [];
+
+    for (final emotionName in dEmotions) {
       for (Emotion globalEmotionName in emotions) {
         if (globalEmotionName.name == emotionName) {
           colorList.add(globalEmotionName.color);
         }
       }
     }
-    print(colorList);
 
-    if (colorList.isEmpty) return Colors.white;
+    if (colorList.isEmpty) return Colors.grey;
     double mixedR = 0;
     double mixedG = 0;
     double mixedB = 0;
