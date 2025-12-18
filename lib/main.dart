@@ -1804,11 +1804,11 @@ class _CalendarState extends State<Calendar> {
     List dreamsList = data["dreamsList"];
 
     setState(() {
+      dreams.clear();
       _dreamsList = dreamsList;
       for (int c = 0; c < _dreamsList.length; c++) {
         DateTime date = cutADate(_dreamsList[c]["Date"]);
-        final key = DateTime(date.year, date.month, date.day);
-        final String name = _dreamsList[c]["Name"];
+        final key = normalize(date);
 
         final List<String> dEmotions = List<String>.from(
           (_dreamsList[c]["Emotions"]),
@@ -1874,8 +1874,6 @@ class _CalendarState extends State<Calendar> {
         }
       }
     }
-
-    if (colorList.isEmpty) return Colors.grey;
     double mixedR = 0;
     double mixedG = 0;
     double mixedB = 0;
@@ -1939,11 +1937,10 @@ class _CalendarState extends State<Calendar> {
         calendarBuilders: CalendarBuilders(
           // builder for today
           todayBuilder: (context, day, _) {
-            final hasDreams = dreams[normalize(day)]?.isNotEmpty ?? false;
             Container(
               margin: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: Colors.orange,
+                color: getDayColor(day),
                 shape: BoxShape.circle,
               ),
               child: Center(

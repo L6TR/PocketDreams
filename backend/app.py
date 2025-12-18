@@ -225,27 +225,29 @@ def askAboutDreams():
     cursor.execute(f"SELECT Name, Description, Date, IsPrivate, PublicationDate FROM Dreams WHERE ID IN ({placeholders})", allId)
     dreamsList = cursor.fetchall()
 
+    dreamsListJSON = []
+    for i,dream in enumerate(dreamsList):
+        dreamID = UserDreamsID[i][0]
 
-    Tags = []
-    Emotions = []
-    for dream in UserDreamsID:
         Tags = []
         Emotions = []
-        cursor.execute("SELECT TagID FROM DreamTags WHERE DreamID = ?", (dream[0],))
+
+        cursor.execute("SELECT TagID FROM DreamTags WHERE DreamID = ?", (dreamID,))
         dreamTags = cursor.fetchall()
-        cursor.execute("SELECT EmotionID FROM DreamEmotions WHERE DreamID = ?", (dream[0],))
+
+        cursor.execute("SELECT EmotionID FROM DreamEmotions WHERE DreamID = ?", (dreamID,))
         dreamEmotions = cursor.fetchall()
+
         for tag in dreamTags:
             cursor.execute("SELECT Name FROM Tags WHERE ID = ?", (tag[0],))
-            dreamTag = cursor.fetchall()
-            Tags.append(dreamTag[0][0])
+        
+            Tags.append(cursor.fetchone()[0])
         for emotion in dreamEmotions:
             cursor.execute("SELECT Name FROM Emotions WHERE ID = ?", (emotion[0],))
-            dreamEmotion = cursor.fetchall()
-            Emotions.append(dreamEmotion[0][0])
+            
+            Emotions.append(cursor.fetchone()[0])
 
-    dreamsListJSON = []
-    for dream in dreamsList:
+        
         dreamsListJSON.append({
             "Name": dream[0],
             "Description": dream[1],
@@ -254,7 +256,7 @@ def askAboutDreams():
             "PublicationDate": dream[4],
             "Tags": Tags,
             "Emotions": Emotions,
-        })
+            })
     
     return jsonify({"success": True, "dreamsList": dreamsListJSON, "message": "You are here"})  
 
