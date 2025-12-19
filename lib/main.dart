@@ -32,7 +32,7 @@ final List<Emotion> emotions = [
 ];
 
 String user = "merunka";
-String server = "http://192.168.0.233:5000";
+String server = "http://10.0.1.12:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -1862,7 +1862,7 @@ class _CalendarState extends State<Calendar> {
   Color getDayColor(DateTime day) {
     final dEmotions = dreams[day];
     if (dEmotions == null || dEmotions.isEmpty) {
-      return Colors.grey;
+      return Colors.transparent;
     }
 
     final List<Color> colorList = [];
@@ -1897,10 +1897,12 @@ class _CalendarState extends State<Calendar> {
 
   DateTime normalize(DateTime d) => DateTime(d.year, d.month, d.day);
 
-  // return the list of Object for the specific day
-  /*List<String> _getDreamsForDay(DateTime day) {
-    return dreams[DateTime(day.year, day.month, day.day)] ?? [];
-  }*/
+  Color getTextColor(DateTime day) {
+    Color textColor = (getDayColor(day) == Colors.transparent)
+        ? Colors.white
+        : Colors.black;
+    return textColor;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1937,16 +1939,17 @@ class _CalendarState extends State<Calendar> {
         calendarBuilders: CalendarBuilders(
           // builder for today
           todayBuilder: (context, day, _) {
-            Container(
+            return Container(
               margin: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: getDayColor(day),
+                color: getDayColor(normalize(day)),
                 shape: BoxShape.circle,
+                border: Border.all(color: cloudPink(), width: 3),
               ),
               child: Center(
                 child: Text(
                   "${day.day}",
-                  style: const TextStyle(color: Colors.white),
+                  style: TextStyle(color: getTextColor(normalize(day))),
                 ),
               ),
             );
@@ -1954,17 +1957,17 @@ class _CalendarState extends State<Calendar> {
 
           // builder for a day what we selecting
           selectedBuilder: (context, day, _) {
-            final hasDreams = dreams[normalize(day)]?.isNotEmpty ?? false;
             return Container(
               margin: const EdgeInsets.all(6),
               decoration: BoxDecoration(
+                color: getDayColor(normalize(day)),
                 border: Border.all(color: Colors.white, width: 3),
                 shape: BoxShape.circle,
               ),
               child: Center(
                 child: Text(
                   '${day.day}',
-                  style: const TextStyle(color: Colors.white),
+                  style: TextStyle(color: getTextColor(normalize(day))),
                 ),
               ),
             );
@@ -1985,7 +1988,7 @@ class _CalendarState extends State<Calendar> {
               child: Center(
                 child: Text(
                   "${day.day}",
-                  style: const TextStyle(color: Colors.white),
+                  style: TextStyle(color: getTextColor(normalize(day))),
                 ),
               ),
             );
@@ -1999,9 +2002,6 @@ class _CalendarState extends State<Calendar> {
             _focusedDay = focusedDay;
           });
         },
-        /*eventLoader: (day) {
-          return _getDreamsForDay(day);
-        },*/
       ),
     );
   }
