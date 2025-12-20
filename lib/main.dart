@@ -1,8 +1,9 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:pocket_dreams/bloc/backend_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:convert';
-import "dart:ui";
 import 'package:http/http.dart' as http;
 import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter/services.dart';
@@ -17,19 +18,44 @@ Map<DateTime, List<Dream>> dreams = {};
 // list for all emotion what we have
 //
 
-final List<Emotion> emotions = [
-  Emotion(name: "Happiness", color: Color.fromARGB(255, 255, 255, 0)),
-  Emotion(name: "Love", color: Color.fromARGB(255, 255, 0, 0)),
-  Emotion(name: "Calm", color: Color.fromARGB(255, 0, 0, 255)),
-  Emotion(name: "Harmony", color: Color.fromARGB(255, 0, 255, 0)),
-  Emotion(name: "Freedom", color: Color.fromARGB(255, 0, 255, 255)),
-  Emotion(name: "Creativity", color: Color.fromARGB(255, 255, 0, 255)),
+final List<Hemotion> hSLemotions = [
+  Hemotion(name: "Happiness", color: HSLColor.fromAHSL(1.0, 60.0, 0.7, 0.5)),
+  Hemotion(name: "Love", color: HSLColor.fromAHSL(1.0, 0.0, 0.7, 0.5)),
+  Hemotion(name: "Calm", color: HSLColor.fromAHSL(1.0, 240.0, 0.7, 0.5)),
+  Hemotion(name: "Harmony", color: HSLColor.fromAHSL(1.0, 120.0, 0.7, 0.5)),
+  Hemotion(name: "Freedom", color: HSLColor.fromAHSL(1.0, 180.0, 0.7, 0.5)),
+  Hemotion(name: "Creativity", color: HSLColor.fromAHSL(1.0, 300.0, 0.7, 0.5)),
 
-  Emotion(name: "Purity", color: Color.fromARGB(255, 255, 255, 255)),
-  Emotion(name: "Depth", color: Color.fromARGB(255, 10, 10, 10)),
-
-  Emotion(name: "Warmth", color: Color.fromARGB(255, 255, 165, 0)),
+  Hemotion(name: "Warmth", color: HSLColor.fromAHSL(1.0, 39.0, 0.7, 0.5)),
 ];
+
+HSLColor mixEmotions(List<HSLColor> emotions) {
+  final hue = mixHues(emotions.map((e) => e.hue).toList());
+  final saturation = mixLinear(emotions.map((e) => e.saturation).toList());
+  final lightness = mixLinear(emotions.map((e) => e.lightness).toList());
+
+  return HSLColor.fromAHSL(1.0, hue, saturation, lightness);
+}
+
+double mixLinear(List<double> values) {
+  return values.reduce((a, b) => a + b) / values.length;
+}
+
+double mixHues(List<double> hues) {
+  double x = 0;
+  double y = 0;
+
+  for (final h in hues) {
+    final rad = h * pi / 180;
+    x += cos(rad);
+    y += sin(rad);
+  }
+  final avgRad = atan2(y, x);
+  double result = avgRad * 180 / pi;
+
+  if (result < 0) result += 360;
+  return result;
+}
 
 String user = "merunka";
 String server = "http://10.0.1.12:5000";
@@ -889,11 +915,11 @@ class EmotionButton extends StatelessWidget {
 // that we need for buttons
 //
 
-class Emotion {
+class Hemotion {
   final String name;
-  final Color color;
+  final HSLColor color;
 
-  Emotion({required this.name, required this.color});
+  Hemotion({required this.name, required this.color});
 }
 
 //
@@ -977,11 +1003,11 @@ class _TodaysDreamState extends State<TodaysDream> {
     // working in cycle with sphere colors
     for (int i = 0; i < chosenSphereColors.length; i++) {
       // working in cycke with all emotions (final list)
-      for (int a = 0; a < emotions.length; a++) {
+      for (int a = 0; a < hSLemotions.length; a++) {
         // compare our sphere colors with emotion color
-        if (emotions[a].color == chosenSphereColors[i]) {
+        if (hSLemotions[a].color == chosenSphereColors[i]) {
           // if emotion color is ok, adding it to the _emotions list (need for json)
-          _emotions.add(emotions[a].name);
+          _emotions.add(hSLemotions[a].name);
         }
       }
     }
@@ -1034,39 +1060,21 @@ class _TodaysDreamState extends State<TodaysDream> {
   }
 
   // List for all spheres + grey
-  List<Color> sphereColors = List.generate(6, (_) => Colors.white10);
+  List<HSLColor?> sphereColors = List.generate(6, (_) => null);
 
   // List for only chosen (i need that)
-  List<Color> chosenSphereColors = [];
+  List<HSLColor> chosenSphereColors = [];
 
   List<EmotionButton> chosenEmotionButtons = [];
 
   List<String> chosenEmotions = [];
 
-  //function for mixing colors
-  Color mixedColor(List<Color> colorList) {
-    if (colorList.isEmpty) return Colors.white10;
+  Color mixedHSLColor(List<HSLColor> emotions) {
+    if (emotions.isEmpty) return Colors.white10;
 
-    double mixedR = 0;
-    double mixedG = 0;
-    double mixedB = 0;
-
-    for (int i = 0; i < colorList.length; i++) {
-      mixedR += (colorList[i].r * 255.0);
-
-      mixedG += (colorList[i].g * 255.0);
-
-      mixedB += (colorList[i].b * 255.0);
-    }
-
-    int len = colorList.length;
-    colorWasChosen = chosenSphereColors.isNotEmpty;
-    return Color.fromARGB(
-      255,
-      (mixedR / len).round(),
-      (mixedG / len).round(),
-      (mixedB / len).round(),
-    );
+    final mixed = mixEmotions(emotions);
+    colorWasChosen = emotions.isNotEmpty;
+    return mixed.toColor();
   }
 
   //function for adding a Dream to The Calendar
@@ -1092,7 +1100,7 @@ class _TodaysDreamState extends State<TodaysDream> {
   void removeEmotion(int index) {
     setState(() {
       final removedColor = sphereColors[index];
-      sphereColors[index] = Colors.white10;
+      sphereColors[index] = null;
 
       chosenSphereColors.remove(removedColor);
       chosenEmotionButtons.removeWhere((btn) => btn.index == index);
@@ -1102,7 +1110,7 @@ class _TodaysDreamState extends State<TodaysDream> {
   //
   //adding a new emotion to the our list
   //
-  void newEmotionChoise(Emotion emotion) {
+  void newEmotionChoise(Hemotion emotion) {
     int index = nextIndex(sphereColors);
     if (index != -1) {
       setState(() {
@@ -1117,7 +1125,7 @@ class _TodaysDreamState extends State<TodaysDream> {
           EmotionButton(
             index: index,
             label: emotion.name,
-            color: emotion.color,
+            color: emotion.color.toColor(),
             onPressed: () {
               removeEmotion(index);
             },
@@ -1127,9 +1135,9 @@ class _TodaysDreamState extends State<TodaysDream> {
     }
   }
 
-  int nextIndex(List listOfColors) {
+  int nextIndex(List<HSLColor?> listOfColors) {
     for (int i = 0; i < listOfColors.length; i++) {
-      if (listOfColors[i] == Colors.white10) {
+      if (listOfColors[i] == null) {
         return i;
       }
     }
@@ -1169,15 +1177,15 @@ class _TodaysDreamState extends State<TodaysDream> {
                               child: Center(
                                 child: SizedBox(
                                   width: 200,
-                                  child: Autocomplete<Emotion>(
+                                  child: Autocomplete<Hemotion>(
                                     optionsBuilder:
                                         (TextEditingValue userInput) {
                                           if (userInput.text == "") {
                                             return const Iterable<
-                                              Emotion
+                                              Hemotion
                                             >.empty();
                                           }
-                                          return emotions.where((emotions) {
+                                          return hSLemotions.where((emotions) {
                                             return emotions.name
                                                 .toLowerCase()
                                                 .contains(
@@ -1185,11 +1193,14 @@ class _TodaysDreamState extends State<TodaysDream> {
                                                 );
                                           });
                                         },
-                                    onSelected: (Emotion emotion) {
-                                      newEmotionChoise(emotion);
+                                    onSelected: (Hemotion emotion) {
+                                      final hemotion = hSLemotions.firstWhere(
+                                        (h) => h.name == emotion.name,
+                                      );
+                                      newEmotionChoise(hemotion);
                                     },
-                                    displayStringForOption: (Emotion emotion) =>
-                                        emotion.name,
+                                    displayStringForOption:
+                                        (Hemotion emotion) => emotion.name,
 
                                     fieldViewBuilder:
                                         (
@@ -1286,7 +1297,9 @@ class _TodaysDreamState extends State<TodaysDream> {
                                         ),
                                         decoration: BoxDecoration(
                                           shape: BoxShape.circle,
-                                          color: sphereColors[i],
+                                          color:
+                                              sphereColors[i]?.toColor() ??
+                                              Colors.white10,
                                           border: Border.all(
                                             color: Colors.black,
                                             width: 1,
@@ -1312,7 +1325,7 @@ class _TodaysDreamState extends State<TodaysDream> {
                                     ),
                                     child: Icon(
                                       Icons.square_rounded,
-                                      color: mixedColor(chosenSphereColors),
+                                      color: mixedHSLColor(chosenSphereColors),
                                     ),
                                   ),
                                 ],
@@ -1865,34 +1878,19 @@ class _CalendarState extends State<Calendar> {
       return Colors.transparent;
     }
 
-    final List<Color> colorList = [];
+    final List<HSLColor> hslList = [];
 
     for (final emotionName in dEmotions) {
-      for (Emotion globalEmotionName in emotions) {
-        if (globalEmotionName.name == emotionName) {
-          colorList.add(globalEmotionName.color);
+      for (final h in hSLemotions) {
+        if (h.name == emotionName) {
+          hslList.add(h.color);
         }
       }
     }
-    double mixedR = 0;
-    double mixedG = 0;
-    double mixedB = 0;
 
-    for (int i = 0; i < colorList.length; i++) {
-      mixedR += (colorList[i].r * 255.0);
+    if (hslList.isEmpty) return Colors.transparent;
 
-      mixedG += (colorList[i].g * 255.0);
-
-      mixedB += (colorList[i].b * 255.0);
-    }
-
-    Color mixedColor = Color.fromARGB(
-      255,
-      (mixedR / colorList.length).round(),
-      (mixedG / colorList.length).round(),
-      (mixedB / colorList.length).round(),
-    );
-    return mixedColor;
+    return mixEmotions(hslList).toColor();
   }
 
   DateTime normalize(DateTime d) => DateTime(d.year, d.month, d.day);
