@@ -1802,6 +1802,27 @@ class Calendar extends StatefulWidget {
 // child of Calendar()
 //
 
+// class for days from the calendar
+class CalendarDay {
+  final String name;
+  final String description;
+  final DateTime date;
+  final bool isPrivate;
+  final DateTime publicationDate;
+  final List<String> tags;
+  final HSLColor color;
+
+  CalendarDay({
+    required this.name,
+    required this.description,
+    required this.date,
+    required this.isPrivate,
+    required this.publicationDate,
+    required this.tags,
+    required this.color,
+  });
+}
+
 class _CalendarState extends State<Calendar> {
   List _dreamsList = [];
   Map<DateTime, List<String>> dreams = {};
@@ -1995,6 +2016,7 @@ class _CalendarState extends State<Calendar> {
 
         // changing a day to the day what you are selecting
         onDaySelected: (selectedDay, focusedDay) {
+          print(selectedDay);
           setState(() {
             _selectedDay = selectedDay;
             _focusedDay = focusedDay;
