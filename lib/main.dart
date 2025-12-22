@@ -1802,6 +1802,8 @@ class Calendar extends StatefulWidget {
 // child of Calendar()
 //
 
+// i am tired
+// would do more tomorow
 // class for days from the calendar
 class CalendarDay {
   final String name;
@@ -1809,8 +1811,8 @@ class CalendarDay {
   final DateTime date;
   final bool isPrivate;
   final DateTime publicationDate;
-  final List<String> tags;
-  final HSLColor color;
+  final List<dynamic> tags;
+  final List<dynamic> emotions;
 
   CalendarDay({
     required this.name,
@@ -1819,13 +1821,14 @@ class CalendarDay {
     required this.isPrivate,
     required this.publicationDate,
     required this.tags,
-    required this.color,
+    required this.emotions,
   });
 }
 
 class _CalendarState extends State<Calendar> {
   List _dreamsList = [];
   Map<DateTime, List<String>> dreams = {};
+  List<CalendarDay> calendarDreams = [];
 
   Future<void> askAboutDreams() async {
     final response = await http.get(
@@ -1836,8 +1839,24 @@ class _CalendarState extends State<Calendar> {
 
     final data = json.decode(response.body);
     List dreamsList = data["dreamsList"];
-
     setState(() {
+      calendarDreams.clear();
+      for (var cDream in dreamsList) {
+        calendarDreams.add(
+          CalendarDay(
+            name: cDream["Name"],
+            description: cDream["Description"],
+            date: cutADate(cDream["Date"]),
+            isPrivate: (cDream["IsPrivate"] == 1),
+            publicationDate: cutADate(cDream["PublicationDate"]),
+            tags: cDream["Tags"],
+            emotions: cDream["Emotions"],
+          ),
+        );
+      }
+
+      print(calendarDreams[1].name);
+
       dreams.clear();
       _dreamsList = dreamsList;
       for (int c = 0; c < _dreamsList.length; c++) {
@@ -2016,7 +2035,6 @@ class _CalendarState extends State<Calendar> {
 
         // changing a day to the day what you are selecting
         onDaySelected: (selectedDay, focusedDay) {
-          print(selectedDay);
           setState(() {
             _selectedDay = selectedDay;
             _focusedDay = focusedDay;
