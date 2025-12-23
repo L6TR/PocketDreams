@@ -1813,6 +1813,7 @@ class CalendarDay {
   final DateTime publicationDate;
   final List<dynamic> tags;
   final List<dynamic> emotions;
+  final String user;
 
   CalendarDay({
     required this.name,
@@ -1822,6 +1823,7 @@ class CalendarDay {
     required this.publicationDate,
     required this.tags,
     required this.emotions,
+    required this.user,
   });
 }
 
@@ -1846,16 +1848,15 @@ class _CalendarState extends State<Calendar> {
           CalendarDay(
             name: cDream["Name"],
             description: cDream["Description"],
-            date: cutADate(cDream["Date"]),
+            date: normalize(cutADate(cDream["Date"])),
             isPrivate: (cDream["IsPrivate"] == 1),
             publicationDate: cutADate(cDream["PublicationDate"]),
             tags: cDream["Tags"],
             emotions: cDream["Emotions"],
+            user: cDream["User"],
           ),
         );
       }
-
-      print(calendarDreams[1].name);
 
       dreams.clear();
       _dreamsList = dreamsList;
@@ -1872,6 +1873,27 @@ class _CalendarState extends State<Calendar> {
         dreams[key]!.addAll(dEmotions);
       }
     });
+  }
+
+  Color getColor(day) {
+    List<HSLColor> hSLColors = [];
+    for (var dream in calendarDreams) {
+      if (dream.date == day) {
+        for (var e in dream.emotions) {
+          for (var h in hSLemotions) {
+            if (h.name == e) {
+              hSLColors.add(h.color);
+              break;
+            }
+          }
+        }
+      }
+    }
+    if (hSLColors.isEmpty) {
+      return Colors.transparent;
+    } else {
+      return mixEmotions(hSLColors).toColor();
+    }
   }
 
   // final => const value
@@ -1911,32 +1933,10 @@ class _CalendarState extends State<Calendar> {
     return DateTime.utc(year, month, day);
   }
 
-  // day is our key
-  Color getDayColor(DateTime day) {
-    final dEmotions = dreams[day];
-    if (dEmotions == null || dEmotions.isEmpty) {
-      return Colors.transparent;
-    }
-
-    final List<HSLColor> hslList = [];
-
-    for (final emotionName in dEmotions) {
-      for (final h in hSLemotions) {
-        if (h.name == emotionName) {
-          hslList.add(h.color);
-        }
-      }
-    }
-
-    if (hslList.isEmpty) return Colors.transparent;
-
-    return mixEmotions(hslList).toColor();
-  }
-
   DateTime normalize(DateTime d) => DateTime(d.year, d.month, d.day);
 
   Color getTextColor(DateTime day) {
-    Color textColor = (getDayColor(day) == Colors.transparent)
+    Color textColor = (getColor(day) == Colors.transparent)
         ? Colors.white
         : Colors.black;
     return textColor;
@@ -1980,7 +1980,7 @@ class _CalendarState extends State<Calendar> {
             return Container(
               margin: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: getDayColor(normalize(day)),
+                color: getColor(normalize(day)),
                 shape: BoxShape.circle,
                 border: Border.all(color: cloudPink(), width: 3),
               ),
@@ -1998,7 +1998,7 @@ class _CalendarState extends State<Calendar> {
             return Container(
               margin: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: getDayColor(normalize(day)),
+                color: getColor(normalize(day)),
                 border: Border.all(color: Colors.white, width: 3),
                 shape: BoxShape.circle,
               ),
@@ -2020,7 +2020,7 @@ class _CalendarState extends State<Calendar> {
             return Container(
               margin: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: getDayColor(normalize(day)),
+                color: getColor(normalize(day)),
                 shape: BoxShape.circle,
               ),
               child: Center(
@@ -2035,12 +2035,62 @@ class _CalendarState extends State<Calendar> {
 
         // changing a day to the day what you are selecting
         onDaySelected: (selectedDay, focusedDay) {
+          for (var days in calendarDreams) {
+            if (days.date == normalize(selectedDay)) {
+              print(days.user);
+              _showTheDream(days);
+              break;
+            }
+          }
           setState(() {
             _selectedDay = selectedDay;
             _focusedDay = focusedDay;
           });
         },
       ),
+    );
+  }
+
+  Future<void> _showTheDream(CalendarDay dream) async {
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color.fromARGB(255, 5, 5, 5),
+          content: /*maybe we need to put it into the function*/ SizedBox(
+            width: 250,
+            height: 500,
+            child: Column(
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: SizedBox(
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: 1,
+                          child: Text(
+                            dream.name,
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: SizedBox(
+                            child: ColoredBox(color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Expanded(flex: 4, child: SizedBox()),
+                Expanded(flex: 1, child: SizedBox()),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

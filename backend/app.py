@@ -254,6 +254,7 @@ def askAboutDreams():
             "Date": dream[2],
             "IsPrivate": dream[3],
             "PublicationDate": dream[4],
+            "User": Username,
             "Tags": Tags,
             "Emotions": Emotions,
             })
