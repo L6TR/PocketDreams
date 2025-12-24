@@ -1809,7 +1809,7 @@ class CalendarDay {
   final String name;
   final String description;
   final DateTime date;
-  final bool isPrivate;
+  bool isPrivate;
   final DateTime publicationDate;
   final List<dynamic> tags;
   final List<dynamic> emotions;
@@ -1873,6 +1873,13 @@ class _CalendarState extends State<Calendar> {
         dreams[key]!.addAll(dEmotions);
       }
     });
+  }
+
+  Color getEmotionColor(emotion) {
+    for (var e in hSLemotions) {
+      if (e.name == emotion) return e.color.toColor();
+    }
+    return Colors.transparent;
   }
 
   Color getColor(day) {
@@ -2052,6 +2059,7 @@ class _CalendarState extends State<Calendar> {
   }
 
   Future<void> _showTheDream(CalendarDay dream) async {
+    Color mainColor = getColor(normalize(dream.date));
     await showDialog(
       context: context,
       builder: (context) {
@@ -2059,33 +2067,158 @@ class _CalendarState extends State<Calendar> {
           backgroundColor: const Color.fromARGB(255, 5, 5, 5),
           content: /*maybe we need to put it into the function*/ SizedBox(
             width: 250,
-            height: 500,
+            height: 450,
             child: Column(
               children: [
+                // top part
                 Expanded(
                   flex: 1,
                   child: SizedBox(
                     child: Row(
                       children: [
+                        // user name
                         Expanded(
                           flex: 1,
                           child: Text(
-                            dream.name,
+                            dream.user,
                             style: TextStyle(color: Colors.white),
                           ),
                         ),
+                        // dream name
                         Expanded(
-                          flex: 1,
+                          flex: 2,
                           child: SizedBox(
-                            child: ColoredBox(color: Colors.white),
+                            width: double.infinity,
+                            height: 50,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                color: mainColor,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  textAlign: TextAlign.center,
+                                  dream.name,
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
                 ),
-                Expanded(flex: 4, child: SizedBox()),
-                Expanded(flex: 1, child: SizedBox()),
+                // middle part
+                Expanded(
+                  flex: 4,
+                  child: Row(
+                    children: [
+                      // description text part
+                      Expanded(
+                        flex: 2,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: const Color.fromARGB(255, 10, 10, 10),
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          child: Text(
+                            dream.description,
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                      // right middle part
+                      Expanded(
+                        flex: 1,
+                        child: Column(
+                          children: [
+                            // privacity part
+                            InkWell(
+                              borderRadius: BorderRadius.circular(5),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    dream.isPrivate
+                                        ? Icons.lock
+                                        : Icons.lock_open,
+                                    color: mainColor,
+                                  ),
+                                  Text(
+                                    dream.isPrivate ? "Private" : "Public",
+                                    style: TextStyle(color: mainColor),
+                                  ),
+                                ],
+                              ),
+                              onTap: () {},
+                            ),
+                            // emotions part
+                            SizedBox(height: 20),
+                            Text(
+                              "Emotions:",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
+                            ),
+                            for (String everyEmotion in dream.emotions)
+                              Text(
+                                everyEmotion,
+                                style: TextStyle(
+                                  color: getEmotionColor(everyEmotion),
+                                  fontSize: 14,
+                                ),
+                              ),
+                            SizedBox(height: 5),
+                            Text(
+                              "Tags:",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
+                            ),
+                            for (String everyTag in dream.tags)
+                              Text(
+                                everyTag,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // bottom part
+                Expanded(
+                  flex: 1,
+                  child: Row(
+                    children: [
+                      // "hello"
+                      Expanded(
+                        flex: 1,
+                        child: Center(
+                          child: Text(
+                            "Dream Date: ${dream.date.year}-${dream.date.month}-${dream.date.day}",
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 1,
+                        // hiiiii :) hiiiii :)
+                        child: Center(
+                          child: Text(
+                            "Publication Date: ${dream.date.year}-${dream.date.month}-${dream.date.day}",
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
