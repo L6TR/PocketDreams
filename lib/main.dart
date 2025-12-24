@@ -27,6 +27,7 @@ final List<Hemotion> hSLemotions = [
   Hemotion(name: "Creativity", color: HSLColor.fromAHSL(1.0, 300.0, 0.7, 0.5)),
 
   Hemotion(name: "Warmth", color: HSLColor.fromAHSL(1.0, 39.0, 0.7, 0.5)),
+  Hemotion(name: "Fear", color: HSLColor.fromAHSL(1.0, 275.0, 0.7, 0.5)),
 ];
 
 HSLColor mixEmotions(List<HSLColor> emotions) {
@@ -1809,7 +1810,7 @@ class CalendarDay {
   final String name;
   final String description;
   final DateTime date;
-  bool isPrivate;
+  final bool isPrivate;
   final DateTime publicationDate;
   final List<dynamic> tags;
   final List<dynamic> emotions;
@@ -2044,7 +2045,6 @@ class _CalendarState extends State<Calendar> {
         onDaySelected: (selectedDay, focusedDay) {
           for (var days in calendarDreams) {
             if (days.date == normalize(selectedDay)) {
-              print(days.user);
               _showTheDream(days);
               break;
             }
@@ -2067,7 +2067,7 @@ class _CalendarState extends State<Calendar> {
           backgroundColor: const Color.fromARGB(255, 5, 5, 5),
           content: /*maybe we need to put it into the function*/ SizedBox(
             width: 250,
-            height: 450,
+            height: 500,
             child: Column(
               children: [
                 // top part
@@ -2110,32 +2110,37 @@ class _CalendarState extends State<Calendar> {
                   ),
                 ),
                 // middle part
-                Expanded(
-                  flex: 4,
+                SizedBox(
+                  height: 320,
                   child: Row(
                     children: [
                       // description text part
-                      Expanded(
-                        flex: 2,
+                      SizedBox(
+                        width: 165,
                         child: DecoratedBox(
                           decoration: BoxDecoration(
                             color: const Color.fromARGB(255, 10, 10, 10),
                             borderRadius: BorderRadius.circular(5),
                           ),
-                          child: Text(
-                            dream.description,
-                            style: TextStyle(color: Colors.white),
+
+                          child: ListView(
+                            children: [
+                              Text(
+                                dream.description,
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ],
                           ),
                         ),
                       ),
+                      SizedBox(width: 5),
                       // right middle part
-                      Expanded(
-                        flex: 1,
+                      SizedBox(
                         child: Column(
                           children: [
+                            SizedBox(height: 5),
                             // privacity part
-                            InkWell(
-                              borderRadius: BorderRadius.circular(5),
+                            SizedBox(
                               child: Row(
                                 children: [
                                   Icon(
@@ -2150,41 +2155,82 @@ class _CalendarState extends State<Calendar> {
                                   ),
                                 ],
                               ),
-                              onTap: () {},
                             ),
                             // emotions part
-                            SizedBox(height: 20),
-                            Text(
-                              "Emotions:",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                              ),
-                            ),
-                            for (String everyEmotion in dream.emotions)
-                              Text(
-                                everyEmotion,
-                                style: TextStyle(
-                                  color: getEmotionColor(everyEmotion),
-                                  fontSize: 14,
-                                ),
-                              ),
                             SizedBox(height: 5),
-                            Text(
-                              "Tags:",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                              ),
-                            ),
-                            for (String everyTag in dream.tags)
-                              Text(
-                                everyTag,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
+                            SizedBox(
+                              height: 150,
+
+                              width: 80,
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  color: const Color.fromARGB(255, 7, 7, 7),
+
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      "Emotions:",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+
+                                    for (String everyEmotion in dream.emotions)
+                                      Text(
+                                        everyEmotion,
+                                        style: TextStyle(
+                                          color: getEmotionColor(everyEmotion),
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                  ],
                                 ),
                               ),
+                            ),
+                            SizedBox(height: 5),
+                            SizedBox(
+                              height: 110,
+                              width: 80,
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  color: const Color.fromARGB(255, 7, 7, 7),
+
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      "Tags:",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    for (
+                                      int t = 0;
+                                      t <= 3 && t < dream.tags.length;
+                                      t++
+                                    )
+                                      Text(
+                                        (t != 3)
+                                            ? dream.tags[t]
+                                            : "and other...",
+                                        style: TextStyle(
+                                          color: (t != 3)
+                                              ? Colors.white
+                                              : Colors.grey,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ),

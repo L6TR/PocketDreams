@@ -45,7 +45,6 @@ cursor = conn.cursor() # we need this one for our SQL commands
 #cursor.execute("CREATE TABLE IF NOT EXISTS UserTags (UserID INTEGER, TagID INTEGER, FOREIGN KEY (UserID) REFERENCES Users(ID), FOREIGN KEY (TagID) REFERENCES Tags(ID));")
 
 
-
 #making a table if it does not exist
 
 
@@ -173,7 +172,7 @@ def addDream():
         return jsonify({"seccuess": False, "message": "User not found"}),404
     UserID = user_result[0]
 
-    cursor.execute("SELECT ID FROM Dreams WHERE Date = ?",(Date,))
+    cursor.execute("SELECT ID FROM Dreams WHERE Date = ? AND User = ?",(Date,UserID,))
     # checking if we already had a dream for this day
     if cursor.fetchall():   
         conn.commit()
