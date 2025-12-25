@@ -106,6 +106,21 @@ OutlinedButton cloudyButton(String myText, doSomething) {
   );
 }
 
+Center generateAListOfButtons(List<String> gList) {
+  int count = gList.length ~/ 4;
+  List<String> restOfTheList = gList;
+  return Center(
+    child: Row(
+      children: [
+        for (int g = 0; g < count; g++)
+          (Column(
+            children: [for (int i = 0; i < 4; i++) (Text(restOfTheList[0]))],
+          )),
+      ],
+    ),
+  );
+}
+
 //
 // run application
 //
@@ -1828,30 +1843,6 @@ class CalendarDay {
   });
 }
 
-class TagPicker extends StatefulWidget {
-  final List<String> initialTags;
-
-  const TagPicker({super.key, required this.initialTags});
-
-  @override
-  State<TagPicker> createState() => _TagPickerState();
-}
-
-class _TagPickerState extends State<TagPicker> {
-  late List<String> tempTags;
-
-  @override
-  void initState() {
-    tempTags = List.from(widget.initialTags);
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(); // пока пусто или твой UI
-  }
-}
-
 class _CalendarState extends State<Calendar> {
   late List<String> tempTags;
   List _dreamsList = [];
@@ -2252,19 +2243,28 @@ class _CalendarState extends State<Calendar> {
                                         ),
                                     ],
                                   ),
-                                  onTap: () async {
-                                    final result =
-                                        await showModalBottomSheet<
-                                          List<String>
-                                        >(
-                                          context: context,
-                                          builder: (_) => TagPicker(
-                                            initialTags: List<String>.from(
-                                              dream.tags,
-                                            ),
+                                  onTap: () {
+                                    showModalBottomSheet(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return Container(
+                                          color: const Color.fromARGB(
+                                            255,
+                                            7,
+                                            7,
+                                            7,
+                                          ),
+                                          height: 400,
+                                          width: double.infinity,
+                                          child: Column(
+                                            children: [
+                                              SizedBox(height: 15),
+                                              generateAListOfButtons(tagList),
+                                            ],
                                           ),
                                         );
-                                    print("tag");
+                                      },
+                                    );
                                   },
                                 ),
                               ),
@@ -2295,7 +2295,7 @@ class _CalendarState extends State<Calendar> {
                         // hiiiii :) hiiiii :)
                         child: Center(
                           child: Text(
-                            "Publication Date: ${dream.date.year}-${dream.date.month}-${dream.date.day}",
+                            "Publication Date: ${dream.publicationDate.year}-${dream.publicationDate.month}-${dream.publicationDate.day}",
                             style: TextStyle(color: Colors.grey),
                           ),
                         ),
