@@ -1828,7 +1828,32 @@ class CalendarDay {
   });
 }
 
+class TagPicker extends StatefulWidget {
+  final List<String> initialTags;
+
+  const TagPicker({super.key, required this.initialTags});
+
+  @override
+  State<TagPicker> createState() => _TagPickerState();
+}
+
+class _TagPickerState extends State<TagPicker> {
+  late List<String> tempTags;
+
+  @override
+  void initState() {
+    tempTags = List.from(widget.initialTags);
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(); // пока пусто или твой UI
+  }
+}
+
 class _CalendarState extends State<Calendar> {
+  late List<String> tempTags;
   List _dreamsList = [];
   Map<DateTime, List<String>> dreams = {};
   List<CalendarDay> calendarDreams = [];
@@ -2165,7 +2190,6 @@ class _CalendarState extends State<Calendar> {
                               child: DecoratedBox(
                                 decoration: BoxDecoration(
                                   color: const Color.fromARGB(255, 7, 7, 7),
-
                                   borderRadius: BorderRadius.circular(5),
                                 ),
 
@@ -2198,36 +2222,50 @@ class _CalendarState extends State<Calendar> {
                               child: DecoratedBox(
                                 decoration: BoxDecoration(
                                   color: const Color.fromARGB(255, 7, 7, 7),
-
                                   borderRadius: BorderRadius.circular(5),
                                 ),
-
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      "Tags:",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                    for (
-                                      int t = 0;
-                                      t <= 3 && t < dream.tags.length;
-                                      t++
-                                    )
+                                child: InkWell(
+                                  child: Column(
+                                    children: [
                                       Text(
-                                        (t != 3)
-                                            ? dream.tags[t]
-                                            : "and other...",
+                                        "Tags:",
                                         style: TextStyle(
-                                          color: (t != 3)
-                                              ? Colors.white
-                                              : Colors.grey,
-                                          fontSize: 14,
+                                          color: Colors.white,
+                                          fontSize: 16,
                                         ),
                                       ),
-                                  ],
+                                      for (
+                                        int t = 0;
+                                        t <= 3 && t < dream.tags.length;
+                                        t++
+                                      )
+                                        Text(
+                                          (t != 3)
+                                              ? dream.tags[t]
+                                              : "and other...",
+                                          style: TextStyle(
+                                            color: (t != 3)
+                                                ? Colors.white
+                                                : Colors.grey,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                  onTap: () async {
+                                    final result =
+                                        await showModalBottomSheet<
+                                          List<String>
+                                        >(
+                                          context: context,
+                                          builder: (_) => TagPicker(
+                                            initialTags: List<String>.from(
+                                              dream.tags,
+                                            ),
+                                          ),
+                                        );
+                                    print("tag");
+                                  },
                                 ),
                               ),
                             ),
