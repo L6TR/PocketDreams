@@ -95,9 +95,7 @@ OutlinedButton cloudyButton(String myText, doSomething) {
   return OutlinedButton(
     style: ButtonStyle(
       backgroundColor: WidgetStatePropertyAll(Colors.white),
-      side: WidgetStatePropertyAll(
-        BorderSide(color: Color.fromARGB(255, 250, 175, 195), width: 5),
-      ),
+      side: WidgetStatePropertyAll(BorderSide(color: cloudPink(), width: 5)),
     ),
     child: Text(myText, style: TextStyle(color: Colors.black)),
     onPressed: () {
@@ -106,18 +104,47 @@ OutlinedButton cloudyButton(String myText, doSomething) {
   );
 }
 
-Center generateAListOfButtons(List<String> gList) {
-  int count = gList.length ~/ 4;
-  List<String> restOfTheList = gList;
-  return Center(
-    child: Row(
-      children: [
-        for (int g = 0; g < count; g++)
-          (Column(
-            children: [for (int i = 0; i < 4; i++) (Text(restOfTheList[0]))],
-          )),
-      ],
-    ),
+Map<String, bool> tagVisibility = {for (var tag in tagList) tag: false};
+
+// button for choosing tags for dream
+StatefulBuilder statusCloudyButton(String myText, doSomething, bool active) {
+  tagVisibility[myText] = active;
+  Color insideC = !active ? Colors.white : cloudPink();
+  Color borderC = !active ? Colors.grey : Color.fromARGB(255, 125, 87, 98);
+
+  return StatefulBuilder(
+    builder: (context, setState) {
+      return OutlinedButton(
+        style: ButtonStyle(
+          side: WidgetStatePropertyAll(BorderSide(color: borderC, width: 5)),
+          backgroundColor: WidgetStatePropertyAll(insideC),
+        ),
+
+        onPressed: () {
+          active = !active;
+          setState(() {
+            insideC = (insideC == Color.fromARGB(255, 250, 175, 195))
+                ? Colors.white
+                : cloudPink();
+            borderC = (borderC == Colors.grey)
+                ? Color.fromARGB(255, 125, 87, 98)
+                : Colors.grey;
+          });
+        },
+        child: Text(myText, style: TextStyle(color: Colors.black)),
+      );
+    },
+  );
+}
+
+Widget generateAListOfButtons(List<String> gList) {
+  return Wrap(
+    spacing: 8,
+    runSpacing: 8,
+    children: [
+      for (int g = 0; g < gList.length; g++)
+        statusCloudyButton(gList[g], {print(gList[g])}, true),
+    ],
   );
 }
 
@@ -392,8 +419,6 @@ class _TagScreenState extends State<TagScreen> {
 
   List<String> chosenTags = [];
 
-  Map<String, bool> tagVisibility = {for (var tag in tagList) tag: false};
-
   void changeStatus(tag) {
     setState(() {
       tagVisibility[tag] = !(tagVisibility[tag] ?? false);
@@ -589,7 +614,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 250, 175, 195),
+        backgroundColor: cloudPink(),
         title: const Text("Pocket Dreams"),
         foregroundColor: Colors.white,
       ),
@@ -633,9 +658,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   hintText: "Name",
                                   focusedBorder: OutlineInputBorder(
                                     // color of the border
-                                    borderSide: BorderSide(
-                                      color: Color.fromARGB(255, 250, 175, 195),
-                                    ),
+                                    borderSide: BorderSide(color: cloudPink()),
                                   ),
                                 ),
                               ),
@@ -654,15 +677,13 @@ class _LoginScreenState extends State<LoginScreen> {
                                 obscureText: true,
 
                                 // color of blinking |
-                                cursorColor: Color.fromARGB(255, 250, 175, 195),
+                                cursorColor: cloudPink(),
                                 decoration: InputDecoration(
                                   border: OutlineInputBorder(),
                                   hintText: "Password",
                                   focusedBorder: OutlineInputBorder(
                                     // color of the border
-                                    borderSide: BorderSide(
-                                      color: Color.fromARGB(255, 250, 175, 195),
-                                    ),
+                                    borderSide: BorderSide(color: cloudPink()),
                                   ),
                                 ),
                               ),
@@ -699,10 +720,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   Colors.white,
                                 ),
                                 side: WidgetStatePropertyAll(
-                                  BorderSide(
-                                    color: Color.fromARGB(255, 250, 175, 195),
-                                    width: 5,
-                                  ),
+                                  BorderSide(color: cloudPink(), width: 5),
                                 ),
                               ),
                               onPressed: () {
@@ -854,10 +872,7 @@ class _SettingsState extends State<Settings> {
               style: ButtonStyle(
                 backgroundColor: WidgetStatePropertyAll(Colors.white),
                 side: WidgetStatePropertyAll(
-                  BorderSide(
-                    color: Color.fromARGB(255, 250, 175, 195),
-                    width: 5,
-                  ),
+                  BorderSide(color: cloudPink(), width: 5),
                 ),
               ),
               onPressed: () {
@@ -875,10 +890,7 @@ class _SettingsState extends State<Settings> {
               style: ButtonStyle(
                 backgroundColor: WidgetStatePropertyAll(Colors.white),
                 side: WidgetStatePropertyAll(
-                  BorderSide(
-                    color: Color.fromARGB(255, 250, 175, 195),
-                    width: 5,
-                  ),
+                  BorderSide(color: cloudPink(), width: 5),
                 ),
               ),
               onPressed: () {
@@ -1389,9 +1401,7 @@ class _TodaysDreamState extends State<TodaysDream> {
                             hintText: "Description",
                             focusedBorder: OutlineInputBorder(
                               // color of the border
-                              borderSide: BorderSide(
-                                color: Color.fromARGB(255, 250, 175, 195),
-                              ),
+                              borderSide: BorderSide(color: cloudPink()),
                             ),
                           ),
                           readOnly: true,
@@ -1473,9 +1483,7 @@ class _TodaysDreamState extends State<TodaysDream> {
                             hintText: "Choose tags",
                             focusedBorder: OutlineInputBorder(
                               // color of the border
-                              borderSide: BorderSide(
-                                color: Color.fromARGB(255, 250, 175, 195),
-                              ),
+                              borderSide: BorderSide(color: cloudPink()),
                             ),
                           ),
                           readOnly: true,
@@ -1711,7 +1719,7 @@ class _TodaysDreamState extends State<TodaysDream> {
             setState(() {
               insideC = (insideC == Color.fromARGB(255, 250, 175, 195))
                   ? Colors.white
-                  : Color.fromARGB(255, 250, 175, 195);
+                  : cloudPink();
               borderC = (borderC == Colors.grey)
                   ? Color.fromARGB(255, 125, 87, 98)
                   : Colors.grey;
