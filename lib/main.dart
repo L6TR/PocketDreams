@@ -91,7 +91,7 @@ Color cloudPink() {
   return Color.fromARGB(255, 250, 175, 195);
 }
 
-OutlinedButton cloudyButton(String myText, doSomething) {
+OutlinedButton cloudyButton(String myText, VoidCallback doSomething) {
   return OutlinedButton(
     style: ButtonStyle(
       backgroundColor: WidgetStatePropertyAll(Colors.white),
@@ -107,8 +107,11 @@ OutlinedButton cloudyButton(String myText, doSomething) {
 Map<String, bool> tagVisibility = {for (var tag in tagList) tag: false};
 
 // button for choosing tags for dream
-StatefulBuilder statusCloudyButton(String myText, doSomething, bool active) {
-  tagVisibility[myText] = active;
+StatefulBuilder statusCloudyButton(
+  String myText,
+  VoidCallback doSomething,
+  bool active,
+) {
   Color insideC = !active ? Colors.white : cloudPink();
   Color borderC = !active ? Colors.grey : Color.fromARGB(255, 125, 87, 98);
 
@@ -121,6 +124,7 @@ StatefulBuilder statusCloudyButton(String myText, doSomething, bool active) {
         ),
 
         onPressed: () {
+          doSomething();
           active = !active;
           setState(() {
             insideC = (insideC == Color.fromARGB(255, 250, 175, 195))
@@ -134,17 +138,6 @@ StatefulBuilder statusCloudyButton(String myText, doSomething, bool active) {
         child: Text(myText, style: TextStyle(color: Colors.black)),
       );
     },
-  );
-}
-
-Widget generateAListOfButtons(List<String> gList) {
-  return Wrap(
-    spacing: 8,
-    runSpacing: 8,
-    children: [
-      for (int g = 0; g < gList.length; g++)
-        statusCloudyButton(gList[g], {print(gList[g])}, true),
-    ],
   );
 }
 
@@ -1830,14 +1823,14 @@ class Calendar extends StatefulWidget {
 // would do more tomorow
 // class for days from the calendar
 class CalendarDay {
-  final String name;
-  final String description;
-  final DateTime date;
-  final bool isPrivate;
-  final DateTime publicationDate;
-  final List<dynamic> tags;
-  final List<dynamic> emotions;
-  final String user;
+  String name;
+  String description;
+  DateTime date;
+  bool isPrivate;
+  DateTime publicationDate;
+  List<dynamic> tags;
+  List<dynamic> emotions;
+  String user;
 
   CalendarDay({
     required this.name,
@@ -1852,7 +1845,6 @@ class CalendarDay {
 }
 
 class _CalendarState extends State<Calendar> {
-  late List<String> tempTags;
   List _dreamsList = [];
   Map<DateTime, List<String>> dreams = {};
   List<CalendarDay> calendarDreams = [];
@@ -2084,236 +2076,319 @@ class _CalendarState extends State<Calendar> {
 
   Future<void> _showTheDream(CalendarDay dream) async {
     Color mainColor = getColor(normalize(dream.date));
+
     await showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          backgroundColor: const Color.fromARGB(255, 5, 5, 5),
-          content: /*maybe we need to put it into the function*/ SizedBox(
-            width: 250,
-            height: 500,
-            child: Column(
-              children: [
-                // top part
-                Expanded(
-                  flex: 1,
-                  child: SizedBox(
-                    child: Row(
-                      children: [
-                        // user name
-                        Expanded(
-                          flex: 1,
-                          child: Text(
-                            dream.user,
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                        // dream name
-                        Expanded(
-                          flex: 2,
-                          child: SizedBox(
-                            width: double.infinity,
-                            height: 50,
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20),
-                                color: mainColor,
-                              ),
-                              child: Center(
-                                child: Text(
-                                  textAlign: TextAlign.center,
-                                  dream.name,
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                // middle part
-                SizedBox(
-                  height: 320,
-                  child: Row(
-                    children: [
-                      // description text part
-                      SizedBox(
-                        width: 165,
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 10, 10, 10),
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-
-                          child: ListView(
-                            children: [
-                              Text(
-                                dream.description,
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              backgroundColor: const Color.fromARGB(255, 5, 5, 5),
+              content: /*maybe we need to put it into the function*/ SizedBox(
+                width: 250,
+                height: 500,
+                child: Column(
+                  children: [
+                    // top part
+                    Expanded(
+                      flex: 1,
+                      child: SizedBox(
+                        child: Row(
+                          children: [
+                            // user name
+                            Expanded(
+                              flex: 1,
+                              child: Text(
+                                dream.user,
                                 style: TextStyle(color: Colors.white),
                               ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 5),
-                      // right middle part
-                      SizedBox(
-                        child: Column(
-                          children: [
-                            SizedBox(height: 5),
-                            // privacity part
-                            SizedBox(
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    dream.isPrivate
-                                        ? Icons.lock
-                                        : Icons.lock_open,
+                            ),
+                            // dream name
+                            Expanded(
+                              flex: 2,
+                              child: SizedBox(
+                                width: double.infinity,
+                                height: 50,
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20),
                                     color: mainColor,
                                   ),
-                                  Text(
-                                    dream.isPrivate ? "Private" : "Public",
-                                    style: TextStyle(color: mainColor),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            // emotions part
-                            SizedBox(height: 5),
-                            SizedBox(
-                              height: 150,
-
-                              width: 80,
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  color: const Color.fromARGB(255, 7, 7, 7),
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      "Emotions:",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                      ),
+                                  child: Center(
+                                    child: Text(
+                                      textAlign: TextAlign.center,
+                                      dream.name,
+                                      style: TextStyle(color: Colors.white),
                                     ),
-
-                                    for (String everyEmotion in dream.emotions)
-                                      Text(
-                                        everyEmotion,
-                                        style: TextStyle(
-                                          color: getEmotionColor(everyEmotion),
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 5),
-                            SizedBox(
-                              height: 110,
-                              width: 80,
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  color: const Color.fromARGB(255, 7, 7, 7),
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                                child: InkWell(
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        "Tags:",
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                      for (
-                                        int t = 0;
-                                        t <= 3 && t < dream.tags.length;
-                                        t++
-                                      )
-                                        Text(
-                                          (t != 3)
-                                              ? dream.tags[t]
-                                              : "and other...",
-                                          style: TextStyle(
-                                            color: (t != 3)
-                                                ? Colors.white
-                                                : Colors.grey,
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                    ],
                                   ),
-                                  onTap: () {
-                                    showModalBottomSheet(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return Container(
-                                          color: const Color.fromARGB(
-                                            255,
-                                            7,
-                                            7,
-                                            7,
-                                          ),
-                                          height: 400,
-                                          width: double.infinity,
-                                          child: Column(
-                                            children: [
-                                              SizedBox(height: 15),
-                                              generateAListOfButtons(tagList),
-                                            ],
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  },
                                 ),
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                // bottom part
-                Expanded(
-                  flex: 1,
-                  child: Row(
-                    children: [
-                      // "hello"
-                      Expanded(
-                        flex: 1,
-                        child: Center(
-                          child: Text(
-                            "Dream Date: ${dream.date.year}-${dream.date.month}-${dream.date.day}",
-                            style: TextStyle(color: Colors.grey),
+                    ),
+                    // middle part
+                    SizedBox(
+                      height: 320,
+                      child: Row(
+                        children: [
+                          // description text part
+                          SizedBox(
+                            width: 165,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: const Color.fromARGB(255, 10, 10, 10),
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+
+                              child: ListView(
+                                children: [
+                                  Text(
+                                    dream.description,
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 1,
-                        // hiiiii :) hiiiii :)
-                        child: Center(
-                          child: Text(
-                            "Publication Date: ${dream.publicationDate.year}-${dream.publicationDate.month}-${dream.publicationDate.day}",
-                            style: TextStyle(color: Colors.grey),
+                          SizedBox(width: 5),
+                          // right middle part
+                          SizedBox(
+                            child: Column(
+                              children: [
+                                SizedBox(height: 5),
+                                // privacity part
+                                SizedBox(
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        dream.isPrivate
+                                            ? Icons.lock
+                                            : Icons.lock_open,
+                                        color: mainColor,
+                                      ),
+                                      Text(
+                                        dream.isPrivate ? "Private" : "Public",
+                                        style: TextStyle(color: mainColor),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                // emotions part
+                                SizedBox(height: 5),
+                                SizedBox(
+                                  height: 150,
+
+                                  width: 80,
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      color: const Color.fromARGB(255, 7, 7, 7),
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          "Emotions:",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+
+                                        for (String everyEmotion
+                                            in dream.emotions)
+                                          Text(
+                                            everyEmotion,
+                                            style: TextStyle(
+                                              color: getEmotionColor(
+                                                everyEmotion,
+                                              ),
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 5),
+                                SizedBox(
+                                  height: 110,
+                                  width: 80,
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      color: const Color.fromARGB(255, 7, 7, 7),
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                    child: InkWell(
+                                      child: Column(
+                                        children: [
+                                          Text(
+                                            "Tags:",
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                          for (
+                                            int t = 0;
+                                            t <= 3 && t < dream.tags.length;
+                                            t++
+                                          )
+                                            Text(
+                                              (t != 3)
+                                                  ? dream.tags[t]
+                                                  : "and other...",
+                                              style: TextStyle(
+                                                color: (t != 3)
+                                                    ? Colors.white
+                                                    : Colors.grey,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                      onTap: () async {
+                                        final List<String>? result =
+                                            await showModalBottomSheet<
+                                              List<String>
+                                            >(
+                                              context: context,
+                                              backgroundColor:
+                                                  const Color.fromARGB(
+                                                    255,
+                                                    7,
+                                                    7,
+                                                    7,
+                                                  ),
+                                              builder: (sheetContext) {
+                                                List<String> tempTags =
+                                                    List.from(dream.tags);
+
+                                                void changeTagStatus(
+                                                  String tag,
+                                                ) {
+                                                  if (tempTags.contains(tag)) {
+                                                    tempTags.remove(tag);
+                                                  } else {
+                                                    tempTags.add(tag);
+                                                  }
+                                                }
+
+                                                return SizedBox(
+                                                  height: 400,
+                                                  width: double.infinity,
+                                                  child: Column(
+                                                    children: [
+                                                      const SizedBox(
+                                                        height: 15,
+                                                      ),
+
+                                                      Wrap(
+                                                        spacing: 8,
+                                                        runSpacing: 8,
+                                                        children: [
+                                                          for (final tag
+                                                              in tagList)
+                                                            statusCloudyButton(
+                                                              tag,
+                                                              () =>
+                                                                  changeTagStatus(
+                                                                    tag,
+                                                                  ),
+                                                              tempTags.contains(
+                                                                tag,
+                                                              ),
+                                                            ),
+                                                        ],
+                                                      ),
+
+                                                      const Spacer(),
+
+                                                      Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceEvenly,
+                                                        children: [
+                                                          cloudyButton(
+                                                            "Cancel",
+                                                            () {
+                                                              Navigator.of(
+                                                                sheetContext,
+                                                              ).pop(null);
+                                                            },
+                                                          ),
+                                                          cloudyButton(
+                                                            "Save",
+                                                            () {
+                                                              Navigator.of(
+                                                                sheetContext,
+                                                              ).pop(
+                                                                tempTags,
+                                                              ); // ✅
+                                                            },
+                                                          ),
+                                                        ],
+                                                      ),
+
+                                                      const SizedBox(
+                                                        height: 15,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                              },
+                                            );
+
+                                        if (result != null) {
+                                          setDialogState(() {
+                                            dream.tags = result;
+                                          });
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                    // bottom part
+                    Expanded(
+                      flex: 1,
+                      child: Row(
+                        children: [
+                          // "hello"
+                          Expanded(
+                            flex: 1,
+                            child: Center(
+                              child: Text(
+                                "Dream Date: ${dream.date.year}-${dream.date.month}-${dream.date.day}",
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 1,
+                            // hiiiii :) hiiiii :)
+                            child: Center(
+                              child: Text(
+                                "Publication Date: ${dream.publicationDate.year}-${dream.publicationDate.month}-${dream.publicationDate.day}",
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
