@@ -2142,13 +2142,33 @@ class _CalendarState extends State<Calendar> {
                                 borderRadius: BorderRadius.circular(5),
                               ),
 
-                              child: ListView(
-                                children: [
-                                  Text(
-                                    dream.description,
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                ],
+                              child: InkWell(
+                                child: ListView(
+                                  children: [
+                                    Text(
+                                      dream.description,
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ],
+                                ),
+                                onTap: () async {
+                                  final String? result =
+                                      await showModalBottomSheet<String>(
+                                        context: context,
+                                        backgroundColor: const Color.fromARGB(
+                                          255,
+                                          7,
+                                          7,
+                                          7,
+                                        ),
+                                        builder: (sheetContext) {
+                                          return SizedBox(
+                                            height: 400,
+                                            width: double.infinity,
+                                          );
+                                        },
+                                      );
+                                },
                               ),
                             ),
                           ),
