@@ -1845,9 +1845,12 @@ class CalendarDay {
 }
 
 class _CalendarState extends State<Calendar> {
+  late String tempName;
+
   List _dreamsList = [];
   Map<DateTime, List<String>> dreams = {};
   List<CalendarDay> calendarDreams = [];
+  late TextEditingController descriptionController;
 
   Future<void> askAboutDreams() async {
     final response = await http.get(
@@ -1899,10 +1902,14 @@ class _CalendarState extends State<Calendar> {
     return Colors.transparent;
   }
 
-  Color getColor(day) {
+  Color getColor(DateTime day) {
+    bool hasDreams = false;
     List<HSLColor> hSLColors = [];
-    for (var dream in calendarDreams) {
+
+    for (CalendarDay dream in calendarDreams) {
       if (dream.date == day) {
+        hasDreams = true;
+
         for (var e in dream.emotions) {
           for (var h in hSLemotions) {
             if (h.name == e) {
@@ -1913,11 +1920,12 @@ class _CalendarState extends State<Calendar> {
         }
       }
     }
-    if (hSLColors.isEmpty) {
+    if (!hasDreams) {
       return Colors.transparent;
-    } else {
-      return mixEmotions(hSLColors).toColor();
+    } else if (hSLColors.isEmpty) {
+      return Colors.grey;
     }
+    return mixEmotions(hSLColors).toColor();
   }
 
   // final => const value
@@ -1939,12 +1947,14 @@ class _CalendarState extends State<Calendar> {
     //means, we dont @override it
     super.initState();
 
+    descriptionController = TextEditingController();
     _selectedDay = _focusedDay;
   }
 
   // we need this one to deleting data when we are not looking at the widget
   @override
   void dispose() {
+    descriptionController.dispose();
     _selectedDays.dispose();
     super.dispose();
   }
@@ -1970,112 +1980,126 @@ class _CalendarState extends State<Calendar> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: TableCalendar(
-        startingDayOfWeek: StartingDayOfWeek.monday,
-        calendarStyle: CalendarStyle(
-          outsideDaysVisible: true,
-          outsideTextStyle: TextStyle(
-            color: const Color.fromARGB(255, 33, 33, 33),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(8.0),
+        child: TableCalendar(
+          startingDayOfWeek: StartingDayOfWeek.monday,
+          calendarStyle: CalendarStyle(
+            outsideDaysVisible: true,
+            outsideTextStyle: TextStyle(
+              color: const Color.fromARGB(255, 33, 33, 33),
+            ),
+            defaultTextStyle: TextStyle(color: Colors.white),
+            weekendTextStyle: TextStyle(color: cloudPink()),
           ),
-          defaultTextStyle: TextStyle(color: Colors.white),
-          weekendTextStyle: TextStyle(color: cloudPink()),
-        ),
-        // text on the top part
-        headerStyle: HeaderStyle(
-          titleCentered: true,
-          formatButtonVisible: false,
-          titleTextStyle: TextStyle(color: Colors.white, fontSize: 18),
-          leftChevronIcon: Icon(Icons.chevron_left, color: Colors.white),
-          rightChevronIcon: Icon(Icons.chevron_right, color: Colors.white),
-        ),
-        rowHeight: 80,
-        focusedDay: _focusedDay,
-        firstDay: DateTime(2000, 1, 1),
-        lastDay: DateTime.now(),
+          // text on the top part
+          headerStyle: HeaderStyle(
+            titleCentered: true,
+            formatButtonVisible: false,
+            titleTextStyle: TextStyle(color: Colors.white, fontSize: 18),
+            leftChevronIcon: Icon(Icons.chevron_left, color: Colors.white),
+            rightChevronIcon: Icon(Icons.chevron_right, color: Colors.white),
+          ),
+          rowHeight: 80,
+          focusedDay: _focusedDay,
+          firstDay: DateTime(2000, 1, 1),
+          lastDay: DateTime.now(),
 
-        // we need this just because "==" is not working with DateTime normaly TTnTT
-        selectedDayPredicate: (day) {
-          return isSameDay(_selectedDay, day);
-        },
-
-        calendarBuilders: CalendarBuilders(
-          // builder for today
-          todayBuilder: (context, day, _) {
-            return Container(
-              margin: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: getColor(normalize(day)),
-                shape: BoxShape.circle,
-                border: Border.all(color: cloudPink(), width: 3),
-              ),
-              child: Center(
-                child: Text(
-                  "${day.day}",
-                  style: TextStyle(color: getTextColor(normalize(day))),
-                ),
-              ),
-            );
+          // we need this just because "==" is not working with DateTime normaly TTnTT
+          selectedDayPredicate: (day) {
+            return isSameDay(_selectedDay, day);
           },
 
-          // builder for a day what we selecting
-          selectedBuilder: (context, day, _) {
-            return Container(
-              margin: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: getColor(normalize(day)),
-                border: Border.all(color: Colors.white, width: 3),
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Text(
-                  '${day.day}',
-                  style: TextStyle(color: getTextColor(normalize(day))),
+          calendarBuilders: CalendarBuilders(
+            // builder for today
+            todayBuilder: (context, day, _) {
+              return Container(
+                margin: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: getColor(normalize(day)),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: cloudPink(), width: 3),
                 ),
-              ),
-            );
-          },
-
-          // builder for all days
-          defaultBuilder: (context, day, focusedDay) {
-            final hasDreams = dreams[normalize(day)]?.isNotEmpty ?? false;
-            // null means clasic buider
-            if (!hasDreams) return null;
-
-            return Container(
-              margin: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: getColor(normalize(day)),
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Text(
-                  "${day.day}",
-                  style: TextStyle(color: getTextColor(normalize(day))),
+                child: Center(
+                  child: Text(
+                    "${day.day}",
+                    style: TextStyle(color: getTextColor(normalize(day))),
+                  ),
                 ),
-              ),
-            );
-          },
-        ),
+              );
+            },
 
-        // changing a day to the day what you are selecting
-        onDaySelected: (selectedDay, focusedDay) {
-          for (var days in calendarDreams) {
-            if (days.date == normalize(selectedDay)) {
-              _showTheDream(days);
-              break;
+            // builder for a day what we selecting
+            selectedBuilder: (context, day, _) {
+              return Container(
+                margin: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: getColor(normalize(day)),
+                  border: Border.all(color: Colors.white, width: 3),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(
+                    '${day.day}',
+                    style: TextStyle(color: getTextColor(normalize(day))),
+                  ),
+                ),
+              );
+            },
+
+            // builder for all days
+            defaultBuilder: (context, day, focusedDay) {
+              bool hasColor = false;
+              for (var calDream in calendarDreams) {
+                if (calDream.date == normalize(day)) {
+                  hasColor = (!calDream.emotions.isEmpty);
+                }
+              }
+              // null means clasic buider
+              if (!hasColor) return null;
+
+              return Container(
+                margin: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: getColor(normalize(day)),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(
+                    "${day.day}",
+                    style: TextStyle(color: getTextColor(normalize(day))),
+                  ),
+                ),
+              );
+            },
+          ),
+
+          // changing a day to the day what you are selecting
+          onDaySelected: (selectedDay, focusedDay) {
+            for (var days in calendarDreams) {
+              if (days.date == normalize(selectedDay)) {
+                _showTheDream(days);
+                break;
+              }
             }
-          }
-          setState(() {
-            _selectedDay = selectedDay;
-            _focusedDay = focusedDay;
-          });
-        },
+            setState(() {
+              _selectedDay = selectedDay;
+              _focusedDay = focusedDay;
+            });
+          },
+        ),
       ),
     );
   }
 
+  //              //
+  // Dialog  Part //
+  //              //
   Future<void> _showTheDream(CalendarDay dream) async {
     Color mainColor = getColor(normalize(dream.date));
+
+    String tempDescription = dream.description;
+    descriptionController.text = tempDescription;
 
     await showDialog(
       context: context,
@@ -2086,7 +2110,7 @@ class _CalendarState extends State<Calendar> {
               backgroundColor: const Color.fromARGB(255, 5, 5, 5),
               content: /*maybe we need to put it into the function*/ SizedBox(
                 width: 250,
-                height: 500,
+                height: 440,
                 child: Column(
                   children: [
                     // top part
@@ -2142,33 +2166,28 @@ class _CalendarState extends State<Calendar> {
                                 borderRadius: BorderRadius.circular(5),
                               ),
 
-                              child: InkWell(
-                                child: ListView(
-                                  children: [
-                                    Text(
-                                      dream.description,
-                                      style: TextStyle(color: Colors.white),
+                              child: SingleChildScrollView(
+                                child: SizedBox(
+                                  height: 300,
+                                  child: TextField(
+                                    expands: true,
+                                    controller: descriptionController,
+                                    maxLines: null,
+                                    keyboardType: TextInputType.multiline,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14,
                                     ),
-                                  ],
+                                    decoration: const InputDecoration(
+                                      border: InputBorder.none,
+                                      isDense: true,
+                                      contentPadding: EdgeInsets.all(8),
+                                    ),
+                                    onChanged: (value) {
+                                      tempDescription = value;
+                                    },
+                                  ),
                                 ),
-                                onTap: () async {
-                                  final String? result =
-                                      await showModalBottomSheet<String>(
-                                        context: context,
-                                        backgroundColor: const Color.fromARGB(
-                                          255,
-                                          7,
-                                          7,
-                                          7,
-                                        ),
-                                        builder: (sheetContext) {
-                                          return SizedBox(
-                                            height: 400,
-                                            width: double.infinity,
-                                          );
-                                        },
-                                      );
-                                },
                               ),
                             ),
                           ),
@@ -2344,9 +2363,7 @@ class _CalendarState extends State<Calendar> {
                                                             () {
                                                               Navigator.of(
                                                                 sheetContext,
-                                                              ).pop(
-                                                                tempTags,
-                                                              ); // ✅
+                                                              ).pop(tempTags);
                                                             },
                                                           ),
                                                         ],
