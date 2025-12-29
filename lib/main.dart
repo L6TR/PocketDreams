@@ -1851,6 +1851,7 @@ class _CalendarState extends State<Calendar> {
   Map<DateTime, List<String>> dreams = {};
   List<CalendarDay> calendarDreams = [];
   late TextEditingController descriptionController;
+  late TextEditingController nameController;
 
   Future<void> askAboutDreams() async {
     final response = await http.get(
@@ -1948,6 +1949,8 @@ class _CalendarState extends State<Calendar> {
     super.initState();
 
     descriptionController = TextEditingController();
+    nameController = TextEditingController();
+
     _selectedDay = _focusedDay;
   }
 
@@ -1955,6 +1958,8 @@ class _CalendarState extends State<Calendar> {
   @override
   void dispose() {
     descriptionController.dispose();
+    nameController.dispose();
+
     _selectedDays.dispose();
     super.dispose();
   }
@@ -2049,28 +2054,30 @@ class _CalendarState extends State<Calendar> {
 
             // builder for all days
             defaultBuilder: (context, day, focusedDay) {
-              bool hasColor = false;
-              for (var calDream in calendarDreams) {
-                if (calDream.date == normalize(day)) {
-                  hasColor = (!calDream.emotions.isEmpty);
+              bool hasAColor = false;
+              for (CalendarDay calDream in calendarDreams) {
+                if (normalize(calDream.date) == normalize(day)) {
+                  hasAColor = true;
+                  break;
                 }
               }
-              // null means clasic buider
-              if (!hasColor) return null;
 
-              return Container(
-                margin: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: getColor(normalize(day)),
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Text(
-                    "${day.day}",
-                    style: TextStyle(color: getTextColor(normalize(day))),
-                  ),
-                ),
-              );
+              return (!hasAColor)
+                  // null means clasic buider
+                  ? null
+                  : Container(
+                      margin: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: getColor(normalize(day)),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Text(
+                          "${day.day}",
+                          style: TextStyle(color: getTextColor(normalize(day))),
+                        ),
+                      ),
+                    );
             },
           ),
 
@@ -2098,8 +2105,13 @@ class _CalendarState extends State<Calendar> {
   Future<void> _showTheDream(CalendarDay dream) async {
     Color mainColor = getColor(normalize(dream.date));
 
+    // temporary gays
     String tempDescription = dream.description;
+    String tempName = dream.name;
+    bool tempPrivacity = dream.isPrivate;
+
     descriptionController.text = tempDescription;
+    nameController.text = tempName;
 
     await showDialog(
       context: context,
@@ -2133,16 +2145,36 @@ class _CalendarState extends State<Calendar> {
                               child: SizedBox(
                                 width: double.infinity,
                                 height: 50,
+
                                 child: DecoratedBox(
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(20),
                                     color: mainColor,
                                   ),
-                                  child: Center(
-                                    child: Text(
-                                      textAlign: TextAlign.center,
-                                      dream.name,
-                                      style: TextStyle(color: Colors.white),
+
+                                  child: SizedBox(
+                                    height: 50,
+                                    width: double.infinity,
+                                    child: Center(
+                                      child: TextField(
+                                        controller: nameController,
+                                        maxLines: 1,
+                                        keyboardType: TextInputType.multiline,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                        ),
+                                        textAlign: TextAlign.center,
+
+                                        decoration: const InputDecoration(
+                                          border: InputBorder.none,
+                                          isDense: true,
+                                          contentPadding: EdgeInsets.all(8),
+                                        ),
+                                        onChanged: (value) {
+                                          tempName = value;
+                                        },
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -2198,20 +2230,31 @@ class _CalendarState extends State<Calendar> {
                               children: [
                                 SizedBox(height: 5),
                                 // privacity part
-                                SizedBox(
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        dream.isPrivate
-                                            ? Icons.lock
-                                            : Icons.lock_open,
-                                        color: mainColor,
-                                      ),
-                                      Text(
-                                        dream.isPrivate ? "Private" : "Public",
-                                        style: TextStyle(color: mainColor),
-                                      ),
-                                    ],
+                                Container(
+                                  padding: EdgeInsets.all(5),
+                                  child: InkWell(
+                                    splashColor: Colors.white10,
+                                    borderRadius: BorderRadius.circular(8),
+
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          tempPrivacity
+                                              ? Icons.lock
+                                              : Icons.lock_open,
+                                          color: mainColor,
+                                        ),
+                                        Text(
+                                          tempPrivacity ? "Private" : "Public",
+                                          style: TextStyle(color: mainColor),
+                                        ),
+                                      ],
+                                    ),
+                                    onTap: () {
+                                      setDialogState(() {
+                                        tempPrivacity = !tempPrivacity;
+                                      });
+                                    },
                                   ),
                                 ),
                                 // emotions part
