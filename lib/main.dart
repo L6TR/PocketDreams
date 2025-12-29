@@ -91,11 +91,16 @@ Color cloudPink() {
   return Color.fromARGB(255, 250, 175, 195);
 }
 
-OutlinedButton cloudyButton(String myText, VoidCallback doSomething) {
+OutlinedButton cloudyButton(
+  String myText,
+  VoidCallback doSomething,
+  Color borderColor,
+  Color buttonColor,
+) {
   return OutlinedButton(
     style: ButtonStyle(
-      backgroundColor: WidgetStatePropertyAll(Colors.white),
-      side: WidgetStatePropertyAll(BorderSide(color: cloudPink(), width: 5)),
+      backgroundColor: WidgetStatePropertyAll(buttonColor),
+      side: WidgetStatePropertyAll(BorderSide(color: borderColor, width: 5)),
     ),
     child: Text(myText, style: TextStyle(color: Colors.black)),
     onPressed: () {
@@ -268,7 +273,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 style: TextStyle(color: Colors.white),
 
                                 // color of blinking |
-                                cursorColor: Color.fromARGB(255, 250, 175, 195),
+                                cursorColor: cloudPink(),
                                 decoration: InputDecoration(
                                   border: OutlineInputBorder(),
                                   hintText: "Name",
@@ -309,7 +314,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ),
                             ),
 
-                            cloudyButton("Register", register),
+                            cloudyButton(
+                              "Register",
+                              register,
+                              cloudPink(),
+                              Colors.white,
+                            ),
                             SizedBox(height: 10),
                             Text(message, style: TextStyle(color: Colors.red)),
                           ],
@@ -436,7 +446,7 @@ class _TagScreenState extends State<TagScreen> {
 
   bool visibility = false;
   // container with Tag and Done Square
-  Container tagChoosing(tag) {
+  Container tagChoosing(String tag) {
     return Container(
       padding: EdgeInsets.all(5),
       margin: EdgeInsets.all(9),
@@ -506,39 +516,23 @@ class _TagScreenState extends State<TagScreen> {
           ),
           Expanded(
             flex: 3,
-            child: Center(
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      tagChoosing(tagList[0]),
-                      tagChoosing(tagList[1]),
-                      tagChoosing(tagList[2]),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      tagChoosing(tagList[3]),
-                      tagChoosing(tagList[4]),
-                      tagChoosing(tagList[5]),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      tagChoosing(tagList[6]),
-                      tagChoosing(tagList[7]),
-                      tagChoosing(tagList[8]),
-                    ],
-                  ),
-                ],
-              ),
+            child: Wrap(
+              spacing: 8,
+              children: [for (String tag in tagList) tagChoosing(tag)],
             ),
           ),
           Expanded(
             flex: 1,
             child: Column(
               children: [
-                Center(child: cloudyButton("Confim", confimTags)),
+                Center(
+                  child: cloudyButton(
+                    "Confim",
+                    confimTags,
+                    cloudPink(),
+                    Colors.white,
+                  ),
+                ),
                 SizedBox(height: 10),
                 Text(message, style: TextStyle(color: Colors.red)),
               ],
@@ -683,7 +677,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
 
                             // remember me
-                            cloudyButton("Login", login),
+                            cloudyButton(
+                              "Login",
+                              login,
+                              cloudPink(),
+                              Colors.white,
+                            ),
                             SizedBox(height: 10),
                             Text(message, style: TextStyle(color: Colors.red)),
                           ],
@@ -828,7 +827,7 @@ class _BaseState extends State<Base> {
             _selectedIndex = index;
           });
         },
-        backgroundColor: const Color.fromARGB(255, 250, 175, 195),
+        backgroundColor: cloudPink(),
       ),
     );
   }
@@ -1238,12 +1237,7 @@ class _TodaysDreamState extends State<TodaysDream> {
                                             ),
 
                                             // color of blinking |
-                                            cursorColor: Color.fromARGB(
-                                              255,
-                                              250,
-                                              175,
-                                              195,
-                                            ),
+                                            cursorColor: cloudPink(),
                                             decoration: InputDecoration(
                                               border: OutlineInputBorder(),
                                               hintText: "Find key words",
@@ -1419,9 +1413,7 @@ class _TodaysDreamState extends State<TodaysDream> {
                             hintText: chosenDate.toString().split(" ")[0],
                             focusedBorder: OutlineInputBorder(
                               // color of the border
-                              borderSide: BorderSide(
-                                color: Color.fromARGB(255, 250, 175, 195),
-                              ),
+                              borderSide: BorderSide(color: cloudPink()),
                             ),
                           ),
                           readOnly: true,
@@ -1619,15 +1611,13 @@ class _TodaysDreamState extends State<TodaysDream> {
                       maxLines: null,
                       expands: true,
                       style: TextStyle(color: Colors.white),
-                      cursorColor: Color.fromARGB(255, 250, 175, 195),
+                      cursorColor: cloudPink(),
                       decoration: InputDecoration(
                         hintText: "Add a name",
                         hintStyle: TextStyle(color: Colors.white54),
                         border: OutlineInputBorder(),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Color.fromARGB(255, 250, 175, 195),
-                          ),
+                          borderSide: BorderSide(color: cloudPink()),
                         ),
                       ),
                     ),
@@ -1642,16 +1632,14 @@ class _TodaysDreamState extends State<TodaysDream> {
                       maxLines: null,
                       expands: true,
                       style: TextStyle(color: Colors.white),
-                      cursorColor: Color.fromARGB(255, 250, 175, 195),
+                      cursorColor: cloudPink(),
 
                       decoration: InputDecoration(
                         hintText: "Describe your dream...",
                         hintStyle: TextStyle(color: Colors.white54),
                         border: OutlineInputBorder(),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Color.fromARGB(255, 250, 175, 195),
-                          ),
+                          borderSide: BorderSide(color: cloudPink()),
                         ),
                       ),
                     ),
@@ -2110,6 +2098,21 @@ class _CalendarState extends State<Calendar> {
     String tempName = dream.name;
     bool tempPrivacity = dream.isPrivate;
 
+    List<Hemotion> tempEmotions = [];
+    for (String dreamEmotion in dream.emotions) {
+      for (Hemotion staticEmotion in hSLemotions) {
+        if (dreamEmotion == staticEmotion.name) {
+          tempEmotions.add(staticEmotion);
+          break;
+        }
+      }
+    }
+
+    List<HSLColor> tempEmotionColor = [];
+    for (Hemotion e in tempEmotions) {
+      tempEmotionColor.add(e.color);
+    }
+
     descriptionController.text = tempDescription;
     nameController.text = tempName;
 
@@ -2257,44 +2260,235 @@ class _CalendarState extends State<Calendar> {
                                     },
                                   ),
                                 ),
-                                // emotions part
                                 SizedBox(height: 5),
-                                SizedBox(
-                                  height: 150,
-
-                                  width: 80,
-                                  child: DecoratedBox(
-                                    decoration: BoxDecoration(
-                                      color: const Color.fromARGB(255, 7, 7, 7),
-                                      borderRadius: BorderRadius.circular(5),
-                                    ),
-
-                                    child: Column(
-                                      children: [
-                                        Text(
-                                          "Emotions:",
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 16,
-                                          ),
+                                // emotions part
+                                InkWell(
+                                  child: SizedBox(
+                                    height: 150,
+                                    width: 80,
+                                    child: DecoratedBox(
+                                      decoration: BoxDecoration(
+                                        color: const Color.fromARGB(
+                                          255,
+                                          7,
+                                          7,
+                                          7,
                                         ),
+                                        borderRadius: BorderRadius.circular(5),
+                                      ),
 
-                                        for (String everyEmotion
-                                            in dream.emotions)
+                                      child: Column(
+                                        children: [
                                           Text(
-                                            everyEmotion,
+                                            "Emotions:",
                                             style: TextStyle(
-                                              color: getEmotionColor(
-                                                everyEmotion,
-                                              ),
-                                              fontSize: 14,
+                                              color: Colors.white,
+                                              fontSize: 16,
                                             ),
                                           ),
-                                      ],
+
+                                          for (String everyEmotion
+                                              in dream.emotions)
+                                            Text(
+                                              everyEmotion,
+                                              style: TextStyle(
+                                                color: getEmotionColor(
+                                                  everyEmotion,
+                                                ),
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                        ],
+                                      ),
                                     ),
                                   ),
+                                  // emotions bottom sheet
+                                  onTap: () async {
+                                    final List<String>?
+                                    result = await showModalBottomSheet<List<String>>(
+                                      context: context,
+                                      backgroundColor: const Color.fromARGB(
+                                        255,
+                                        7,
+                                        7,
+                                        7,
+                                      ),
+                                      builder: (sheetContext) {
+                                        return StatefulBuilder(
+                                          builder: (context, setSheetState) {
+                                            return SizedBox(
+                                              height: 400,
+                                              width: double.infinity,
+                                              child: Align(
+                                                alignment: Alignment.topCenter,
+                                                child: Column(
+                                                  children: [
+                                                    SizedBox(height: 20),
+                                                    // top color combination part
+                                                    Row(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: [
+                                                        for (
+                                                          int i = 0;
+                                                          i < 6;
+                                                          i++
+                                                        )
+                                                          Row(
+                                                            children: [
+                                                              SizedBox(
+                                                                width: 3,
+                                                              ),
+                                                              Container(
+                                                                width: 30,
+                                                                height: 30,
+                                                                margin:
+                                                                    EdgeInsets.symmetric(
+                                                                      vertical:
+                                                                          4,
+                                                                    ),
+                                                                decoration: BoxDecoration(
+                                                                  shape: BoxShape
+                                                                      .circle,
+                                                                  border: Border.all(
+                                                                    color: Colors
+                                                                        .white,
+                                                                    width: 3,
+                                                                  ),
+                                                                ),
+                                                                child: Container(
+                                                                  width: 5,
+                                                                  height: 5,
+                                                                  margin:
+                                                                      EdgeInsets.symmetric(
+                                                                        vertical:
+                                                                            1,
+                                                                      ),
+                                                                  decoration: BoxDecoration(
+                                                                    shape: BoxShape
+                                                                        .circle,
+                                                                    color:
+                                                                        (i >=
+                                                                            tempEmotionColor.length)
+                                                                        ? Colors
+                                                                              .white10
+                                                                        : tempEmotionColor[i]
+                                                                              .toColor(),
+                                                                    border: Border.all(
+                                                                      color: Colors
+                                                                          .black,
+                                                                      width:
+                                                                          1.5,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        // arrow
+                                                        Icon(
+                                                          Icons
+                                                              .keyboard_double_arrow_right,
+                                                          color:
+                                                              tempEmotions
+                                                                  .isNotEmpty
+                                                              ? Colors.white
+                                                              : Colors.white10,
+                                                        ),
+                                                        // mixed emotions
+                                                        Container(
+                                                          margin:
+                                                              EdgeInsets.symmetric(
+                                                                vertical: 4,
+                                                              ),
+                                                          decoration: BoxDecoration(
+                                                            borderRadius:
+                                                                BorderRadius.circular(
+                                                                  7,
+                                                                ),
+                                                            border: Border.all(
+                                                              color:
+                                                                  Colors.white,
+                                                              width: 3,
+                                                            ),
+                                                          ),
+                                                          child: Icon(
+                                                            Icons
+                                                                .square_rounded,
+                                                            color:
+                                                                (tempEmotionColor
+                                                                    .isEmpty)
+                                                                ? Colors.white10
+                                                                : mixEmotions(
+                                                                    tempEmotionColor,
+                                                                  ).toColor(),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    Wrap(
+                                                      spacing: 8,
+                                                      children: [
+                                                        for (Hemotion e
+                                                            in hSLemotions)
+                                                          cloudyButton(
+                                                            e.name,
+                                                            () {
+                                                              setSheetState(() {
+                                                                setSheetState(() {
+                                                                  if (tempEmotions
+                                                                      .contains(
+                                                                        e,
+                                                                      )) {
+                                                                    tempEmotions
+                                                                        .remove(
+                                                                          e,
+                                                                        );
+                                                                    tempEmotionColor
+                                                                        .remove(
+                                                                          e.color,
+                                                                        );
+                                                                  } else if (tempEmotions
+                                                                          .length <
+                                                                      6) {
+                                                                    tempEmotions
+                                                                        .add(e);
+                                                                    tempEmotionColor
+                                                                        .add(
+                                                                          e.color,
+                                                                        );
+                                                                  }
+                                                                });
+                                                              });
+                                                            },
+                                                            (tempEmotions
+                                                                    .contains(
+                                                                      e,
+                                                                    ))
+                                                                ? Colors.white
+                                                                : Colors.grey,
+                                                            (tempEmotions
+                                                                    .contains(
+                                                                      e,
+                                                                    ))
+                                                                ? e.color
+                                                                      .toColor()
+                                                                : Colors.white,
+                                                          ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        );
+                                      },
+                                    );
+                                  },
                                 ),
                                 SizedBox(height: 5),
+                                // tags part
                                 SizedBox(
                                   height: 110,
                                   width: 80,
@@ -2331,6 +2525,7 @@ class _CalendarState extends State<Calendar> {
                                             ),
                                         ],
                                       ),
+                                      // tags bottom sheet
                                       onTap: () async {
                                         final List<String>? result =
                                             await showModalBottomSheet<
@@ -2400,6 +2595,8 @@ class _CalendarState extends State<Calendar> {
                                                                 sheetContext,
                                                               ).pop(null);
                                                             },
+                                                            cloudPink(),
+                                                            Colors.white,
                                                           ),
                                                           cloudyButton(
                                                             "Save",
@@ -2408,6 +2605,8 @@ class _CalendarState extends State<Calendar> {
                                                                 sheetContext,
                                                               ).pop(tempTags);
                                                             },
+                                                            cloudPink(),
+                                                            Colors.white,
                                                           ),
                                                         ],
                                                       ),
