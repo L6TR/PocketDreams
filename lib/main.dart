@@ -2097,6 +2097,7 @@ class _CalendarState extends State<Calendar> {
     String tempDescription = dream.description;
     String tempName = dream.name;
     bool tempPrivacity = dream.isPrivate;
+    DateTime tempDate = dream.date;
 
     List<Hemotion> tempEmotions = [];
     for (String dreamEmotion in dream.emotions) {
@@ -2698,9 +2699,62 @@ class _CalendarState extends State<Calendar> {
                           Expanded(
                             flex: 1,
                             child: Center(
-                              child: Text(
-                                "Dream Date: ${dream.date.year}-${dream.date.month}-${dream.date.day}",
-                                style: TextStyle(color: Colors.grey),
+                              child: InkWell(
+                                child: Text(
+                                  "Dream Date: ${tempDate.year}-${tempDate.month}-${tempDate.day}",
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                                onTap: () async {
+                                  List<DateTime> chosenDays = [];
+                                  for (final CalendarDay chosenDay
+                                      in calendarDreams) {
+                                    chosenDays.add(chosenDay.date);
+                                  }
+
+                                  DateTime? result = await showDatePicker(
+                                    context: context,
+                                    initialDate: DateTime.now(),
+                                    firstDate: DateTime(2000),
+                                    lastDate: DateTime.now(),
+
+                                    selectableDayPredicate: (day) {
+                                      for (final disabled in chosenDays) {
+                                        if (isSameDay(day, disabled)) {
+                                          return false;
+                                        }
+                                      }
+                                      return true;
+                                    },
+
+                                    builder: (context, child) {
+                                      return Theme(
+                                        data: ThemeData.light().copyWith(
+                                          primaryColor: cloudPink(),
+                                          colorScheme: ColorScheme.light(
+                                            primary: cloudPink(),
+                                            onPrimary: Colors.white,
+                                            surface: Color.fromARGB(
+                                              255,
+                                              5,
+                                              5,
+                                              5,
+                                            ),
+                                            onSurface: Colors.white,
+                                          ),
+                                          dialogTheme: DialogThemeData(
+                                            backgroundColor: Colors.black,
+                                          ),
+                                        ),
+                                        child: child!,
+                                      );
+                                    },
+                                  );
+                                  if (result != null) {
+                                    setDialogState(() {
+                                      tempDate = result;
+                                    });
+                                  }
+                                },
                               ),
                             ),
                           ),
