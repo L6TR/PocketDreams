@@ -2091,6 +2091,7 @@ class _CalendarState extends State<Calendar> {
   // Dialog  Part //
   //              //
   Future<void> _showTheDream(CalendarDay dream) async {
+    bool changes = false;
     Color mainColor = getColor(normalize(dream.date));
 
     // temporary gays
@@ -2100,14 +2101,19 @@ class _CalendarState extends State<Calendar> {
     DateTime tempDate = dream.date;
 
     List<Hemotion> tempEmotions = [];
-    for (String dreamEmotion in dream.emotions) {
-      for (Hemotion staticEmotion in hSLemotions) {
-        if (dreamEmotion == staticEmotion.name) {
-          tempEmotions.add(staticEmotion);
-          break;
+    void getEmotionsFromTheDB() {
+      tempEmotions.clear();
+      for (String dreamEmotion in dream.emotions) {
+        for (Hemotion staticEmotion in hSLemotions) {
+          if (dreamEmotion == staticEmotion.name) {
+            tempEmotions.add(staticEmotion);
+            break;
+          }
         }
       }
     }
+
+    getEmotionsFromTheDB();
 
     List<String> tempTags = List.from(dream.tags);
 
@@ -2123,12 +2129,12 @@ class _CalendarState extends State<Calendar> {
               backgroundColor: const Color.fromARGB(255, 5, 5, 5),
               content: /*maybe we need to put it into the function*/ SizedBox(
                 width: 250,
-                height: 440,
+                height: 470,
                 child: Column(
                   children: [
                     // top part
                     Expanded(
-                      flex: 1,
+                      flex: 2,
                       child: SizedBox(
                         child: Row(
                           children: [
@@ -2173,7 +2179,10 @@ class _CalendarState extends State<Calendar> {
                                           contentPadding: EdgeInsets.all(8),
                                         ),
                                         onChanged: (value) {
-                                          tempName = value;
+                                          setDialogState(() {
+                                            tempName = value;
+                                            changes = true;
+                                          });
                                         },
                                       ),
                                     ),
@@ -2217,7 +2226,10 @@ class _CalendarState extends State<Calendar> {
                                       contentPadding: EdgeInsets.all(8),
                                     ),
                                     onChanged: (value) {
-                                      tempDescription = value;
+                                      setDialogState(() {
+                                        tempDescription = value;
+                                        changes = true;
+                                      });
                                     },
                                   ),
                                 ),
@@ -2525,6 +2537,7 @@ class _CalendarState extends State<Calendar> {
                                       },
                                     );
                                     if (result != null) {
+                                      changes = true;
                                       setDialogState(() {
                                         tempEmotions = result;
                                         List<HSLColor> mixList = [];
@@ -2676,6 +2689,7 @@ class _CalendarState extends State<Calendar> {
                                             );
 
                                         if (result != null) {
+                                          changes = true;
                                           setDialogState(() {
                                             tempTags = result;
                                           });
@@ -2711,6 +2725,7 @@ class _CalendarState extends State<Calendar> {
                                     chosenDays.add(chosenDay.date);
                                   }
 
+                                  // date pick part
                                   DateTime? result = await showDatePicker(
                                     context: context,
                                     initialDate: DateTime.now(),
@@ -2750,6 +2765,7 @@ class _CalendarState extends State<Calendar> {
                                     },
                                   );
                                   if (result != null) {
+                                    changes = true;
                                     setDialogState(() {
                                       tempDate = result;
                                     });
@@ -2767,6 +2783,62 @@ class _CalendarState extends State<Calendar> {
                                 style: TextStyle(color: Colors.grey),
                               ),
                             ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          InkWell(
+                            borderRadius: BorderRadius.circular(5),
+                            child: Center(
+                              child: Icon(
+                                Icons.delete_forever,
+                                color: Colors.red,
+                              ),
+                            ),
+                            onTap: () {},
+                          ),
+                          InkWell(
+                            borderRadius: BorderRadius.circular(5),
+                            child: Center(
+                              child: Icon(
+                                Icons.restore,
+                                color: (changes) ? mainColor : Colors.white10,
+                              ),
+                            ),
+                            onTap: () {
+                              if (changes) {
+                                setDialogState(() {
+                                  tempTags = List.from(dream.tags);
+                                  getEmotionsFromTheDB();
+                                  tempDate = dream.date;
+                                  tempPrivacity = dream.isPrivate;
+
+                                  tempName = dream.name;
+                                  nameController.text = tempName;
+
+                                  tempDescription = dream.description;
+                                  descriptionController.text = tempDescription;
+
+                                  mainColor = getColor(normalize(dream.date));
+                                  changes = false;
+                                });
+                              }
+                            },
+                          ),
+                          InkWell(
+                            borderRadius: BorderRadius.circular(5),
+                            child: Center(
+                              child: Icon(
+                                Icons.save,
+                                color: (changes) ? mainColor : Colors.white10,
+                              ),
+                            ),
+                            onTap: () {},
                           ),
                         ],
                       ),
