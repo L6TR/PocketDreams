@@ -2526,6 +2526,13 @@ class _CalendarState extends State<Calendar> {
                                     if (result != null) {
                                       setDialogState(() {
                                         tempEmotions = result;
+                                        List<HSLColor> mixList = [];
+                                        for (Hemotion c in tempEmotions) {
+                                          mixList.add(c.color);
+                                        }
+                                        mainColor = (mixList.isNotEmpty)
+                                            ? mixEmotions(mixList).toColor()
+                                            : Colors.grey;
                                       });
                                     }
                                   },
