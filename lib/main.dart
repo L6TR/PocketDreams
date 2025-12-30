@@ -1884,7 +1884,7 @@ class _CalendarState extends State<Calendar> {
     });
   }
 
-  Color getEmotionColor(emotion) {
+  Color getEmotionColor(String emotion) {
     for (var e in hSLemotions) {
       if (e.name == emotion) return e.color.toColor();
     }
@@ -2108,10 +2108,7 @@ class _CalendarState extends State<Calendar> {
       }
     }
 
-    List<HSLColor> tempEmotionColor = [];
-    for (Hemotion e in tempEmotions) {
-      tempEmotionColor.add(e.color);
-    }
+    List<String> tempTags = List.from(dream.tags);
 
     descriptionController.text = tempDescription;
     nameController.text = tempName;
@@ -2120,7 +2117,7 @@ class _CalendarState extends State<Calendar> {
       context: context,
       builder: (context) {
         return StatefulBuilder(
-          builder: (context, setDialogState) {
+          builder: (dialogContext, setDialogState) {
             return AlertDialog(
               backgroundColor: const Color.fromARGB(255, 5, 5, 5),
               content: /*maybe we need to put it into the function*/ SizedBox(
@@ -2287,13 +2284,13 @@ class _CalendarState extends State<Calendar> {
                                             ),
                                           ),
 
-                                          for (String everyEmotion
-                                              in dream.emotions)
+                                          for (Hemotion everyEmotion
+                                              in tempEmotions)
                                             Text(
-                                              everyEmotion,
+                                              everyEmotion.name,
                                               style: TextStyle(
                                                 color: getEmotionColor(
-                                                  everyEmotion,
+                                                  everyEmotion.name,
                                                 ),
                                                 fontSize: 14,
                                               ),
@@ -2302,11 +2299,14 @@ class _CalendarState extends State<Calendar> {
                                       ),
                                     ),
                                   ),
+                                  //
                                   // emotions bottom sheet
+                                  //
                                   onTap: () async {
-                                    final List<String>?
-                                    result = await showModalBottomSheet<List<String>>(
-                                      context: context,
+                                    final List<Hemotion>?
+                                    result = await showModalBottomSheet<List<Hemotion>>(
+                                      context: dialogContext,
+                                      useRootNavigator: true,
                                       backgroundColor: const Color.fromARGB(
                                         255,
                                         7,
@@ -2314,6 +2314,13 @@ class _CalendarState extends State<Calendar> {
                                         7,
                                       ),
                                       builder: (sheetContext) {
+                                        List<Hemotion> sheetEmotions =
+                                            List<Hemotion>.from(tempEmotions);
+                                        List<HSLColor> sheetEmotionsColor = [];
+                                        for (Hemotion e in sheetEmotions) {
+                                          sheetEmotionsColor.add(e.color);
+                                        }
+
                                         return StatefulBuilder(
                                           builder: (context, setSheetState) {
                                             return SizedBox(
@@ -2368,12 +2375,12 @@ class _CalendarState extends State<Calendar> {
                                                                     shape: BoxShape
                                                                         .circle,
                                                                     color:
-                                                                        (i >=
-                                                                            tempEmotionColor.length)
-                                                                        ? Colors
-                                                                              .white10
-                                                                        : tempEmotionColor[i]
-                                                                              .toColor(),
+                                                                        (i <
+                                                                            sheetEmotionsColor.length)
+                                                                        ? sheetEmotionsColor[i]
+                                                                              .toColor()
+                                                                        : Colors
+                                                                              .white10,
                                                                     border: Border.all(
                                                                       color: Colors
                                                                           .black,
@@ -2390,7 +2397,7 @@ class _CalendarState extends State<Calendar> {
                                                           Icons
                                                               .keyboard_double_arrow_right,
                                                           color:
-                                                              tempEmotions
+                                                              sheetEmotions
                                                                   .isNotEmpty
                                                               ? Colors.white
                                                               : Colors.white10,
@@ -2416,11 +2423,11 @@ class _CalendarState extends State<Calendar> {
                                                             Icons
                                                                 .square_rounded,
                                                             color:
-                                                                (tempEmotionColor
+                                                                (sheetEmotionsColor
                                                                     .isEmpty)
                                                                 ? Colors.white10
                                                                 : mixEmotions(
-                                                                    tempEmotionColor,
+                                                                    sheetEmotionsColor,
                                                                   ).toColor(),
                                                           ),
                                                         ),
@@ -2435,39 +2442,37 @@ class _CalendarState extends State<Calendar> {
                                                             e.name,
                                                             () {
                                                               setSheetState(() {
-                                                                setSheetState(() {
-                                                                  if (tempEmotions
-                                                                      .contains(
+                                                                if (sheetEmotions
+                                                                    .contains(
+                                                                      e,
+                                                                    )) {
+                                                                  sheetEmotions
+                                                                      .remove(
                                                                         e,
-                                                                      )) {
-                                                                    tempEmotions
-                                                                        .remove(
-                                                                          e,
-                                                                        );
-                                                                    tempEmotionColor
-                                                                        .remove(
-                                                                          e.color,
-                                                                        );
-                                                                  } else if (tempEmotions
-                                                                          .length <
-                                                                      6) {
-                                                                    tempEmotions
-                                                                        .add(e);
-                                                                    tempEmotionColor
-                                                                        .add(
-                                                                          e.color,
-                                                                        );
-                                                                  }
-                                                                });
+                                                                      );
+                                                                  sheetEmotionsColor
+                                                                      .remove(
+                                                                        e.color,
+                                                                      );
+                                                                } else if (sheetEmotions
+                                                                        .length <
+                                                                    6) {
+                                                                  sheetEmotions
+                                                                      .add(e);
+                                                                  sheetEmotionsColor
+                                                                      .add(
+                                                                        e.color,
+                                                                      );
+                                                                }
                                                               });
                                                             },
-                                                            (tempEmotions
+                                                            (sheetEmotions
                                                                     .contains(
                                                                       e,
                                                                     ))
                                                                 ? Colors.white
                                                                 : Colors.grey,
-                                                            (tempEmotions
+                                                            (sheetEmotions
                                                                     .contains(
                                                                       e,
                                                                     ))
@@ -2477,6 +2482,39 @@ class _CalendarState extends State<Calendar> {
                                                           ),
                                                       ],
                                                     ),
+                                                    const Spacer(),
+
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceEvenly,
+                                                      children: [
+                                                        cloudyButton(
+                                                          "Cancel",
+                                                          () {
+                                                            Navigator.of(
+                                                              sheetContext,
+                                                            ).pop(null);
+                                                          },
+                                                          cloudPink(),
+                                                          Colors.white,
+                                                        ),
+                                                        cloudyButton(
+                                                          "Save",
+                                                          () {
+                                                            Navigator.of(
+                                                              sheetContext,
+                                                            ).pop(
+                                                              sheetEmotions,
+                                                            );
+                                                          },
+                                                          cloudPink(),
+                                                          Colors.white,
+                                                        ),
+                                                      ],
+                                                    ),
+
+                                                    const SizedBox(height: 15),
                                                   ],
                                                 ),
                                               ),
@@ -2485,10 +2523,17 @@ class _CalendarState extends State<Calendar> {
                                         );
                                       },
                                     );
+                                    if (result != null) {
+                                      setDialogState(() {
+                                        tempEmotions = result;
+                                      });
+                                    }
                                   },
                                 ),
                                 SizedBox(height: 5),
+                                //
                                 // tags part
+                                //
                                 SizedBox(
                                   height: 110,
                                   width: 80,
@@ -2509,12 +2554,12 @@ class _CalendarState extends State<Calendar> {
                                           ),
                                           for (
                                             int t = 0;
-                                            t <= 3 && t < dream.tags.length;
+                                            t <= 3 && t < tempTags.length;
                                             t++
                                           )
                                             Text(
                                               (t != 3)
-                                                  ? dream.tags[t]
+                                                  ? tempTags[t]
                                                   : "and other...",
                                               style: TextStyle(
                                                 color: (t != 3)
@@ -2531,7 +2576,8 @@ class _CalendarState extends State<Calendar> {
                                             await showModalBottomSheet<
                                               List<String>
                                             >(
-                                              context: context,
+                                              context: dialogContext,
+                                              useRootNavigator: true,
                                               backgroundColor:
                                                   const Color.fromARGB(
                                                     255,
@@ -2540,16 +2586,16 @@ class _CalendarState extends State<Calendar> {
                                                     7,
                                                   ),
                                               builder: (sheetContext) {
-                                                List<String> tempTags =
-                                                    List.from(dream.tags);
+                                                List<String> sheetTags =
+                                                    List.from(tempTags);
 
                                                 void changeTagStatus(
                                                   String tag,
                                                 ) {
-                                                  if (tempTags.contains(tag)) {
-                                                    tempTags.remove(tag);
+                                                  if (sheetTags.contains(tag)) {
+                                                    sheetTags.remove(tag);
                                                   } else {
-                                                    tempTags.add(tag);
+                                                    sheetTags.add(tag);
                                                   }
                                                 }
 
@@ -2574,9 +2620,10 @@ class _CalendarState extends State<Calendar> {
                                                                   changeTagStatus(
                                                                     tag,
                                                                   ),
-                                                              tempTags.contains(
-                                                                tag,
-                                                              ),
+                                                              sheetTags
+                                                                  .contains(
+                                                                    tag,
+                                                                  ),
                                                             ),
                                                         ],
                                                       ),
@@ -2603,7 +2650,7 @@ class _CalendarState extends State<Calendar> {
                                                             () {
                                                               Navigator.of(
                                                                 sheetContext,
-                                                              ).pop(tempTags);
+                                                              ).pop(sheetTags);
                                                             },
                                                             cloudPink(),
                                                             Colors.white,
@@ -2622,7 +2669,7 @@ class _CalendarState extends State<Calendar> {
 
                                         if (result != null) {
                                           setDialogState(() {
-                                            dream.tags = result;
+                                            tempTags = result;
                                           });
                                         }
                                       },
