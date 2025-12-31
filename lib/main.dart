@@ -2792,6 +2792,7 @@ class _CalendarState extends State<Calendar> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
+                          // delete dream button
                           InkWell(
                             borderRadius: BorderRadius.circular(5),
                             child: Center(
@@ -2800,8 +2801,99 @@ class _CalendarState extends State<Calendar> {
                                 color: Colors.red,
                               ),
                             ),
-                            onTap: () {},
+                            // are you sure you want to delete this dream
+                            onTap: () async {
+                              final bool?
+                              result = await showModalBottomSheet<bool>(
+                                context: dialogContext,
+                                useRootNavigator: true,
+                                backgroundColor: const Color.fromARGB(
+                                  255,
+                                  7,
+                                  7,
+                                  7,
+                                ),
+                                builder: (sheetContext) {
+                                  return StatefulBuilder(
+                                    builder: (context, setSheetState) {
+                                      return SizedBox(
+                                        height: 155,
+                                        width: double.infinity,
+                                        child: Column(
+                                          children: [
+                                            Center(
+                                              child: Column(
+                                                children: [
+                                                  SizedBox(height: 20),
+                                                  // top text part
+                                                  Text(
+                                                    "Are you sure you want to delete this dream?",
+                                                    style: TextStyle(
+                                                      fontSize: 16,
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      Text(
+                                                        tempName,
+                                                        style: TextStyle(
+                                                          fontSize: 16,
+                                                          color: mainColor,
+                                                        ),
+                                                      ),
+                                                      Text(
+                                                        " will be lost forever! (A long time!)",
+                                                        style: TextStyle(
+                                                          fontSize: 16,
+                                                          color: Colors.white,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            Spacer(),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceEvenly,
+                                              children: [
+                                                cloudyButton(
+                                                  "Cancel",
+                                                  () {
+                                                    Navigator.of(
+                                                      sheetContext,
+                                                    ).pop(null);
+                                                  },
+                                                  Colors.white,
+                                                  mainColor,
+                                                ),
+                                                cloudyButton(
+                                                  "Delete",
+                                                  () {},
+                                                  Colors.white,
+                                                  Colors.red,
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(height: 30),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                              );
+                              if (result != null) {
+                                //delete the dream
+                              }
+                            },
                           ),
+                          // reset button
                           InkWell(
                             borderRadius: BorderRadius.circular(5),
                             child: Center(
@@ -2830,6 +2922,7 @@ class _CalendarState extends State<Calendar> {
                               }
                             },
                           ),
+                          // save changes button
                           InkWell(
                             borderRadius: BorderRadius.circular(5),
                             child: Center(
@@ -2838,7 +2931,83 @@ class _CalendarState extends State<Calendar> {
                                 color: (changes) ? mainColor : Colors.white10,
                               ),
                             ),
-                            onTap: () {},
+                            onTap: () async {
+                              if (changes) {
+                                final bool?
+                                result = await showModalBottomSheet<bool>(
+                                  context: dialogContext,
+                                  useRootNavigator: true,
+                                  backgroundColor: const Color.fromARGB(
+                                    255,
+                                    7,
+                                    7,
+                                    7,
+                                  ),
+                                  builder: (sheetContext) {
+                                    return StatefulBuilder(
+                                      builder: (context, setSheetState) {
+                                        return SizedBox(
+                                          height: 155,
+                                          width: double.infinity,
+                                          child: Column(
+                                            children: [
+                                              Center(
+                                                child: Column(
+                                                  children: [
+                                                    SizedBox(height: 20),
+                                                    // top text part
+                                                    SizedBox(
+                                                      width: 250,
+                                                      child: Text(
+                                                        "Are you sure you want to save changes in this dream?",
+                                                        style: TextStyle(
+                                                          fontSize: 16,
+                                                          color: Colors.white,
+                                                        ),
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Spacer(),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceEvenly,
+                                                children: [
+                                                  cloudyButton(
+                                                    "Cancel",
+                                                    () {
+                                                      Navigator.of(
+                                                        sheetContext,
+                                                      ).pop(null);
+                                                    },
+                                                    Colors.white,
+                                                    mainColor,
+                                                  ),
+                                                  cloudyButton(
+                                                    "Save",
+                                                    () {},
+                                                    Colors.white,
+                                                    mainColor,
+                                                  ),
+                                                ],
+                                              ),
+                                              SizedBox(height: 30),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                );
+                                if (result != null) {
+                                  //delete the dream
+                                }
+                              }
+                            },
                           ),
                         ],
                       ),
