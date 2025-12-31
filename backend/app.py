@@ -248,6 +248,7 @@ def askAboutDreams():
 
         
         dreamsListJSON.append({
+            "ID": dreamID,
             "Name": dream[0],
             "Description": dream[1],
             "Date": dream[2],
@@ -259,6 +260,24 @@ def askAboutDreams():
             })
     
     return jsonify({"success": True, "dreamsList": dreamsListJSON, "message": "You are here"})  
+
+@app.route("/api/deleteThisDream", methods=["DELETE"])
+def deleteThisDream():
+    dreamID = request.args.get("dream")
+
+    conn = sqlite3.connect("pocketdreams.db")
+    cursor = conn.cursor()
+    
+    cursor.execute("DELETE FROM DreamEmotions WHERE DreamID = ?", (dreamID,))
+    cursor.execute("DELETE FROM DreamTags WHERE DreamID = ?", (dreamID,))
+    cursor.execute("DELETE FROM Reports WHERE ID = ?", (dreamID,))
+    cursor.execute("DELETE FROM Dreams WHERE ID = ?", (dreamID,))
+
+    conn.commit()
+    conn.close()
+
+
+    return jsonify({"success": True, "message": "Dream was deleted successfully"})  
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

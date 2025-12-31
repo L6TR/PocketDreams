@@ -1811,6 +1811,7 @@ class Calendar extends StatefulWidget {
 // would do more tomorow
 // class for days from the calendar
 class CalendarDay {
+  int id;
   String name;
   String description;
   DateTime date;
@@ -1821,6 +1822,7 @@ class CalendarDay {
   String user;
 
   CalendarDay({
+    required this.id,
     required this.name,
     required this.description,
     required this.date,
@@ -1841,6 +1843,7 @@ class _CalendarState extends State<Calendar> {
   late TextEditingController descriptionController;
   late TextEditingController nameController;
 
+  // get all data about dreams from the backend
   Future<void> askAboutDreams() async {
     final response = await http.get(
       Uri.parse("$server/api/askAboutDreams?username=$user"),
@@ -1855,6 +1858,7 @@ class _CalendarState extends State<Calendar> {
       for (var cDream in dreamsList) {
         calendarDreams.add(
           CalendarDay(
+            id: cDream["ID"],
             name: cDream["Name"],
             description: cDream["Description"],
             date: normalize(cutADate(cDream["Date"])),
@@ -1882,6 +1886,13 @@ class _CalendarState extends State<Calendar> {
         dreams[key]!.addAll(dEmotions);
       }
     });
+  }
+
+  Future<void> deleteThisDream(dream) async {
+    await http.delete(
+      Uri.parse("$server/api/deleteThisDream?dream=$dream"),
+      headers: {"Content-Type": "application/json"},
+    );
   }
 
   Color getEmotionColor(String emotion) {
@@ -2091,6 +2102,8 @@ class _CalendarState extends State<Calendar> {
   // Dialog  Part //
   //              //
   Future<void> _showTheDream(CalendarDay dream) async {
+    int dreamID = dream.id;
+
     bool changes = false;
     Color mainColor = getColor(normalize(dream.date));
 
@@ -2874,7 +2887,14 @@ class _CalendarState extends State<Calendar> {
                                                 ),
                                                 cloudyButton(
                                                   "Delete",
-                                                  () {},
+                                                  () {
+                                                    Navigator.of(
+                                                      sheetContext,
+                                                    ).pop(true);
+                                                    Navigator.of(
+                                                      dialogContext,
+                                                    ).pop();
+                                                  },
                                                   Colors.white,
                                                   Colors.red,
                                                 ),
@@ -2889,7 +2909,8 @@ class _CalendarState extends State<Calendar> {
                                 },
                               );
                               if (result != null) {
-                                //delete the dream
+                                deleteThisDream(dream.id);
+                                askAboutDreams();
                               }
                             },
                           ),
