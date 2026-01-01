@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:pocket_dreams/bloc/backend_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -964,6 +963,19 @@ class Dream {
   });
 }
 
+// make from date format in integer like yearmonthday
+// like if we have 2025.12.04 we create 20251204
+int rightDateFormat(date) {
+  // if we have for example 4 month we need 04, that means if we have month < 10 we are adding 0
+  String month = date.month < 10
+      ? "0${date.month.toString()}"
+      : date.month.toString();
+  // same logic as in month
+  String day = date.day < 10 ? "0${date.day.toString()}" : date.day.toString();
+  date = date.year.toString() + month + day;
+  return int.parse(date);
+}
+
 //
 // TodaysDream widget
 // Base for _TodaysDreamState
@@ -1030,21 +1042,6 @@ class _TodaysDreamState extends State<TodaysDream> {
           _emotions.add(hSLemotions[a].name);
         }
       }
-    }
-
-    // make from date format in integer like yearmonthday
-    // like if we have 2025.12.04 we create 20251204
-    int rightDateFormat(date) {
-      // if we have for example 4 month we need 04, that means if we have month < 10 we are adding 0
-      String month = date.month < 10
-          ? "0${date.month.toString()}"
-          : date.month.toString();
-      // same logic as in month
-      String day = date.day < 10
-          ? "0${date.day.toString()}"
-          : date.day.toString();
-      date = date.year.toString() + month + day;
-      return int.parse(date);
     }
 
     final response = await http.post(
@@ -1835,7 +1832,13 @@ class CalendarDay {
 }
 
 class _CalendarState extends State<Calendar> {
-  late String tempName;
+  late String _tempName;
+  late String _description;
+  late int _privacity;
+  late int _date;
+  late List<String> _tags;
+  late List<String> _emotions;
+  late int _id;
 
   List _dreamsList = [];
   Map<DateTime, List<String>> dreams = {};
@@ -1892,6 +1895,22 @@ class _CalendarState extends State<Calendar> {
     await http.delete(
       Uri.parse("$server/api/deleteThisDream?dream=$dream"),
       headers: {"Content-Type": "application/json"},
+    );
+  }
+
+  Future<void> saveTheChanges() async {
+    await http.put(
+      Uri.parse("$server/api/saveTheChanges"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "id": _id,
+        "name": _tempName,
+        "description": _description,
+        "isPrivate": _privacity,
+        "date": _date,
+        "tags": _tags,
+        "emotions": _emotions,
+      }),
     );
   }
 
@@ -2102,10 +2121,10 @@ class _CalendarState extends State<Calendar> {
   // Dialog  Part //
   //              //
   Future<void> _showTheDream(CalendarDay dream) async {
-    int dreamID = dream.id;
-
     bool changes = false;
     Color mainColor = getColor(normalize(dream.date));
+
+    String errorText = "";
 
     // temporary gays
     String tempDescription = dream.description;
@@ -2738,21 +2757,33 @@ class _CalendarState extends State<Calendar> {
                                     chosenDays.add(chosenDay.date);
                                   }
 
+                                  DateTime initial = normalize(DateTime.now());
+
+                                  while (chosenDays.contains(initial)) {
+                                    initial = initial.subtract(
+                                      const Duration(days: 1),
+                                    );
+                                  }
+
                                   // date pick part
                                   DateTime? result = await showDatePicker(
                                     context: context,
-                                    initialDate: DateTime.now(),
                                     firstDate: DateTime(2000),
                                     lastDate: DateTime.now(),
 
                                     selectableDayPredicate: (day) {
                                       for (final disabled in chosenDays) {
-                                        if (isSameDay(day, disabled)) {
+                                        if (isSameDay(
+                                          normalize(day),
+                                          normalize(disabled),
+                                        )) {
                                           return false;
                                         }
                                       }
                                       return true;
                                     },
+
+                                    initialDate: initial,
 
                                     builder: (context, child) {
                                       return Theme(
@@ -2953,7 +2984,11 @@ class _CalendarState extends State<Calendar> {
                               ),
                             ),
                             onTap: () async {
+                              // save sheet
                               if (changes) {
+                                setDialogState(() {
+                                  errorText = "";
+                                });
                                 final bool?
                                 result = await showModalBottomSheet<bool>(
                                   context: dialogContext,
@@ -2968,7 +3003,7 @@ class _CalendarState extends State<Calendar> {
                                     return StatefulBuilder(
                                       builder: (context, setSheetState) {
                                         return SizedBox(
-                                          height: 155,
+                                          height: 162,
                                           width: double.infinity,
                                           child: Column(
                                             children: [
@@ -2992,6 +3027,14 @@ class _CalendarState extends State<Calendar> {
                                                   ],
                                                 ),
                                               ),
+                                              Text(
+                                                errorText,
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  color: Colors.red,
+                                                  fontSize: 12,
+                                                ),
+                                              ),
                                               Spacer(),
                                               Row(
                                                 mainAxisAlignment:
@@ -3010,7 +3053,21 @@ class _CalendarState extends State<Calendar> {
                                                   ),
                                                   cloudyButton(
                                                     "Save",
-                                                    () {},
+                                                    () {
+                                                      if (tempTags.isNotEmpty ||
+                                                          tempEmotions
+                                                              .isNotEmpty) {
+                                                        Navigator.of(
+                                                          sheetContext,
+                                                        ).pop(true);
+                                                      } else {
+                                                        setSheetState(() {
+                                                          errorText =
+                                                              "please choose Tags or Emotions for your dream";
+                                                        });
+                                                      }
+                                                    },
+
                                                     Colors.white,
                                                     mainColor,
                                                   ),
@@ -3025,7 +3082,21 @@ class _CalendarState extends State<Calendar> {
                                   },
                                 );
                                 if (result != null) {
-                                  //delete the dream
+                                  List<String> tempEmotionsName = [];
+                                  for (Hemotion e in tempEmotions) {
+                                    tempEmotionsName.add(e.name);
+                                  }
+
+                                  _id = dream.id;
+                                  _tags = tempTags;
+                                  _emotions = tempEmotionsName;
+                                  _date = rightDateFormat(tempDate);
+                                  _privacity = (tempPrivacity ? 1 : 0);
+                                  _tempName = tempName;
+                                  _description = tempDescription;
+
+                                  saveTheChanges();
+                                  askAboutDreams();
                                 }
                               }
                             },

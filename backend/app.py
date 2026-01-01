@@ -279,5 +279,41 @@ def deleteThisDream():
 
     return jsonify({"success": True, "message": "Dream was deleted successfully"})  
 
+@app.route("/api/saveTheChanges", methods=["PUT"])
+def saveTheChanges():
+    data = request.get_json()
+
+    dream_id = data["id"]
+    name = data["name"]
+    description = data["description"]
+    is_private = data["isPrivate"]
+    date = data["date"]
+
+    emotions = data["emotions"]
+    tags = data["tags"]
+
+    conn = sqlite3.connect("pocketdreams.db")
+    cursor = conn.cursor()
+
+    cursor.execute(" UPDATE Dreams SET Name = ?, Description = ?, IsPrivate = ?, Date = ? WHERE ID = ? ", (name, description, is_private, date, dream_id))
+    cursor.execute("DELETE FROM DreamEmotions WHERE DreamID = ?",(dream_id,))
+    for emotion in emotions:
+        cursor.execute("SELECT ID FROM Emotions WHERE Name = ?", (emotion,))
+        emotionid = cursor.fetchall()[0][0]
+        cursor.execute("INSERT INTO DreamEmotions (DreamID, EmotionID) VALUES (?, ?)",(dream_id, emotionid,))
+    cursor.execute("DELETE FROM DreamTags WHERE DreamID = ?",(dream_id,))
+    for tag in tags:
+        cursor.execute("SELECT ID FROM Tags WHERE Name = ?", (tag,))
+        tagid = cursor.fetchall()[0][0]
+        cursor.execute("INSERT INTO DreamTags (DreamID, TagID) VALUES (?, ?)",(dream_id, tagid,))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "success": True,
+        "message": "Dream was edited successfully"
+    })
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
