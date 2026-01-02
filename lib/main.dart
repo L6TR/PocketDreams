@@ -2152,535 +2152,402 @@ class _CalendarState extends State<Calendar> {
     descriptionController.text = tempDescription;
     nameController.text = tempName;
 
+    _confirmClose() {}
+
     await showDialog(
+      barrierDismissible: (!changes),
       context: context,
       builder: (context) {
         return StatefulBuilder(
           builder: (dialogContext, setDialogState) {
-            return AlertDialog(
-              backgroundColor: const Color.fromARGB(255, 5, 5, 5),
-              content: /*maybe we need to put it into the function*/ SizedBox(
-                width: 250,
-                height: 470,
-                child: Column(
-                  children: [
-                    // top part
-                    Expanded(
-                      flex: 2,
-                      child: SizedBox(
-                        child: Row(
-                          children: [
-                            // user name
-                            Expanded(
-                              flex: 1,
-                              child: Text(
-                                dream.user,
-                                style: TextStyle(color: Colors.white),
+            return PopScope(
+              canPop: (!changes),
+              onPopInvokedWithResult: (didPop, result) async {
+                if (didPop) return;
+
+                final shouldClose = await _confirmClose();
+                if (shouldClose) {
+                  Navigator.of(dialogContext).pop(result);
+                }
+              },
+              child: AlertDialog(
+                backgroundColor: const Color.fromARGB(255, 5, 5, 5),
+                content: /*maybe we need to put it into the function*/ SizedBox(
+                  width: 250,
+                  height: 470,
+                  child: Column(
+                    children: [
+                      // top part
+                      Expanded(
+                        flex: 2,
+                        child: SizedBox(
+                          child: Row(
+                            children: [
+                              // user name
+                              Expanded(
+                                flex: 1,
+                                child: Text(
+                                  dream.user,
+                                  style: TextStyle(color: Colors.white),
+                                ),
                               ),
-                            ),
-                            // dream name
-                            Expanded(
-                              flex: 2,
-                              child: SizedBox(
-                                width: double.infinity,
-                                height: 50,
+                              // dream name
+                              Expanded(
+                                flex: 2,
+                                child: SizedBox(
+                                  width: double.infinity,
+                                  height: 50,
 
-                                child: DecoratedBox(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(20),
-                                    color: mainColor,
-                                  ),
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(20),
+                                      color: mainColor,
+                                    ),
 
-                                  child: SizedBox(
-                                    height: 50,
-                                    width: double.infinity,
-                                    child: Center(
-                                      child: TextField(
-                                        controller: nameController,
-                                        maxLines: 1,
-                                        keyboardType: TextInputType.multiline,
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 14,
+                                    child: SizedBox(
+                                      height: 50,
+                                      width: double.infinity,
+                                      child: Center(
+                                        child: TextField(
+                                          controller: nameController,
+                                          maxLines: 1,
+                                          keyboardType: TextInputType.multiline,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 14,
+                                          ),
+                                          textAlign: TextAlign.center,
+
+                                          decoration: const InputDecoration(
+                                            border: InputBorder.none,
+                                            isDense: true,
+                                            contentPadding: EdgeInsets.all(8),
+                                          ),
+                                          onChanged: (value) {
+                                            setDialogState(() {
+                                              tempName = value;
+                                              changes = true;
+                                            });
+                                          },
                                         ),
-                                        textAlign: TextAlign.center,
-
-                                        decoration: const InputDecoration(
-                                          border: InputBorder.none,
-                                          isDense: true,
-                                          contentPadding: EdgeInsets.all(8),
-                                        ),
-                                        onChanged: (value) {
-                                          setDialogState(() {
-                                            tempName = value;
-                                            changes = true;
-                                          });
-                                        },
                                       ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    // middle part
-                    SizedBox(
-                      height: 320,
-                      child: Row(
-                        children: [
-                          // description text part
-                          SizedBox(
-                            width: 165,
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: const Color.fromARGB(255, 10, 10, 10),
-                                borderRadius: BorderRadius.circular(5),
-                              ),
+                      // middle part
+                      SizedBox(
+                        height: 320,
+                        child: Row(
+                          children: [
+                            // description text part
+                            SizedBox(
+                              width: 165,
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  color: const Color.fromARGB(255, 10, 10, 10),
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
 
-                              child: SingleChildScrollView(
-                                child: SizedBox(
-                                  height: 300,
-                                  child: TextField(
-                                    expands: true,
-                                    controller: descriptionController,
-                                    maxLines: null,
-                                    keyboardType: TextInputType.multiline,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 14,
+                                child: SingleChildScrollView(
+                                  child: SizedBox(
+                                    height: 300,
+                                    child: TextField(
+                                      expands: true,
+                                      controller: descriptionController,
+                                      maxLines: null,
+                                      keyboardType: TextInputType.multiline,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                      ),
+                                      decoration: const InputDecoration(
+                                        border: InputBorder.none,
+                                        isDense: true,
+                                        contentPadding: EdgeInsets.all(8),
+                                      ),
+                                      onChanged: (value) {
+                                        setDialogState(() {
+                                          tempDescription = value;
+                                          changes = true;
+                                        });
+                                      },
                                     ),
-                                    decoration: const InputDecoration(
-                                      border: InputBorder.none,
-                                      isDense: true,
-                                      contentPadding: EdgeInsets.all(8),
-                                    ),
-                                    onChanged: (value) {
-                                      setDialogState(() {
-                                        tempDescription = value;
-                                        changes = true;
-                                      });
-                                    },
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                          SizedBox(width: 5),
-                          // right middle part
-                          SizedBox(
-                            child: Column(
-                              children: [
-                                SizedBox(height: 5),
-                                // privacity part
-                                Container(
-                                  padding: EdgeInsets.all(5),
-                                  child: InkWell(
-                                    splashColor: Colors.white10,
-                                    borderRadius: BorderRadius.circular(8),
+                            SizedBox(width: 5),
+                            // right middle part
+                            SizedBox(
+                              child: Column(
+                                children: [
+                                  SizedBox(height: 5),
+                                  // privacity part
+                                  Container(
+                                    padding: EdgeInsets.all(5),
+                                    child: InkWell(
+                                      splashColor: Colors.white10,
+                                      borderRadius: BorderRadius.circular(8),
 
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          tempPrivacity
-                                              ? Icons.lock
-                                              : Icons.lock_open,
-                                          color: mainColor,
-                                        ),
-                                        Text(
-                                          tempPrivacity ? "Private" : "Public",
-                                          style: TextStyle(color: mainColor),
-                                        ),
-                                      ],
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            tempPrivacity
+                                                ? Icons.lock
+                                                : Icons.lock_open,
+                                            color: mainColor,
+                                          ),
+                                          Text(
+                                            tempPrivacity
+                                                ? "Private"
+                                                : "Public",
+                                            style: TextStyle(color: mainColor),
+                                          ),
+                                        ],
+                                      ),
+                                      onTap: () {
+                                        setDialogState(() {
+                                          tempPrivacity = !tempPrivacity;
+                                          changes = true;
+                                        });
+                                      },
                                     ),
-                                    onTap: () {
-                                      setDialogState(() {
-                                        tempPrivacity = !tempPrivacity;
-                                      });
-                                    },
                                   ),
-                                ),
-                                SizedBox(height: 5),
-                                // emotions part
-                                InkWell(
-                                  child: SizedBox(
-                                    height: 150,
-                                    width: 80,
-                                    child: DecoratedBox(
-                                      decoration: BoxDecoration(
-                                        color: const Color.fromARGB(
+                                  SizedBox(height: 5),
+                                  // emotions part
+                                  InkWell(
+                                    child: SizedBox(
+                                      height: 150,
+                                      width: 80,
+                                      child: DecoratedBox(
+                                        decoration: BoxDecoration(
+                                          color: const Color.fromARGB(
+                                            255,
+                                            7,
+                                            7,
+                                            7,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            5,
+                                          ),
+                                        ),
+
+                                        child: Column(
+                                          children: [
+                                            Text(
+                                              "Emotions:",
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 16,
+                                              ),
+                                            ),
+
+                                            for (Hemotion everyEmotion
+                                                in tempEmotions)
+                                              Text(
+                                                everyEmotion.name,
+                                                style: TextStyle(
+                                                  color: getEmotionColor(
+                                                    everyEmotion.name,
+                                                  ),
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    //
+                                    // emotions bottom sheet
+                                    //
+                                    onTap: () async {
+                                      final List<Hemotion>?
+                                      result = await showModalBottomSheet<List<Hemotion>>(
+                                        context: dialogContext,
+                                        useRootNavigator: true,
+                                        backgroundColor: const Color.fromARGB(
                                           255,
                                           7,
                                           7,
                                           7,
                                         ),
-                                        borderRadius: BorderRadius.circular(5),
-                                      ),
+                                        builder: (sheetContext) {
+                                          List<Hemotion> sheetEmotions =
+                                              List<Hemotion>.from(tempEmotions);
+                                          List<HSLColor> sheetEmotionsColor =
+                                              [];
+                                          for (Hemotion e in sheetEmotions) {
+                                            sheetEmotionsColor.add(e.color);
+                                          }
 
-                                      child: Column(
-                                        children: [
-                                          Text(
-                                            "Emotions:",
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                            ),
-                                          ),
-
-                                          for (Hemotion everyEmotion
-                                              in tempEmotions)
-                                            Text(
-                                              everyEmotion.name,
-                                              style: TextStyle(
-                                                color: getEmotionColor(
-                                                  everyEmotion.name,
-                                                ),
-                                                fontSize: 14,
-                                              ),
-                                            ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  //
-                                  // emotions bottom sheet
-                                  //
-                                  onTap: () async {
-                                    final List<Hemotion>?
-                                    result = await showModalBottomSheet<List<Hemotion>>(
-                                      context: dialogContext,
-                                      useRootNavigator: true,
-                                      backgroundColor: const Color.fromARGB(
-                                        255,
-                                        7,
-                                        7,
-                                        7,
-                                      ),
-                                      builder: (sheetContext) {
-                                        List<Hemotion> sheetEmotions =
-                                            List<Hemotion>.from(tempEmotions);
-                                        List<HSLColor> sheetEmotionsColor = [];
-                                        for (Hemotion e in sheetEmotions) {
-                                          sheetEmotionsColor.add(e.color);
-                                        }
-
-                                        return StatefulBuilder(
-                                          builder: (context, setSheetState) {
-                                            return SizedBox(
-                                              height: 400,
-                                              width: double.infinity,
-                                              child: Align(
-                                                alignment: Alignment.topCenter,
-                                                child: Column(
-                                                  children: [
-                                                    SizedBox(height: 20),
-                                                    // top color combination part
-                                                    Row(
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: [
-                                                        for (
-                                                          int i = 0;
-                                                          i < 6;
-                                                          i++
-                                                        )
-                                                          Row(
-                                                            children: [
-                                                              SizedBox(
-                                                                width: 3,
-                                                              ),
-                                                              Container(
-                                                                width: 30,
-                                                                height: 30,
-                                                                margin:
-                                                                    EdgeInsets.symmetric(
-                                                                      vertical:
-                                                                          4,
-                                                                    ),
-                                                                decoration: BoxDecoration(
-                                                                  shape: BoxShape
-                                                                      .circle,
-                                                                  border: Border.all(
-                                                                    color: Colors
-                                                                        .white,
-                                                                    width: 3,
-                                                                  ),
+                                          return StatefulBuilder(
+                                            builder: (context, setSheetState) {
+                                              return SizedBox(
+                                                height: 400,
+                                                width: double.infinity,
+                                                child: Align(
+                                                  alignment:
+                                                      Alignment.topCenter,
+                                                  child: Column(
+                                                    children: [
+                                                      SizedBox(height: 20),
+                                                      // top color combination part
+                                                      Row(
+                                                        mainAxisSize:
+                                                            MainAxisSize.min,
+                                                        children: [
+                                                          for (
+                                                            int i = 0;
+                                                            i < 6;
+                                                            i++
+                                                          )
+                                                            Row(
+                                                              children: [
+                                                                SizedBox(
+                                                                  width: 3,
                                                                 ),
-                                                                child: Container(
-                                                                  width: 5,
-                                                                  height: 5,
+                                                                Container(
+                                                                  width: 30,
+                                                                  height: 30,
                                                                   margin:
                                                                       EdgeInsets.symmetric(
                                                                         vertical:
-                                                                            1,
+                                                                            4,
                                                                       ),
                                                                   decoration: BoxDecoration(
                                                                     shape: BoxShape
                                                                         .circle,
-                                                                    color:
-                                                                        (i <
-                                                                            sheetEmotionsColor.length)
-                                                                        ? sheetEmotionsColor[i]
-                                                                              .toColor()
-                                                                        : Colors
-                                                                              .white10,
                                                                     border: Border.all(
                                                                       color: Colors
-                                                                          .black,
-                                                                      width:
-                                                                          1.5,
+                                                                          .white,
+                                                                      width: 3,
+                                                                    ),
+                                                                  ),
+                                                                  child: Container(
+                                                                    width: 5,
+                                                                    height: 5,
+                                                                    margin:
+                                                                        EdgeInsets.symmetric(
+                                                                          vertical:
+                                                                              1,
+                                                                        ),
+                                                                    decoration: BoxDecoration(
+                                                                      shape: BoxShape
+                                                                          .circle,
+                                                                      color:
+                                                                          (i <
+                                                                              sheetEmotionsColor.length)
+                                                                          ? sheetEmotionsColor[i].toColor()
+                                                                          : Colors.white10,
+                                                                      border: Border.all(
+                                                                        color: Colors
+                                                                            .black,
+                                                                        width:
+                                                                            1.5,
+                                                                      ),
                                                                     ),
                                                                   ),
                                                                 ),
-                                                              ),
-                                                            ],
+                                                              ],
+                                                            ),
+                                                          // arrow
+                                                          Icon(
+                                                            Icons
+                                                                .keyboard_double_arrow_right,
+                                                            color:
+                                                                sheetEmotions
+                                                                    .isNotEmpty
+                                                                ? Colors.white
+                                                                : Colors
+                                                                      .white10,
                                                           ),
-                                                        // arrow
-                                                        Icon(
-                                                          Icons
-                                                              .keyboard_double_arrow_right,
-                                                          color:
-                                                              sheetEmotions
-                                                                  .isNotEmpty
-                                                              ? Colors.white
-                                                              : Colors.white10,
-                                                        ),
-                                                        // mixed emotions
-                                                        Container(
-                                                          margin:
-                                                              EdgeInsets.symmetric(
-                                                                vertical: 4,
-                                                              ),
-                                                          decoration: BoxDecoration(
-                                                            borderRadius:
-                                                                BorderRadius.circular(
-                                                                  7,
+                                                          // mixed emotions
+                                                          Container(
+                                                            margin:
+                                                                EdgeInsets.symmetric(
+                                                                  vertical: 4,
                                                                 ),
-                                                            border: Border.all(
+                                                            decoration: BoxDecoration(
+                                                              borderRadius:
+                                                                  BorderRadius.circular(
+                                                                    7,
+                                                                  ),
+                                                              border: Border.all(
+                                                                color: Colors
+                                                                    .white,
+                                                                width: 3,
+                                                              ),
+                                                            ),
+                                                            child: Icon(
+                                                              Icons
+                                                                  .square_rounded,
                                                               color:
-                                                                  Colors.white,
-                                                              width: 3,
+                                                                  (sheetEmotionsColor
+                                                                      .isEmpty)
+                                                                  ? Colors
+                                                                        .white10
+                                                                  : mixEmotions(
+                                                                      sheetEmotionsColor,
+                                                                    ).toColor(),
                                                             ),
                                                           ),
-                                                          child: Icon(
-                                                            Icons
-                                                                .square_rounded,
-                                                            color:
-                                                                (sheetEmotionsColor
-                                                                    .isEmpty)
-                                                                ? Colors.white10
-                                                                : mixEmotions(
-                                                                    sheetEmotionsColor,
-                                                                  ).toColor(),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    Wrap(
-                                                      spacing: 8,
-                                                      children: [
-                                                        for (Hemotion e
-                                                            in hSLemotions)
-                                                          cloudyButton(
-                                                            e.name,
-                                                            () {
-                                                              setSheetState(() {
-                                                                if (sheetEmotions
-                                                                    .contains(
-                                                                      e,
-                                                                    )) {
-                                                                  sheetEmotions
-                                                                      .remove(
-                                                                        e,
-                                                                      );
-                                                                  sheetEmotionsColor
-                                                                      .remove(
-                                                                        e.color,
-                                                                      );
-                                                                } else if (sheetEmotions
-                                                                        .length <
-                                                                    6) {
-                                                                  sheetEmotions
-                                                                      .add(e);
-                                                                  sheetEmotionsColor
-                                                                      .add(
-                                                                        e.color,
-                                                                      );
-                                                                }
-                                                              });
-                                                            },
-                                                            (sheetEmotions
-                                                                    .contains(
-                                                                      e,
-                                                                    ))
-                                                                ? Colors.white
-                                                                : Colors.grey,
-                                                            (sheetEmotions
-                                                                    .contains(
-                                                                      e,
-                                                                    ))
-                                                                ? e.color
-                                                                      .toColor()
-                                                                : Colors.white,
-                                                          ),
-                                                      ],
-                                                    ),
-                                                    const Spacer(),
-
-                                                    Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceEvenly,
-                                                      children: [
-                                                        cloudyButton(
-                                                          "Cancel",
-                                                          () {
-                                                            Navigator.of(
-                                                              sheetContext,
-                                                            ).pop(null);
-                                                          },
-                                                          cloudPink(),
-                                                          Colors.white,
-                                                        ),
-                                                        cloudyButton(
-                                                          "Save",
-                                                          () {
-                                                            Navigator.of(
-                                                              sheetContext,
-                                                            ).pop(
-                                                              sheetEmotions,
-                                                            );
-                                                          },
-                                                          cloudPink(),
-                                                          Colors.white,
-                                                        ),
-                                                      ],
-                                                    ),
-
-                                                    const SizedBox(height: 15),
-                                                  ],
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                        );
-                                      },
-                                    );
-                                    if (result != null) {
-                                      changes = true;
-                                      setDialogState(() {
-                                        tempEmotions = result;
-                                        List<HSLColor> mixList = [];
-                                        for (Hemotion c in tempEmotions) {
-                                          mixList.add(c.color);
-                                        }
-                                        mainColor = (mixList.isNotEmpty)
-                                            ? mixEmotions(mixList).toColor()
-                                            : Colors.grey;
-                                      });
-                                    }
-                                  },
-                                ),
-                                SizedBox(height: 5),
-                                //
-                                // tags part
-                                //
-                                SizedBox(
-                                  height: 110,
-                                  width: 80,
-                                  child: DecoratedBox(
-                                    decoration: BoxDecoration(
-                                      color: const Color.fromARGB(255, 7, 7, 7),
-                                      borderRadius: BorderRadius.circular(5),
-                                    ),
-                                    child: InkWell(
-                                      child: Column(
-                                        children: [
-                                          Text(
-                                            "Tags:",
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                          for (
-                                            int t = 0;
-                                            t <= 3 && t < tempTags.length;
-                                            t++
-                                          )
-                                            Text(
-                                              (t != 3)
-                                                  ? tempTags[t]
-                                                  : "and other...",
-                                              style: TextStyle(
-                                                color: (t != 3)
-                                                    ? Colors.white
-                                                    : Colors.grey,
-                                                fontSize: 14,
-                                              ),
-                                            ),
-                                        ],
-                                      ),
-                                      // tags bottom sheet
-                                      onTap: () async {
-                                        final List<String>? result =
-                                            await showModalBottomSheet<
-                                              List<String>
-                                            >(
-                                              context: dialogContext,
-                                              useRootNavigator: true,
-                                              backgroundColor:
-                                                  const Color.fromARGB(
-                                                    255,
-                                                    7,
-                                                    7,
-                                                    7,
-                                                  ),
-                                              builder: (sheetContext) {
-                                                List<String> sheetTags =
-                                                    List.from(tempTags);
-
-                                                void changeTagStatus(
-                                                  String tag,
-                                                ) {
-                                                  if (sheetTags.contains(tag)) {
-                                                    sheetTags.remove(tag);
-                                                  } else {
-                                                    sheetTags.add(tag);
-                                                  }
-                                                }
-
-                                                return SizedBox(
-                                                  height: 400,
-                                                  width: double.infinity,
-                                                  child: Column(
-                                                    children: [
-                                                      const SizedBox(
-                                                        height: 15,
+                                                        ],
                                                       ),
-
                                                       Wrap(
                                                         spacing: 8,
-                                                        runSpacing: 8,
                                                         children: [
-                                                          for (final tag
-                                                              in tagList)
-                                                            statusCloudyButton(
-                                                              tag,
-                                                              () =>
-                                                                  changeTagStatus(
-                                                                    tag,
-                                                                  ),
-                                                              sheetTags
-                                                                  .contains(
-                                                                    tag,
-                                                                  ),
+                                                          for (Hemotion e
+                                                              in hSLemotions)
+                                                            cloudyButton(
+                                                              e.name,
+                                                              () {
+                                                                setSheetState(() {
+                                                                  if (sheetEmotions
+                                                                      .contains(
+                                                                        e,
+                                                                      )) {
+                                                                    sheetEmotions
+                                                                        .remove(
+                                                                          e,
+                                                                        );
+                                                                    sheetEmotionsColor
+                                                                        .remove(
+                                                                          e.color,
+                                                                        );
+                                                                  } else if (sheetEmotions
+                                                                          .length <
+                                                                      6) {
+                                                                    sheetEmotions
+                                                                        .add(e);
+                                                                    sheetEmotionsColor
+                                                                        .add(
+                                                                          e.color,
+                                                                        );
+                                                                  }
+                                                                });
+                                                              },
+                                                              (sheetEmotions
+                                                                      .contains(
+                                                                        e,
+                                                                      ))
+                                                                  ? Colors.white
+                                                                  : Colors.grey,
+                                                              (sheetEmotions
+                                                                      .contains(
+                                                                        e,
+                                                                      ))
+                                                                  ? e.color
+                                                                        .toColor()
+                                                                  : Colors
+                                                                        .white,
                                                             ),
                                                         ],
                                                       ),
-
                                                       const Spacer(),
 
                                                       Row(
@@ -2703,7 +2570,9 @@ class _CalendarState extends State<Calendar> {
                                                             () {
                                                               Navigator.of(
                                                                 sheetContext,
-                                                              ).pop(sheetTags);
+                                                              ).pop(
+                                                                sheetEmotions,
+                                                              );
                                                             },
                                                             cloudPink(),
                                                             Colors.white,
@@ -2716,279 +2585,302 @@ class _CalendarState extends State<Calendar> {
                                                       ),
                                                     ],
                                                   ),
-                                                );
-                                              },
-                                            );
-
-                                        if (result != null) {
-                                          changes = true;
-                                          setDialogState(() {
-                                            tempTags = result;
-                                          });
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // bottom part
-                    Expanded(
-                      flex: 1,
-                      child: Row(
-                        children: [
-                          // "hello"
-                          Expanded(
-                            flex: 1,
-                            child: Center(
-                              child: InkWell(
-                                child: Text(
-                                  "Dream Date: ${tempDate.year}-${tempDate.month}-${tempDate.day}",
-                                  style: TextStyle(color: Colors.grey),
-                                ),
-                                onTap: () async {
-                                  List<DateTime> chosenDays = [];
-                                  for (final CalendarDay chosenDay
-                                      in calendarDreams) {
-                                    chosenDays.add(chosenDay.date);
-                                  }
-
-                                  DateTime initial = normalize(DateTime.now());
-
-                                  while (chosenDays.contains(initial)) {
-                                    initial = initial.subtract(
-                                      const Duration(days: 1),
-                                    );
-                                  }
-
-                                  // date pick part
-                                  DateTime? result = await showDatePicker(
-                                    context: context,
-                                    firstDate: DateTime(2000),
-                                    lastDate: DateTime.now(),
-
-                                    selectableDayPredicate: (day) {
-                                      for (final disabled in chosenDays) {
-                                        if (isSameDay(
-                                          normalize(day),
-                                          normalize(disabled),
-                                        )) {
-                                          return false;
-                                        }
-                                      }
-                                      return true;
-                                    },
-
-                                    initialDate: initial,
-
-                                    builder: (context, child) {
-                                      return Theme(
-                                        data: ThemeData.light().copyWith(
-                                          primaryColor: cloudPink(),
-                                          colorScheme: ColorScheme.light(
-                                            primary: cloudPink(),
-                                            onPrimary: Colors.white,
-                                            surface: Color.fromARGB(
-                                              255,
-                                              5,
-                                              5,
-                                              5,
-                                            ),
-                                            onSurface: Colors.white,
-                                          ),
-                                          dialogTheme: DialogThemeData(
-                                            backgroundColor: Colors.black,
-                                          ),
-                                        ),
-                                        child: child!,
+                                                ),
+                                              );
+                                            },
+                                          );
+                                        },
                                       );
+                                      if (result != null) {
+                                        changes = true;
+                                        setDialogState(() {
+                                          tempEmotions = result;
+                                          List<HSLColor> mixList = [];
+                                          for (Hemotion c in tempEmotions) {
+                                            mixList.add(c.color);
+                                          }
+                                          mainColor = (mixList.isNotEmpty)
+                                              ? mixEmotions(mixList).toColor()
+                                              : Colors.grey;
+                                        });
+                                      }
                                     },
-                                  );
-                                  if (result != null) {
-                                    changes = true;
-                                    setDialogState(() {
-                                      tempDate = result;
-                                    });
-                                  }
-                                },
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 1,
-                            // hiiiii :) hiiiii :)
-                            child: Center(
-                              child: Text(
-                                "Publication Date: ${dream.publicationDate.year}-${dream.publicationDate.month}-${dream.publicationDate.day}",
-                                style: TextStyle(color: Colors.grey),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          // delete dream button
-                          InkWell(
-                            borderRadius: BorderRadius.circular(5),
-                            child: Center(
-                              child: Icon(
-                                Icons.delete_forever,
-                                color: Colors.red,
-                              ),
-                            ),
-                            // are you sure you want to delete this dream
-                            onTap: () async {
-                              final bool?
-                              result = await showModalBottomSheet<bool>(
-                                context: dialogContext,
-                                useRootNavigator: true,
-                                backgroundColor: const Color.fromARGB(
-                                  255,
-                                  7,
-                                  7,
-                                  7,
-                                ),
-                                builder: (sheetContext) {
-                                  return StatefulBuilder(
-                                    builder: (context, setSheetState) {
-                                      return SizedBox(
-                                        height: 155,
-                                        width: double.infinity,
+                                  ),
+                                  SizedBox(height: 5),
+                                  //
+                                  // tags part
+                                  //
+                                  SizedBox(
+                                    height: 110,
+                                    width: 80,
+                                    child: DecoratedBox(
+                                      decoration: BoxDecoration(
+                                        color: const Color.fromARGB(
+                                          255,
+                                          7,
+                                          7,
+                                          7,
+                                        ),
+                                        borderRadius: BorderRadius.circular(5),
+                                      ),
+                                      child: InkWell(
                                         child: Column(
                                           children: [
-                                            Center(
-                                              child: Column(
-                                                children: [
-                                                  SizedBox(height: 20),
-                                                  // top text part
-                                                  Text(
-                                                    "Are you sure you want to delete this dream?",
-                                                    style: TextStyle(
-                                                      fontSize: 16,
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    children: [
-                                                      Text(
-                                                        tempName,
-                                                        style: TextStyle(
-                                                          fontSize: 16,
-                                                          color: mainColor,
-                                                        ),
-                                                      ),
-                                                      Text(
-                                                        " will be lost forever! (A long time!)",
-                                                        style: TextStyle(
-                                                          fontSize: 16,
-                                                          color: Colors.white,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
+                                            Text(
+                                              "Tags:",
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 16,
                                               ),
                                             ),
-                                            Spacer(),
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.spaceEvenly,
-                                              children: [
-                                                cloudyButton(
-                                                  "Cancel",
-                                                  () {
-                                                    Navigator.of(
-                                                      sheetContext,
-                                                    ).pop(null);
-                                                  },
-                                                  Colors.white,
-                                                  mainColor,
+                                            for (
+                                              int t = 0;
+                                              t <= 3 && t < tempTags.length;
+                                              t++
+                                            )
+                                              Text(
+                                                (t != 3)
+                                                    ? tempTags[t]
+                                                    : "and other...",
+                                                style: TextStyle(
+                                                  color: (t != 3)
+                                                      ? Colors.white
+                                                      : Colors.grey,
+                                                  fontSize: 14,
                                                 ),
-                                                cloudyButton(
-                                                  "Delete",
-                                                  () {
-                                                    Navigator.of(
-                                                      sheetContext,
-                                                    ).pop(true);
-                                                    Navigator.of(
-                                                      dialogContext,
-                                                    ).pop();
-                                                  },
-                                                  Colors.white,
-                                                  Colors.red,
-                                                ),
-                                              ],
-                                            ),
-                                            SizedBox(height: 30),
+                                              ),
                                           ],
                                         ),
+                                        // tags bottom sheet
+                                        onTap: () async {
+                                          final List<String>? result =
+                                              await showModalBottomSheet<
+                                                List<String>
+                                              >(
+                                                context: dialogContext,
+                                                useRootNavigator: true,
+                                                backgroundColor:
+                                                    const Color.fromARGB(
+                                                      255,
+                                                      7,
+                                                      7,
+                                                      7,
+                                                    ),
+                                                builder: (sheetContext) {
+                                                  List<String> sheetTags =
+                                                      List.from(tempTags);
+
+                                                  void changeTagStatus(
+                                                    String tag,
+                                                  ) {
+                                                    if (sheetTags.contains(
+                                                      tag,
+                                                    )) {
+                                                      sheetTags.remove(tag);
+                                                    } else {
+                                                      sheetTags.add(tag);
+                                                    }
+                                                  }
+
+                                                  return SizedBox(
+                                                    height: 400,
+                                                    width: double.infinity,
+                                                    child: Column(
+                                                      children: [
+                                                        const SizedBox(
+                                                          height: 15,
+                                                        ),
+
+                                                        Wrap(
+                                                          spacing: 8,
+                                                          runSpacing: 8,
+                                                          children: [
+                                                            for (final tag
+                                                                in tagList)
+                                                              statusCloudyButton(
+                                                                tag,
+                                                                () =>
+                                                                    changeTagStatus(
+                                                                      tag,
+                                                                    ),
+                                                                sheetTags
+                                                                    .contains(
+                                                                      tag,
+                                                                    ),
+                                                              ),
+                                                          ],
+                                                        ),
+
+                                                        const Spacer(),
+
+                                                        Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceEvenly,
+                                                          children: [
+                                                            cloudyButton(
+                                                              "Cancel",
+                                                              () {
+                                                                Navigator.of(
+                                                                  sheetContext,
+                                                                ).pop(null);
+                                                              },
+                                                              cloudPink(),
+                                                              Colors.white,
+                                                            ),
+                                                            cloudyButton(
+                                                              "Save",
+                                                              () {
+                                                                Navigator.of(
+                                                                  sheetContext,
+                                                                ).pop(
+                                                                  sheetTags,
+                                                                );
+                                                              },
+                                                              cloudPink(),
+                                                              Colors.white,
+                                                            ),
+                                                          ],
+                                                        ),
+
+                                                        const SizedBox(
+                                                          height: 15,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  );
+                                                },
+                                              );
+
+                                          if (result != null) {
+                                            changes = true;
+                                            setDialogState(() {
+                                              tempTags = result;
+                                            });
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // bottom part
+                      Expanded(
+                        flex: 1,
+                        child: Row(
+                          children: [
+                            // "hello"
+                            Expanded(
+                              flex: 1,
+                              child: Center(
+                                child: InkWell(
+                                  child: Text(
+                                    "Dream Date: ${tempDate.year}-${tempDate.month}-${tempDate.day}",
+                                    style: TextStyle(color: Colors.grey),
+                                  ),
+                                  onTap: () async {
+                                    List<DateTime> chosenDays = [];
+                                    for (final CalendarDay chosenDay
+                                        in calendarDreams) {
+                                      chosenDays.add(chosenDay.date);
+                                    }
+
+                                    DateTime initial = normalize(
+                                      DateTime.now(),
+                                    );
+
+                                    while (chosenDays.contains(initial)) {
+                                      initial = initial.subtract(
+                                        const Duration(days: 1),
                                       );
-                                    },
-                                  );
-                                },
-                              );
-                              if (result != null) {
-                                deleteThisDream(dream.id);
-                                askAboutDreams();
-                              }
-                            },
-                          ),
-                          // reset button
-                          InkWell(
-                            borderRadius: BorderRadius.circular(5),
-                            child: Center(
-                              child: Icon(
-                                Icons.restore,
-                                color: (changes) ? mainColor : Colors.white10,
+                                    }
+
+                                    // date pick part
+                                    DateTime? result = await showDatePicker(
+                                      context: context,
+                                      firstDate: DateTime(2000),
+                                      lastDate: DateTime.now(),
+
+                                      selectableDayPredicate: (day) {
+                                        for (final disabled in chosenDays) {
+                                          if (isSameDay(
+                                            normalize(day),
+                                            normalize(disabled),
+                                          )) {
+                                            return false;
+                                          }
+                                        }
+                                        return true;
+                                      },
+
+                                      initialDate: initial,
+
+                                      builder: (context, child) {
+                                        return Theme(
+                                          data: ThemeData.light().copyWith(
+                                            primaryColor: cloudPink(),
+                                            colorScheme: ColorScheme.light(
+                                              primary: cloudPink(),
+                                              onPrimary: Colors.white,
+                                              surface: Color.fromARGB(
+                                                255,
+                                                5,
+                                                5,
+                                                5,
+                                              ),
+                                              onSurface: Colors.white,
+                                            ),
+                                            dialogTheme: DialogThemeData(
+                                              backgroundColor: Colors.black,
+                                            ),
+                                          ),
+                                          child: child!,
+                                        );
+                                      },
+                                    );
+                                    if (result != null) {
+                                      changes = true;
+                                      setDialogState(() {
+                                        tempDate = result;
+                                      });
+                                    }
+                                  },
+                                ),
                               ),
                             ),
-                            onTap: () {
-                              if (changes) {
-                                setDialogState(() {
-                                  tempTags = List.from(dream.tags);
-                                  getEmotionsFromTheDB();
-                                  tempDate = dream.date;
-                                  tempPrivacity = dream.isPrivate;
-
-                                  tempName = dream.name;
-                                  nameController.text = tempName;
-
-                                  tempDescription = dream.description;
-                                  descriptionController.text = tempDescription;
-
-                                  mainColor = getColor(normalize(dream.date));
-                                  changes = false;
-                                });
-                              }
-                            },
-                          ),
-                          // save changes button
-                          InkWell(
-                            borderRadius: BorderRadius.circular(5),
-                            child: Center(
-                              child: Icon(
-                                Icons.save,
-                                color: (changes) ? mainColor : Colors.white10,
+                            Expanded(
+                              flex: 1,
+                              // hiiiii :) hiiiii :)
+                              child: Center(
+                                child: Text(
+                                  "Publication Date: ${dream.publicationDate.year}-${dream.publicationDate.month}-${dream.publicationDate.day}",
+                                  style: TextStyle(color: Colors.grey),
+                                ),
                               ),
                             ),
-                            onTap: () async {
-                              // save sheet
-                              if (changes) {
-                                setDialogState(() {
-                                  errorText = "";
-                                });
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        flex: 1,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            // delete dream button
+                            InkWell(
+                              borderRadius: BorderRadius.circular(5),
+                              child: Center(
+                                child: Icon(
+                                  Icons.delete_forever,
+                                  color: Colors.red,
+                                ),
+                              ),
+                              // are you sure you want to delete this dream
+                              onTap: () async {
                                 final bool?
                                 result = await showModalBottomSheet<bool>(
                                   context: dialogContext,
@@ -3003,7 +2895,7 @@ class _CalendarState extends State<Calendar> {
                                     return StatefulBuilder(
                                       builder: (context, setSheetState) {
                                         return SizedBox(
-                                          height: 162,
+                                          height: 155,
                                           width: double.infinity,
                                           child: Column(
                                             children: [
@@ -3012,27 +2904,35 @@ class _CalendarState extends State<Calendar> {
                                                   children: [
                                                     SizedBox(height: 20),
                                                     // top text part
-                                                    SizedBox(
-                                                      width: 250,
-                                                      child: Text(
-                                                        "Are you sure you want to save changes in this dream?",
-                                                        style: TextStyle(
-                                                          fontSize: 16,
-                                                          color: Colors.white,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.center,
+                                                    Text(
+                                                      "Are you sure you want to delete this dream?",
+                                                      style: TextStyle(
+                                                        fontSize: 16,
+                                                        color: Colors.white,
                                                       ),
                                                     ),
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        Text(
+                                                          tempName,
+                                                          style: TextStyle(
+                                                            fontSize: 16,
+                                                            color: mainColor,
+                                                          ),
+                                                        ),
+                                                        Text(
+                                                          " will be lost forever! (A long time!)",
+                                                          style: TextStyle(
+                                                            fontSize: 16,
+                                                            color: Colors.white,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
                                                   ],
-                                                ),
-                                              ),
-                                              Text(
-                                                errorText,
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                  color: Colors.red,
-                                                  fontSize: 12,
                                                 ),
                                               ),
                                               Spacer(),
@@ -3052,24 +2952,17 @@ class _CalendarState extends State<Calendar> {
                                                     mainColor,
                                                   ),
                                                   cloudyButton(
-                                                    "Save",
+                                                    "Delete",
                                                     () {
-                                                      if (tempTags.isNotEmpty ||
-                                                          tempEmotions
-                                                              .isNotEmpty) {
-                                                        Navigator.of(
-                                                          sheetContext,
-                                                        ).pop(true);
-                                                      } else {
-                                                        setSheetState(() {
-                                                          errorText =
-                                                              "please choose Tags or Emotions for your dream";
-                                                        });
-                                                      }
+                                                      Navigator.of(
+                                                        sheetContext,
+                                                      ).pop(true);
+                                                      Navigator.of(
+                                                        dialogContext,
+                                                      ).pop();
                                                     },
-
                                                     Colors.white,
-                                                    mainColor,
+                                                    Colors.red,
                                                   ),
                                                 ],
                                               ),
@@ -3082,29 +2975,174 @@ class _CalendarState extends State<Calendar> {
                                   },
                                 );
                                 if (result != null) {
-                                  List<String> tempEmotionsName = [];
-                                  for (Hemotion e in tempEmotions) {
-                                    tempEmotionsName.add(e.name);
-                                  }
-
-                                  _id = dream.id;
-                                  _tags = tempTags;
-                                  _emotions = tempEmotionsName;
-                                  _date = rightDateFormat(tempDate);
-                                  _privacity = (tempPrivacity ? 1 : 0);
-                                  _tempName = tempName;
-                                  _description = tempDescription;
-
-                                  saveTheChanges();
+                                  deleteThisDream(dream.id);
                                   askAboutDreams();
                                 }
-                              }
-                            },
-                          ),
-                        ],
+                              },
+                            ),
+                            // reset button
+                            InkWell(
+                              borderRadius: BorderRadius.circular(5),
+                              child: Center(
+                                child: Icon(
+                                  Icons.restore,
+                                  color: (changes) ? mainColor : Colors.white10,
+                                ),
+                              ),
+                              onTap: () {
+                                if (changes) {
+                                  setDialogState(() {
+                                    tempTags = List.from(dream.tags);
+                                    getEmotionsFromTheDB();
+                                    tempDate = dream.date;
+                                    tempPrivacity = dream.isPrivate;
+
+                                    tempName = dream.name;
+                                    nameController.text = tempName;
+
+                                    tempDescription = dream.description;
+                                    descriptionController.text =
+                                        tempDescription;
+
+                                    mainColor = getColor(normalize(dream.date));
+                                    changes = false;
+                                  });
+                                }
+                              },
+                            ),
+                            // save changes button
+                            InkWell(
+                              borderRadius: BorderRadius.circular(5),
+                              child: Center(
+                                child: Icon(
+                                  Icons.save,
+                                  color: (changes) ? mainColor : Colors.white10,
+                                ),
+                              ),
+                              onTap: () async {
+                                // save sheet
+                                if (changes) {
+                                  setDialogState(() {
+                                    errorText = "";
+                                  });
+                                  final bool?
+                                  result = await showModalBottomSheet<bool>(
+                                    context: dialogContext,
+                                    useRootNavigator: true,
+                                    backgroundColor: const Color.fromARGB(
+                                      255,
+                                      7,
+                                      7,
+                                      7,
+                                    ),
+                                    builder: (sheetContext) {
+                                      return StatefulBuilder(
+                                        builder: (context, setSheetState) {
+                                          return SizedBox(
+                                            height: 162,
+                                            width: double.infinity,
+                                            child: Column(
+                                              children: [
+                                                Center(
+                                                  child: Column(
+                                                    children: [
+                                                      SizedBox(height: 20),
+                                                      // top text part
+                                                      SizedBox(
+                                                        width: 250,
+                                                        child: Text(
+                                                          "Are you sure you want to save changes in this dream?",
+                                                          style: TextStyle(
+                                                            fontSize: 16,
+                                                            color: Colors.white,
+                                                          ),
+                                                          textAlign:
+                                                              TextAlign.center,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Text(
+                                                  errorText,
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                    color: Colors.red,
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                                Spacer(),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceEvenly,
+                                                  children: [
+                                                    cloudyButton(
+                                                      "Cancel",
+                                                      () {
+                                                        Navigator.of(
+                                                          sheetContext,
+                                                        ).pop(null);
+                                                      },
+                                                      Colors.white,
+                                                      mainColor,
+                                                    ),
+                                                    cloudyButton(
+                                                      "Save",
+                                                      () {
+                                                        if (tempTags
+                                                                .isNotEmpty ||
+                                                            tempEmotions
+                                                                .isNotEmpty) {
+                                                          Navigator.of(
+                                                            sheetContext,
+                                                          ).pop(true);
+                                                        } else {
+                                                          setSheetState(() {
+                                                            errorText =
+                                                                "please choose Tags or Emotions for your dream";
+                                                          });
+                                                        }
+                                                      },
+
+                                                      Colors.white,
+                                                      mainColor,
+                                                    ),
+                                                  ],
+                                                ),
+                                                SizedBox(height: 30),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    },
+                                  );
+                                  if (result != null) {
+                                    List<String> tempEmotionsName = [];
+                                    for (Hemotion e in tempEmotions) {
+                                      tempEmotionsName.add(e.name);
+                                    }
+
+                                    _id = dream.id;
+                                    _tags = tempTags;
+                                    _emotions = tempEmotionsName;
+                                    _date = rightDateFormat(tempDate);
+                                    _privacity = (tempPrivacity ? 1 : 0);
+                                    _tempName = tempName;
+                                    _description = tempDescription;
+
+                                    saveTheChanges();
+                                    askAboutDreams();
+                                  }
+                                }
+                              },
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             );
