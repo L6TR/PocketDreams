@@ -58,7 +58,7 @@ double mixHues(List<double> hues) {
 }
 
 String user = "merunka";
-String server = "http://10.0.1.12:5000";
+String server = "http://10.1.76.157:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -2152,7 +2152,61 @@ class _CalendarState extends State<Calendar> {
     descriptionController.text = tempDescription;
     nameController.text = tempName;
 
-    _confirmClose() {}
+    Future<bool> confirmClose() async {
+      final bool? result = await showModalBottomSheet<bool>(
+        context: context,
+        //useRootNavigator: true,
+        backgroundColor: const Color.fromARGB(255, 7, 7, 7),
+        builder: (sheetContext) {
+          return SizedBox(
+            height: 150,
+            width: double.infinity,
+            child: Column(
+              children: [
+                SizedBox(height: 15),
+                Text(
+                  "Are you sure, you want to close this dream?",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+                Text(
+                  "you still have unsaved data",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white60, fontSize: 16),
+                ),
+                Spacer(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    cloudyButton(
+                      "Cancel",
+                      () {
+                        Navigator.of(sheetContext).pop(null);
+                      },
+                      Colors.white,
+                      mainColor,
+                    ),
+                    cloudyButton(
+                      "Still Close",
+                      () {
+                        Navigator.of(sheetContext).pop(true);
+                      },
+                      Colors.white,
+                      Colors.red,
+                    ),
+                  ],
+                ),
+                SizedBox(height: 30),
+              ],
+            ),
+          );
+        },
+      );
+      if (result != null) {
+        return true;
+      }
+      return false;
+    }
 
     await showDialog(
       barrierDismissible: (!changes),
@@ -2165,7 +2219,7 @@ class _CalendarState extends State<Calendar> {
               onPopInvokedWithResult: (didPop, result) async {
                 if (didPop) return;
 
-                final shouldClose = await _confirmClose();
+                final shouldClose = await confirmClose();
                 if (shouldClose) {
                   Navigator.of(dialogContext).pop(result);
                 }
