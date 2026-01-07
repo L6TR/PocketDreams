@@ -315,5 +315,37 @@ def saveTheChanges():
         "message": "Dream was edited successfully"
     })
 
+@app.route("/api/getBackendDreams", methods=["GET"])
+def getBackendDreams():
+    Username = request.args.get("username")
+    Limit = 2
+    Offset = 2
+
+    conn = sqlite3.connect("pocketdreams.db")
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT TagID FROM UserTags WHERE UserID = (SELECT ID FROM Users WHERE Username = ?)",(Username,))
+
+    cursor.execute("""
+    SELECT DISTINCT d.ID, d.Name, d.Description, d.Date
+    FROM Dreams d
+    JOIN DreamTags dt ON d.ID = dt.DreamID
+    JOIN UserTags ut ON dt.TagID = ut.TagID
+    WHERE ut.UserID = (SELECT ID FROM Users WHERE Username = ?)
+    AND d.User = ut.UserID
+    ORDER BY d.Date DESC
+    LIMIT ? OFFSET ?
+    """, (Username, Limit, Offset))
+
+    print(cursor.fetchall())
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "success": True,
+        "message": "Dream was edited successfully"
+    })
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

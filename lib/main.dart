@@ -58,7 +58,7 @@ double mixHues(List<double> hues) {
 }
 
 String user = "merunka";
-String server = "http://10.1.76.157:5000";
+String server = "http://192.168.0.233:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -772,9 +772,7 @@ class _BaseState extends State<Base> {
   Widget _buildBody() {
     switch (_selectedIndex) {
       case 0:
-        return Center(
-          child: Text("Chat screen", style: TextStyle(color: Colors.white)),
-        );
+        return const DreamViev();
       case 1:
         return const TodaysDream();
       case 2:
@@ -3204,5 +3202,39 @@ class _CalendarState extends State<Calendar> {
         );
       },
     );
+  }
+}
+
+class DreamViev extends StatefulWidget {
+  const DreamViev({super.key});
+
+  @override
+  State<DreamViev> createState() => _DreamViev();
+}
+
+//
+// _RegisterScreenState widget
+// child of Login()
+//
+
+class _DreamViev extends State<DreamViev> {
+  Future<void> getBackendDreams() async {
+    final response = await http.get(
+      Uri.parse("$server/api/getBackendDreams?username=$user"),
+      headers: {"Content-Type": "application/json"},
+    );
+
+    final data = json.decode(response.body);
+  }
+
+  @override
+  void initState() {
+    getBackendDreams();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(backgroundColor: Colors.black);
   }
 }
