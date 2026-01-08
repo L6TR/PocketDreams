@@ -1522,6 +1522,7 @@ class _TodaysDreamState extends State<TodaysDream> {
                       });
                     } else if (!isPrivate && _description.isEmpty) {
                       setState(() {
+                        print(_description);
                         errorColor = Colors.red;
                         error =
                             "You must to write the description for the public dream";
@@ -1658,6 +1659,7 @@ class _TodaysDreamState extends State<TodaysDream> {
               ),
               onPressed: () {
                 setState(() {
+                  print("hi");
                   lastNameUpdate = nameController.text;
                   lastDescriptionUpdate = descriptionController.text;
                 });
@@ -1850,7 +1852,6 @@ class _CalendarState extends State<Calendar> {
       Uri.parse("$server/api/askAboutDreams?username=$user"),
       headers: {"Content-Type": "application/json"},
     );
-    String message = "";
 
     final data = json.decode(response.body);
     List dreamsList = data["dreamsList"];

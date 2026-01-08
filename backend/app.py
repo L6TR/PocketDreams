@@ -326,17 +326,20 @@ def getBackendDreams():
 
     cursor.execute("SELECT TagID FROM UserTags WHERE UserID = (SELECT ID FROM Users WHERE Username = ?)",(Username,))
 
+    #SELECT DISTINCT d.ID, d.Name, d.Description, 
     cursor.execute("""
-    SELECT DISTINCT d.ID, d.Name, d.Description, d.Date
+    SELECT DISTINCT d.Name, d.Date
     FROM Dreams d
     JOIN DreamTags dt ON d.ID = dt.DreamID
     JOIN UserTags ut ON dt.TagID = ut.TagID
     WHERE ut.UserID = (SELECT ID FROM Users WHERE Username = ?)
-    AND d.User = ut.UserID
+    AND d.User != (SELECT ID FROM Users WHERE Username = ?)
+    AND d.IsPrivate = 0
     ORDER BY d.Date DESC
-    LIMIT ? OFFSET ?
-    """, (Username, Limit, Offset))
+    """, (Username, Username))
 
+    #LIMIT ? OFFSET ?
+    #, Limit, Offset
     print(cursor.fetchall())
 
     conn.commit()
