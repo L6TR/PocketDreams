@@ -41,6 +41,20 @@ double mixLinear(List<double> values) {
   return values.reduce((a, b) => a + b) / values.length;
 }
 
+// sayHiToTheBackend
+Future<void> checkTheBackendStatus() async {
+  final response = await http.get(
+    Uri.parse("$server/api/chooseTags"),
+    headers: {"Content-Type": "application/json"},
+  );
+
+  final data = json.decode(response.body);
+
+  print(data);
+
+  if (data["success"]) {}
+}
+
 double mixHues(List<double> hues) {
   double x = 0;
   double y = 0;
@@ -58,7 +72,7 @@ double mixHues(List<double> hues) {
 }
 
 String user = "merunka";
-String server = "http://192.168.0.233:5000";
+String server = "http://10.0.1.12:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -167,7 +181,6 @@ void main() async {
 
 class PocketDreams extends StatelessWidget {
   const PocketDreams({super.key});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
