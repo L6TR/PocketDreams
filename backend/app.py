@@ -178,13 +178,16 @@ def addDream():
         conn.commit()
         conn.close()
         return jsonify({"success": False, "message": "You had already wrote a dream for this day"}), 403 
-    cursor.execute("SELECT ID FROM Dreams WHERE Name = ?",(DreamName,))
-
+    
     # checking if we already had a dream with this name
+    cursor.execute("SELECT ID FROM Dreams WHERE Name = ? AND User = ?",(DreamName, UserID,))
+    print(cursor.fetchall())
     if cursor.fetchall():   
         conn.commit()
         conn.close()
         return jsonify({"success": False, "message": "You had already wrote a dream with this name"}), 403 
+    
+    # now we can add a dream
     cursor.execute("INSERT INTO Dreams (Name, Description, Date, IsPrivate, PublicationDate, User) VALUES (?, ?, ?, ?, ?, ?)", (DreamName, Description,Date,IsPrivate,PublicationDate,UserID))
     cursor.execute("SELECT ID FROM Dreams WHERE Name = ?", (DreamName,))
     dreamID = cursor.fetchone()[0]
