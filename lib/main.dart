@@ -42,7 +42,7 @@ double mixLinear(List<double> values) {
 }
 
 // sayHiToTheBackend
-Future<void> checkTheBackendStatus() async {
+/*Future<void> checkTheBackendStatus() async {
   final response = await http.get(
     Uri.parse("$server/api/chooseTags"),
     headers: {"Content-Type": "application/json"},
@@ -53,7 +53,7 @@ Future<void> checkTheBackendStatus() async {
   print(data);
 
   if (data["success"]) {}
-}
+}*/
 
 double mixHues(List<double> hues) {
   double x = 0;
@@ -1514,7 +1514,7 @@ class _TodaysDreamState extends State<TodaysDream> {
                   //
                   onPressed: () {
                     if (_tags.isEmpty &&
-                        _description.isEmpty &&
+                        lastDescriptionUpdate!.isEmpty &&
                         !colorWasChosen) {
                       setState(() {
                         errorColor = Colors.red;
@@ -1522,7 +1522,7 @@ class _TodaysDreamState extends State<TodaysDream> {
                       });
                     } else if (!isPrivate &&
                         _tags.isEmpty &&
-                        _description.isEmpty) {
+                        lastDescriptionUpdate!.isEmpty) {
                       setState(() {
                         errorColor = Colors.red;
                         error =
@@ -1533,14 +1533,14 @@ class _TodaysDreamState extends State<TodaysDream> {
                         errorColor = Colors.red;
                         error = "You must to choose tags for the public dream";
                       });
-                    } else if (!isPrivate && _description.isEmpty) {
+                    } else if (!isPrivate && lastDescriptionUpdate!.isEmpty) {
                       setState(() {
-                        print(_description);
                         errorColor = Colors.red;
                         error =
                             "You must to write the description for the public dream";
                       });
                     } else {
+                      print(isPrivate);
                       addDream();
                     }
                   },
@@ -1672,10 +1672,11 @@ class _TodaysDreamState extends State<TodaysDream> {
               ),
               onPressed: () {
                 setState(() {
-                  print("hi");
                   lastNameUpdate = nameController.text;
                   lastDescriptionUpdate = descriptionController.text;
                 });
+
+                print(lastDescriptionUpdate);
                 Navigator.pop(context);
               },
               child: Text("Save"),
@@ -3185,6 +3186,9 @@ class _CalendarState extends State<Calendar> {
                                     },
                                   );
                                   if (result != null) {
+                                    setDialogState(() {
+                                      changes = false;
+                                    });
                                     List<String> tempEmotionsName = [];
                                     for (Hemotion e in tempEmotions) {
                                       tempEmotionsName.add(e.name);
@@ -3225,11 +3229,6 @@ class DreamViev extends StatefulWidget {
   @override
   State<DreamViev> createState() => _DreamViev();
 }
-
-//
-// _RegisterScreenState widget
-// child of Login()
-//
 
 class _DreamViev extends State<DreamViev> {
   Future<void> getBackendDreams() async {

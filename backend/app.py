@@ -331,15 +331,12 @@ def getBackendDreams():
 
     #SELECT DISTINCT d.ID, d.Name, d.Description, 
     cursor.execute("""
-    SELECT DISTINCT d.Name, d.Date
+    SELECT DISTINCT d.ID, d.Name, d.Description
     FROM Dreams d
-    JOIN DreamTags dt ON d.ID = dt.DreamID
-    JOIN UserTags ut ON dt.TagID = ut.TagID
-    WHERE ut.UserID = (SELECT ID FROM Users WHERE Username = ?)
-    AND d.User != (SELECT ID FROM Users WHERE Username = ?)
-    AND d.IsPrivate = 0
-    ORDER BY d.Date DESC
-    """, (Username, Username))
+    JOIN UserTags ut ON ut.UserID = (SELECT ID FROM Users WHERE Username = ?)
+    JOIN DreamTags dt ON dt.DreamID = d.ID
+    WHERE dt.TagID = ut.tagID AND d.User != (SELECT ID FROM Users WHERE Username = ?) AND d.IsPrivate = 0
+    """, (Username, Username,))
 
     #LIMIT ? OFFSET ?
     #, Limit, Offset
