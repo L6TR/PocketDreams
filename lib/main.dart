@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 //https://stackoverflow.com/questions/49418332/flutter-how-to-prevent-device-orientation-changes-and-force-portrait
 
 //
@@ -72,7 +73,7 @@ double mixHues(List<double> hues) {
 }
 
 String user = "merunka";
-String server = "http://192.168.0.233:5000";
+String server = "http://10.1.120.119:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -3238,6 +3239,7 @@ class _DreamViev extends State<DreamViev> {
     );
 
     final data = json.decode(response.body);
+    print(data["dreamsList"]);
   }
 
   @override
