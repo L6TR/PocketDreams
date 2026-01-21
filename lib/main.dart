@@ -73,7 +73,7 @@ double mixHues(List<double> hues) {
 }
 
 String user = "merunka";
-String server = "http://10.1.120.119:5000";
+String server = "http://192.168.0.233:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -3250,6 +3250,55 @@ class _DreamViev extends State<DreamViev> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(backgroundColor: Colors.black);
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Container(
+        padding: EdgeInsets.only(left: 15, right: 15, top: 5),
+        child: MasonryGridView.count(
+          crossAxisCount: 2,
+          itemBuilder: (context, index) {
+            return Tile(index: index, extent: 250);
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class Tile extends StatelessWidget {
+  final int index;
+  final double extent;
+
+  const Tile({super.key, required this.index, required this.extent});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(2),
+      child: Container(
+        height: extent,
+        margin: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: Colors.white10,
+          borderRadius: BorderRadius.circular(8),
+        ),
+
+        // our dream viev
+        child: Column(
+          children: [
+            Container(
+              height: 30,
+              width: double.infinity,
+              margin: const EdgeInsets.only(top: 5, left: 3, right: 3),
+              decoration: BoxDecoration(
+                color: Colors.grey,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text("Dream Name", textAlign: TextAlign.center),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
