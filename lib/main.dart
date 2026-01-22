@@ -75,7 +75,7 @@ double mixHues(List<double> hues) {
 }
 
 String user = "merunka";
-String server = "http://10.1.100.77:5000";
+String server = "http://192.168.0.233:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -3244,6 +3244,21 @@ class _DreamViev extends State<DreamViev> {
 
     final data = json.decode(response.body);
     tileDreams = data["dreamsList"];
+
+    if (tileDreams != null) {
+      for (var dream in tileDreams!) {
+        final String? rawEmotions = dream[5]?.toString();
+
+        final List<int> tileEmotions =
+            (rawEmotions != null && rawEmotions.isNotEmpty)
+            ? rawEmotions.split(',').map((id) => int.parse(id.trim())).toList()
+            : [];
+
+        if (tileEmotions.isNotEmpty) {
+          print(tileEmotions);
+        }
+      }
+    }
     userTags = data["userTags"];
     print(userTags);
   }
@@ -3283,7 +3298,6 @@ class Tile extends StatelessWidget {
     required this.extent,
     required this.dream,
   });
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -3307,7 +3321,7 @@ class Tile extends StatelessWidget {
                 color: Colors.grey,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Text(dream[1], textAlign: TextAlign.center),
+              child: Text(dream[5], textAlign: TextAlign.center),
             ),
           ],
         ),

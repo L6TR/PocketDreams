@@ -351,7 +351,7 @@ def getBackendDreams():
     FROM UserTags ut
     JOIN Tags t ON t.ID = ut.TagID 
     WHERE ut.UserID = (SELECT ID FROM Users WHERE Username = ?)
-                   """, (Username,))
+    """, (Username,))
 
     userTags = cursor.fetchall()
     print(userTags)
