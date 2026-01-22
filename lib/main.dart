@@ -1,3 +1,5 @@
+import 'dart:developer';
+import 'dart:ffi';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:pocket_dreams/bloc/backend_bloc.dart';
@@ -73,7 +75,7 @@ double mixHues(List<double> hues) {
 }
 
 String user = "merunka";
-String server = "http://192.168.0.233:5000";
+String server = "http://10.1.100.77:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -3232,6 +3234,8 @@ class DreamViev extends StatefulWidget {
 }
 
 class _DreamViev extends State<DreamViev> {
+  List? tileDreams;
+  dynamic userTags;
   Future<void> getBackendDreams() async {
     final response = await http.get(
       Uri.parse("$server/api/getBackendDreams?username=$user"),
@@ -3239,7 +3243,9 @@ class _DreamViev extends State<DreamViev> {
     );
 
     final data = json.decode(response.body);
-    print(data["dreamsList"]);
+    tileDreams = data["dreamsList"];
+    userTags = data["userTags"];
+    print(userTags);
   }
 
   @override
@@ -3253,11 +3259,12 @@ class _DreamViev extends State<DreamViev> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: Container(
-        padding: EdgeInsets.only(left: 15, right: 15, top: 5),
+        padding: EdgeInsets.only(left: 2, top: 5),
         child: MasonryGridView.count(
           crossAxisCount: 2,
+          itemCount: tileDreams != null ? tileDreams!.length : 0,
           itemBuilder: (context, index) {
-            return Tile(index: index, extent: 250);
+            return Tile(index: index, extent: 250, dream: tileDreams![index]);
           },
         ),
       ),
@@ -3268,8 +3275,14 @@ class _DreamViev extends State<DreamViev> {
 class Tile extends StatelessWidget {
   final int index;
   final double extent;
+  final List dream;
 
-  const Tile({super.key, required this.index, required this.extent});
+  const Tile({
+    super.key,
+    required this.index,
+    required this.extent,
+    required this.dream,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -3294,7 +3307,7 @@ class Tile extends StatelessWidget {
                 color: Colors.grey,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Text("Dream Name", textAlign: TextAlign.center),
+              child: Text(dream[1], textAlign: TextAlign.center),
             ),
           ],
         ),

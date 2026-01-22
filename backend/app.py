@@ -337,12 +337,24 @@ def getBackendDreams():
     JOIN DreamTags dt ON dt.DreamID = d.ID
     JOIN DreamEmotions de On de.DreamID = d.ID
     WHERE dt.TagID = ut.tagID AND d.User != (SELECT ID FROM Users WHERE Username = ?) AND d.IsPrivate = 0
+    GROUP BY d.ID
     """, (Username, Username,))
 
     #LIMIT ? OFFSET ?
     #, Limit, Offset
 
+    
     dreams = cursor.fetchall()
+
+    cursor.execute("""
+    SELECT t.Name
+    FROM UserTags ut
+    JOIN Tags t ON t.ID = ut.TagID 
+    WHERE ut.UserID = (SELECT ID FROM Users WHERE Username = ?)
+                   """, (Username,))
+
+    userTags = cursor.fetchall()
+    print(userTags)
 
     conn.commit()
     conn.close()
@@ -350,7 +362,9 @@ def getBackendDreams():
     return jsonify({
         "success": True,
         "message": "You got dreams succesfully",
-        "dreamsList": dreams
+        "dreamsList": dreams,
+        "userTags": userTags 
+        
     })
 
 if __name__ == "__main__":
