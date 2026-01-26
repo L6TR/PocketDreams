@@ -1,5 +1,3 @@
-import 'dart:developer';
-import 'dart:ffi';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:pocket_dreams/bloc/backend_bloc.dart';
@@ -27,6 +25,9 @@ final List<Hemotion> hSLemotions = [
   Hemotion(name: "Harmony", color: HSLColor.fromAHSL(1.0, 120.0, 0.7, 0.5)),
   Hemotion(name: "Freedom", color: HSLColor.fromAHSL(1.0, 180.0, 0.7, 0.5)),
   Hemotion(name: "Creativity", color: HSLColor.fromAHSL(1.0, 300.0, 0.7, 0.5)),
+
+  Hemotion(name: "Purity", color: HSLColor.fromAHSL(1.0, 190.0, 0.7, 0.5)),
+  Hemotion(name: "Depth", color: HSLColor.fromAHSL(1.0, 230.0, 0.7, 0.5)),
 
   Hemotion(name: "Warmth", color: HSLColor.fromAHSL(1.0, 39.0, 0.7, 0.5)),
   Hemotion(name: "Fear", color: HSLColor.fromAHSL(1.0, 275.0, 0.7, 0.5)),
@@ -57,6 +58,36 @@ double mixLinear(List<double> values) {
 
   if (data["success"]) {}
 }*/
+
+// by this function we are getting from a Int date like 20251209 => DateTime 2025-12-09
+DateTime cutADate(int date) {
+  int year = date ~/ 10000;
+  int month = ((date % 10000) ~/ 100);
+  int day = (date % 100);
+  return DateTime.utc(year, month, day);
+}
+
+// getting from DateTime 2026-01-15 00:00:00.000Z only DateTime 2026-01-15 00:00:00.000
+DateTime normalize(DateTime d) => DateTime(d.year, d.month, d.day);
+
+//function for adding a Dream to The Calendar
+Dream newDream(
+  dreamsColor,
+  dreamName,
+  dreamsDate,
+  dreamsDescribe,
+  dreamIsPrivate,
+  dreamTags,
+) {
+  return Dream(
+    tags: dreamTags,
+    isPrivate: dreamIsPrivate,
+    date: dreamsDate,
+    name: dreamName,
+    emotionColor: dreamsColor,
+    describe: dreamsDescribe,
+  );
+}
 
 double mixHues(List<double> hues) {
   double x = 0;
@@ -1108,25 +1139,6 @@ class _TodaysDreamState extends State<TodaysDream> {
     return mixed.toColor();
   }
 
-  //function for adding a Dream to The Calendar
-  Dream newDream(
-    dreamsColor,
-    dreamName,
-    dreamsDate,
-    dreamsDescribe,
-    dreamIsPrivate,
-    dreamTags,
-  ) {
-    return Dream(
-      tags: dreamTags,
-      isPrivate: dreamIsPrivate,
-      date: dreamsDate,
-      name: dreamName,
-      emotionColor: dreamsColor,
-      describe: dreamsDescribe,
-    );
-  }
-
   // function for deleting Emotion
   void removeEmotion(int index) {
     setState(() {
@@ -1997,16 +2009,6 @@ class _CalendarState extends State<Calendar> {
     _selectedDays.dispose();
     super.dispose();
   }
-
-  // by this function we are getting from a Int date like 20251209 => DateTime 2025-12-09
-  DateTime cutADate(date) {
-    int year = date ~/ 10000;
-    int month = ((date % 10000) ~/ 100);
-    int day = (date % 100);
-    return DateTime.utc(year, month, day);
-  }
-
-  DateTime normalize(DateTime d) => DateTime(d.year, d.month, d.day);
 
   Color getTextColor(DateTime day) {
     Color textColor = (getColor(day) == Colors.transparent)
@@ -3233,8 +3235,26 @@ class DreamViev extends StatefulWidget {
   State<DreamViev> createState() => _DreamViev();
 }
 
+class TileDream extends Dream {
+  final DateTime publicationDate;
+  final List<String> emotionsName;
+
+  TileDream({
+    required this.publicationDate,
+    required this.emotionsName,
+
+    required super.tags,
+    required super.name,
+    required super.date,
+    required super.isPrivate,
+    required super.emotionColor,
+    required super.describe,
+  });
+}
+
 class _DreamViev extends State<DreamViev> {
   List? tileDreams;
+  List<TileDream> tileDreamsList = [];
   dynamic userTags;
   Future<void> getBackendDreams() async {
     final response = await http.get(
@@ -3245,22 +3265,51 @@ class _DreamViev extends State<DreamViev> {
     final data = json.decode(response.body);
     tileDreams = data["dreamsList"];
 
+    // getting from "2,10" String a [2,10] List<int>
+    List<int> idFromStringToList(String? stringId) {
+      if (stringId == null || stringId.trim().isEmpty) return [];
+      return stringId.split(",").map((id) => int.parse(id.trim())).toList();
+    }
+
     if (tileDreams != null) {
       for (var dream in tileDreams!) {
-        final String? rawEmotions = dream[5]?.toString();
+        List<HSLColor> emotionsColor = [];
+        List<String> emotionsName = [];
+        List<String> tagsName = [];
 
-        final List<int> tileEmotions =
-            (rawEmotions != null && rawEmotions.isNotEmpty)
-            ? rawEmotions.split(',').map((id) => int.parse(id.trim())).toList()
-            : [];
-
-        if (tileEmotions.isNotEmpty) {
-          print(tileEmotions);
+        // for emotions
+        final List<int> tileEmotionsID = idFromStringToList(
+          dream[5]?.toString(),
+        );
+        for (int id in tileEmotionsID) {
+          emotionsColor.add(hSLemotions[id - 1].color);
+          emotionsName.add(hSLemotions[id - 1].name);
         }
+
+        // for tags
+        final List<int> tileTagsID = idFromStringToList(dream[6]?.toString());
+        for (int id in tileTagsID) {
+          tagsName.add(tagList[id - 1]);
+        }
+
+        //print(mixEmotions(emotionsColor));
+        tileDreamsList.add(
+          TileDream(
+            publicationDate: normalize(cutADate(dream[4])),
+            tags: tagsName,
+            name: dream[1],
+            date: normalize(cutADate(dream[3])),
+            isPrivate: 0,
+            emotionColor: mixEmotions(emotionsColor).toColor(),
+            describe: dream[2],
+            emotionsName: emotionsName,
+          ),
+        );
+        print(tileDreamsList);
       }
     }
     userTags = data["userTags"];
-    print(userTags);
+    //print(userTags);
   }
 
   @override
@@ -3279,7 +3328,11 @@ class _DreamViev extends State<DreamViev> {
           crossAxisCount: 2,
           itemCount: tileDreams != null ? tileDreams!.length : 0,
           itemBuilder: (context, index) {
-            return Tile(index: index, extent: 250, dream: tileDreams![index]);
+            return Tile(
+              index: index,
+              extent: 250,
+              dream: tileDreamsList[index],
+            );
           },
         ),
       ),
@@ -3290,7 +3343,7 @@ class _DreamViev extends State<DreamViev> {
 class Tile extends StatelessWidget {
   final int index;
   final double extent;
-  final List dream;
+  final TileDream dream;
 
   const Tile({
     super.key,
@@ -3318,10 +3371,10 @@ class Tile extends StatelessWidget {
               width: double.infinity,
               margin: const EdgeInsets.only(top: 5, left: 3, right: 3),
               decoration: BoxDecoration(
-                color: Colors.grey,
+                color: dream.emotionColor,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Text(dream[5], textAlign: TextAlign.center),
+              child: Text(dream.name, textAlign: TextAlign.center),
             ),
           ],
         ),

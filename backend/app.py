@@ -331,7 +331,7 @@ def getBackendDreams():
 
     #SELECT DISTINCT d.ID, d.Name, d.Description, 
     cursor.execute("""
-    SELECT DISTINCT d.ID, d.Name, d.Description, d.Date, d.PublicationDate, GROUP_CONCAT(DISTINCT de.EmotionID) as EmotionIDs
+    SELECT DISTINCT d.ID, d.Name, d.Description, d.Date, d.PublicationDate, GROUP_CONCAT(DISTINCT de.EmotionID) as EmotionIDs, GROUP_CONCAT(DISTINCT dt.TagID) as TagIDs
     FROM Dreams d
     JOIN UserTags ut ON ut.UserID = (SELECT ID FROM Users WHERE Username = ?)
     JOIN DreamTags dt ON dt.DreamID = d.ID
