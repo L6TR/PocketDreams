@@ -1555,7 +1555,6 @@ class _TodaysDreamState extends State<TodaysDream> {
                             "You must to write the description for the public dream";
                       });
                     } else {
-                      print(isPrivate);
                       addDream();
                     }
                   },
@@ -1690,8 +1689,6 @@ class _TodaysDreamState extends State<TodaysDream> {
                   lastNameUpdate = nameController.text;
                   lastDescriptionUpdate = descriptionController.text;
                 });
-
-                print(lastDescriptionUpdate);
                 Navigator.pop(context);
               },
               child: Text("Save"),
@@ -3265,6 +3262,8 @@ class _DreamViev extends State<DreamViev> {
     final data = json.decode(response.body);
     tileDreams = data["dreamsList"];
 
+    tileDreamsList.clear();
+
     // getting from "2,10" String a [2,10] List<int>
     List<int> idFromStringToList(String? stringId) {
       if (stringId == null || stringId.trim().isEmpty) return [];
@@ -3282,14 +3281,18 @@ class _DreamViev extends State<DreamViev> {
           dream[5]?.toString(),
         );
         for (int id in tileEmotionsID) {
-          emotionsColor.add(hSLemotions[id - 1].color);
-          emotionsName.add(hSLemotions[id - 1].name);
+          if (id - 1 < hSLemotions.length) {
+            emotionsColor.add(hSLemotions[id - 1].color);
+            emotionsName.add(hSLemotions[id - 1].name);
+          }
         }
 
         // for tags
         final List<int> tileTagsID = idFromStringToList(dream[6]?.toString());
         for (int id in tileTagsID) {
-          tagsName.add(tagList[id - 1]);
+          if (id - 1 < tagList.length) {
+            tagsName.add(tagList[id - 1]);
+          }
         }
 
         //print(mixEmotions(emotionsColor));
@@ -3305,10 +3308,13 @@ class _DreamViev extends State<DreamViev> {
             emotionsName: emotionsName,
           ),
         );
-        print(tileDreamsList);
       }
     }
     userTags = data["userTags"];
+
+    if (mounted) {
+      setState(() {});
+    }
     //print(userTags);
   }
 
@@ -3330,7 +3336,7 @@ class _DreamViev extends State<DreamViev> {
           itemBuilder: (context, index) {
             return Tile(
               index: index,
-              extent: 250,
+              maxHeight: 250,
               dream: tileDreamsList[index],
             );
           },
@@ -3342,21 +3348,21 @@ class _DreamViev extends State<DreamViev> {
 
 class Tile extends StatelessWidget {
   final int index;
-  final double extent;
+  final double maxHeight;
   final TileDream dream;
 
   const Tile({
     super.key,
     required this.index,
-    required this.extent,
+    required this.maxHeight,
     required this.dream,
   });
+
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(2),
       child: Container(
-        height: extent,
         margin: const EdgeInsets.all(4),
         decoration: BoxDecoration(
           color: Colors.white10,
@@ -3366,15 +3372,50 @@ class Tile extends StatelessWidget {
         // our dream viev
         child: Column(
           children: [
+            // top part
             Container(
               height: 30,
               width: double.infinity,
-              margin: const EdgeInsets.only(top: 5, left: 3, right: 3),
+              margin: const EdgeInsets.only(
+                top: 5,
+                left: 3,
+                right: 3,
+                bottom: 2,
+              ),
               decoration: BoxDecoration(
                 color: dream.emotionColor,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(dream.name, textAlign: TextAlign.center),
+            ),
+            // middle part
+            Container(
+              width: double.infinity,
+              margin: const EdgeInsets.all(5),
+              child: Text(
+                dream.describe,
+                textAlign: TextAlign.start,
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            // bottom part
+            Wrap(
+              children: [
+                for (String tag in dream.tags)
+                  // Container for our tags
+                  Container(
+                    margin: EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      " #$tag ",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                //Text(tag, style: TextStyle(color: Colors.white)),
+              ],
             ),
           ],
         ),
