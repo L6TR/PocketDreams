@@ -106,7 +106,7 @@ double mixHues(List<double> hues) {
 }
 
 String user = "merunka";
-String server = "http://192.168.0.233:5000";
+String server = "http://10.1.123.202:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -3232,6 +3232,13 @@ class DreamViev extends StatefulWidget {
   State<DreamViev> createState() => _DreamViev();
 }
 
+// Icon what, when we do tab on it, doing something
+InkWell onTabIcon(Icon icon, Future<void> Function() doSomething) {
+  return InkWell(onTap: doSomething, child: icon);
+}
+
+Icon likeStatus = Icon(Icons.favorite_border_rounded, color: Colors.grey);
+
 class TileDream extends Dream {
   final DateTime publicationDate;
   final List<String> emotionsName;
@@ -3253,6 +3260,7 @@ class _DreamViev extends State<DreamViev> {
   List? tileDreams;
   List<TileDream> tileDreamsList = [];
   dynamic userTags;
+
   Future<void> getBackendDreams() async {
     final response = await http.get(
       Uri.parse("$server/api/getBackendDreams?username=$user"),
@@ -3358,6 +3366,10 @@ class Tile extends StatelessWidget {
     required this.dream,
   });
 
+  Future<void> changeBackendLikeStatus() async {
+    print("hola");
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -3388,6 +3400,7 @@ class Tile extends StatelessWidget {
               ),
               child: Text(dream.name, textAlign: TextAlign.center),
             ),
+            // Text("User: ${dream.}"),
             // middle part
             Container(
               width: double.infinity,
@@ -3399,6 +3412,20 @@ class Tile extends StatelessWidget {
               ),
             ),
             // bottom part
+            Container(
+              margin: EdgeInsets.only(right: 10, left: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  onTabIcon(likeStatus, changeBackendLikeStatus),
+                  Spacer(),
+                  onTabIcon(
+                    Icon(Icons.comment, color: Colors.grey),
+                    changeBackendLikeStatus,
+                  ),
+                ],
+              ),
+            ),
             Wrap(
               children: [
                 for (String tag in dream.tags)
