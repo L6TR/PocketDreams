@@ -80,6 +80,7 @@ Dream newDream(
   dreamTags,
 ) {
   return Dream(
+    likes: 0,
     tags: dreamTags,
     isPrivate: dreamIsPrivate,
     date: dreamsDate,
@@ -106,7 +107,7 @@ double mixHues(List<double> hues) {
 }
 
 String user = "merunka";
-String server = "http://10.1.123.202:5000";
+String server = "http://10.0.1.12:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -997,8 +998,10 @@ class Dream {
   final String describe;
   final int isPrivate;
   final List<String> tags;
+  final int likes;
 
   Dream({
+    required this.likes,
     required this.tags,
     required this.name,
     required this.date,
@@ -3239,14 +3242,20 @@ InkWell onTabIcon(Icon icon, Future<void> Function() doSomething) {
 
 Icon likeStatus = Icon(Icons.favorite_border_rounded, color: Colors.grey);
 
+// class for showing our dream inside Tiles
 class TileDream extends Dream {
   final DateTime publicationDate;
   final List<String> emotionsName;
+  final String owner;
+  final int id;
 
   TileDream({
+    required this.id,
+    required this.owner,
     required this.publicationDate,
     required this.emotionsName,
 
+    required super.likes,
     required super.tags,
     required super.name,
     required super.date,
@@ -3269,6 +3278,7 @@ class _DreamViev extends State<DreamViev> {
 
     final data = json.decode(response.body);
     tileDreams = data["dreamsList"];
+    print(tileDreams);
 
     tileDreamsList.clear();
 
@@ -3302,10 +3312,9 @@ class _DreamViev extends State<DreamViev> {
             tagsName.add(tagList[id - 1]);
           }
         }
-
-        //print(mixEmotions(emotionsColor));
         tileDreamsList.add(
           TileDream(
+            id: dream[0],
             publicationDate: normalize(cutADate(dream[4])),
             tags: tagsName,
             name: dream[1],
@@ -3314,6 +3323,8 @@ class _DreamViev extends State<DreamViev> {
             emotionColor: mixEmotions(emotionsColor).toColor(),
             describe: dream[2],
             emotionsName: emotionsName,
+            owner: dream[7],
+            likes: dream[8] ?? "0",
           ),
         );
       }
@@ -3367,7 +3378,14 @@ class Tile extends StatelessWidget {
   });
 
   Future<void> changeBackendLikeStatus() async {
-    print("hola");
+    final response = await http.get(
+      Uri.parse(
+        "$server/api/getBackendDreams?username=$user&dream=${dream.id}",
+      ),
+      headers: {"Content-Type": "application/json"},
+    );
+
+    final data = json.decode(response.body);
   }
 
   @override
@@ -3400,7 +3418,7 @@ class Tile extends StatelessWidget {
               ),
               child: Text(dream.name, textAlign: TextAlign.center),
             ),
-            // Text("User: ${dream.}"),
+            Text("User: ${dream.owner}", style: TextStyle(color: Colors.white)),
             // middle part
             Container(
               width: double.infinity,
@@ -3417,8 +3435,17 @@ class Tile extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  // likes
                   onTabIcon(likeStatus, changeBackendLikeStatus),
+                  Container(
+                    margin: EdgeInsets.only(left: 3),
+                    child: Text(
+                      dream.likes.toString(),
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
                   Spacer(),
+                  // comments
                   onTabIcon(
                     Icon(Icons.comment, color: Colors.grey),
                     changeBackendLikeStatus,

@@ -35,7 +35,7 @@ cursor = conn.cursor() # we need this one for our SQL commands
 
 #cursor.execute("CREATE TABLE IF NOT EXISTS Comments (ID INTEGER PRIMARY KEY, CommentedText TEXT, CreatedAt INTEGER, CommentedBy INTEGER, CommentedDream INTEGER, FOREIGN KEY (CommentedBy) REFERENCES Users(ID), FOREIGN KEY (CommentedDream) REFERENCES Dreams(ID))")
 #cursor.execute("CREATE TABLE IF NOT EXISTS Reports (ID INTEGER PRIMARY KEY, Type TEXT, CreatedBy INTEGER, FOREIGN KEY (CreatedBy) REFERENCES Users(ID))")
-#cursor.execute("CREATE TABLE IF NOT EXISTS Likes (ID INTEGER PRIMARY KEY, LikedBy INTEGER, LikedDream INTEGER, FOREIGN KEY (LikedDream) REFERENCES Dreams(ID), FOREIGN KEY (LikedBy) REFERENCES Users(ID))")
+#cursor.execute("CREATE TABLE IF NOT EXISTS Likes ( LikedBy INTEGER, LikedDream INTEGER, FOREIGN KEY (LikedDream) REFERENCES Dreams(ID), FOREIGN KEY (LikedBy) REFERENCES Users(ID))")
 #cursor.execute("CREATE TABLE IF NOT EXISTS Friendship (ID INTEGER PRIMARY KEY, UserID INTEGER, FriendID INTEGER, FOREIGN KEY (UserID) REFERENCES Users(ID), FOREIGN KEY (FriendID) REFERENCES Users(ID))")
 
 
@@ -298,7 +298,7 @@ def saveTheChanges():
     conn = sqlite3.connect("pocketdreams.db")
     cursor = conn.cursor()
 
-    cursor.execute(" UPDATE Dreams SET Name = ?, Description = ?, IsPrivate = ?, Date = ? WHERE ID = ? ", (name, description, is_private, date, dream_id))
+    cursor.execute("UPDATE Dreams SET Name = ?, Description = ?, IsPrivate = ?, Date = ? WHERE ID = ? ", (name, description, is_private, date, dream_id))
     cursor.execute("DELETE FROM DreamEmotions WHERE DreamID = ?",(dream_id,))
     for emotion in emotions:
         cursor.execute("SELECT ID FROM Emotions WHERE Name = ?", (emotion,))
@@ -331,14 +331,21 @@ def getBackendDreams():
 
     #SELECT DISTINCT d.ID, d.Name, d.Description, 
     cursor.execute("""
-    SELECT DISTINCT d.ID, d.Name, d.Description, d.Date, d.PublicationDate, GROUP_CONCAT(DISTINCT de.EmotionID) as EmotionIDs, GROUP_CONCAT(DISTINCT dt.TagID) as TagIDs, ?
+    SELECT DISTINCT d.ID, 
+                   d.Name, 
+                   d.Description, 
+                   d.Date, d.PublicationDate, 
+                   GROUP_CONCAT(DISTINCT de.EmotionID) as EmotionIDs, 
+                   GROUP_CONCAT(DISTINCT dt.TagID) as TagIDs, 
+                   (SELECT Username FROM Users WHERE ID = d.user),
+                   (SELECT COUNT(ID) FROM Likes WHERE LikedDream = d.ID)
     FROM Dreams d
     JOIN UserTags ut ON ut.UserID = (SELECT ID FROM Users WHERE Username = ?)
     JOIN DreamTags dt ON dt.DreamID = d.ID
     JOIN DreamEmotions de On de.DreamID = d.ID
     WHERE dt.TagID = ut.tagID AND d.User != (SELECT ID FROM Users WHERE Username = ?) AND d.IsPrivate = 0
     GROUP BY d.ID
-    """, (Username, Username, Username))
+    """, (Username, Username))
 
     #LIMIT ? OFFSET ?
     #, Limit, Offset
@@ -354,7 +361,6 @@ def getBackendDreams():
     """, (Username,))
 
     userTags = cursor.fetchall()
-    print(userTags)
 
     conn.commit()
     conn.close()
@@ -364,7 +370,28 @@ def getBackendDreams():
         "message": "You got dreams succesfully",
         "dreamsList": dreams,
         "userTags": userTags 
-        
+    })
+
+
+@app.route("/api/changeBackendLikeStatus", methods=["GET","POST","DELETE"])
+def changeBackendLikeStatus():
+    conn = sqlite3.connect("pocketdreams.db")
+    cursor = conn.cursor()
+    Username = request.args.get("username")
+    Dream = request.args.get("dream")
+
+    cursor.execute("SELECT ID FROM Likes WHERE LikedBy = ?",(Username,))
+    if (cursor.fetchall):
+        cursor.execute("""
+    INSERT INTO Likes (LikedBy, LikedDream) VALUES ((SELECT ID FROM Users WHERE Username = ?), ?)
+    """, (Username,Dream,))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "success": True,
+        "message": "Like status had changed",
     })
 
 if __name__ == "__main__":
