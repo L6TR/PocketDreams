@@ -327,6 +327,9 @@ def getBackendDreams():
     conn = sqlite3.connect("pocketdreams.db")
     cursor = conn.cursor()
 
+    cursor.execute("SELECT ID FROM Users WHERE Username = ?",(Username,))
+    UserId = cursor.fetchone()[0]
+
     cursor.execute("SELECT TagID FROM UserTags WHERE UserID = (SELECT ID FROM Users WHERE Username = ?)",(Username,))
 
     #SELECT DISTINCT d.ID, d.Name, d.Description, 
@@ -338,14 +341,15 @@ def getBackendDreams():
                    GROUP_CONCAT(DISTINCT de.EmotionID) as EmotionIDs, 
                    GROUP_CONCAT(DISTINCT dt.TagID) as TagIDs, 
                    (SELECT Username FROM Users WHERE ID = d.user),
-                   (SELECT COUNT(ID) FROM Likes WHERE LikedDream = d.ID)
+                   (SELECT COUNT(LikedBy) FROM Likes WHERE LikedDream = d.ID),
+                   (SELECT COUNT(LikedBy) FROM Likes WHERE LikedDream = d.ID AND LikedBy = ?)
     FROM Dreams d
-    JOIN UserTags ut ON ut.UserID = (SELECT ID FROM Users WHERE Username = ?)
+    JOIN UserTags ut ON ut.UserID = ?
     JOIN DreamTags dt ON dt.DreamID = d.ID
     JOIN DreamEmotions de On de.DreamID = d.ID
-    WHERE dt.TagID = ut.tagID AND d.User != (SELECT ID FROM Users WHERE Username = ?) AND d.IsPrivate = 0
+    WHERE dt.TagID = ut.tagID AND d.User != ? AND d.IsPrivate = 0
     GROUP BY d.ID
-    """, (Username, Username))
+    """, (UserId, UserId, UserId,))
 
     #LIMIT ? OFFSET ?
     #, Limit, Offset
@@ -373,26 +377,51 @@ def getBackendDreams():
     })
 
 
-@app.route("/api/changeBackendLikeStatus", methods=["GET","POST","DELETE"])
+@app.route("/api/changeBackendLikeStatus", methods=["GET"])
 def changeBackendLikeStatus():
     conn = sqlite3.connect("pocketdreams.db")
     cursor = conn.cursor()
+
+
+
     Username = request.args.get("username")
-    Dream = request.args.get("dream")
+    DreamID = request.args.get("dream")
+    if not Username or not DreamID:
+        conn.close()
+        return jsonify({"success": False, "error": "Missing parameters"}), 400
 
-    cursor.execute("SELECT ID FROM Likes WHERE LikedBy = ?",(Username,))
-    if (cursor.fetchall):
+    print(Username)
+    cursor.execute("SELECT 1 FROM Likes WHERE LikedBy = (SELECT ID FROM Users WHERE Username = ?) AND LikedDream = ?",(Username, DreamID,))
+    
+    if (not cursor.fetchone()):
         cursor.execute("""
-    INSERT INTO Likes (LikedBy, LikedDream) VALUES ((SELECT ID FROM Users WHERE Username = ?), ?)
-    """, (Username,Dream,))
-
-    conn.commit()
-    conn.close()
-
-    return jsonify({
+    INSERT INTO Likes (LikedBy, LikedDream) 
+    VALUES ((SELECT ID FROM Users WHERE Username = ?), ?)
+    """, (Username, DreamID,))
+        conn.commit()
+        conn.close()
+        return jsonify({
         "success": True,
         "message": "Like status had changed",
+        "likeStatus": "created"
     })
+    else:
+        cursor.execute("""
+                        DELETE FROM Likes 
+                        WHERE LikedBy = (SELECT ID FROM Users WHERE Username = ?)
+                        AND LikedDream = ?
+        """, (Username, DreamID))
+        conn.commit()
+        conn.close()
+        return jsonify({
+        "success": True,
+        "message": "Like status had changed",
+        "likeStatus": "deleted",
+    })  
+
+        
+
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

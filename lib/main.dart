@@ -3240,20 +3240,20 @@ InkWell onTabIcon(Icon icon, Future<void> Function() doSomething) {
   return InkWell(onTap: doSomething, child: icon);
 }
 
-Icon likeStatus = Icon(Icons.favorite_border_rounded, color: Colors.grey);
-
 // class for showing our dream inside Tiles
 class TileDream extends Dream {
   final DateTime publicationDate;
   final List<String> emotionsName;
   final String owner;
   final int id;
+  final bool doILikeThis;
 
   TileDream({
     required this.id,
     required this.owner,
     required this.publicationDate,
     required this.emotionsName,
+    required this.doILikeThis,
 
     required super.likes,
     required super.tags,
@@ -3265,11 +3265,17 @@ class TileDream extends Dream {
   });
 }
 
+//                                    //
+// Widget for showing Dreams in Tiles //
+//                                    //
 class _DreamViev extends State<DreamViev> {
   List? tileDreams;
   List<TileDream> tileDreamsList = [];
   dynamic userTags;
 
+  //
+  // getting dreams from the backend
+  //
   Future<void> getBackendDreams() async {
     final response = await http.get(
       Uri.parse("$server/api/getBackendDreams?username=$user"),
@@ -3324,7 +3330,8 @@ class _DreamViev extends State<DreamViev> {
             describe: dream[2],
             emotionsName: emotionsName,
             owner: dream[7],
-            likes: dream[8] ?? "0",
+            likes: dream[8] ?? 0,
+            doILikeThis: dream[9] == 1,
           ),
         );
       }
@@ -3337,6 +3344,7 @@ class _DreamViev extends State<DreamViev> {
     //print(userTags);
   }
 
+  // getting dreams at the start
   @override
   void initState() {
     getBackendDreams();
@@ -3365,7 +3373,10 @@ class _DreamViev extends State<DreamViev> {
   }
 }
 
-class Tile extends StatelessWidget {
+//                      //
+// Creating Tiles Part  //
+//                      //
+class Tile extends StatefulWidget {
   final int index;
   final double maxHeight;
   final TileDream dream;
@@ -3377,15 +3388,43 @@ class Tile extends StatelessWidget {
     required this.dream,
   });
 
-  Future<void> changeBackendLikeStatus() async {
-    final response = await http.get(
-      Uri.parse(
-        "$server/api/getBackendDreams?username=$user&dream=${dream.id}",
-      ),
-      headers: {"Content-Type": "application/json"},
-    );
+  @override
+  State<Tile> createState() => _TileState();
+}
 
-    final data = json.decode(response.body);
+class _TileState extends State<Tile> {
+  late bool localIsLiked;
+  late int localLikesCount;
+
+  @override
+  void initState() {
+    super.initState();
+    localIsLiked = widget.dream.doILikeThis;
+    localLikesCount = widget.dream.likes;
+  }
+
+  Future<void> changeBackendLikeStatus() async {
+    setState(() {
+      localIsLiked = !localIsLiked;
+      localIsLiked ? localLikesCount++ : localLikesCount--;
+    });
+
+    try {
+      final response = await http.get(
+        Uri.parse(
+          "$server/api/changeBackendLikeStatus?username=$user&dream=${widget.dream.id}",
+        ),
+        headers: {"Content-Type": "application/json"},
+      );
+
+      final data = json.decode(response.body);
+      print(data["likeStatus"]);
+    } catch (error) {
+      setState(() {
+        localIsLiked = !localIsLiked;
+        localIsLiked ? localLikesCount++ : localLikesCount--;
+      });
+    }
   }
 
   @override
@@ -3413,18 +3452,21 @@ class Tile extends StatelessWidget {
                 bottom: 2,
               ),
               decoration: BoxDecoration(
-                color: dream.emotionColor,
+                color: widget.dream.emotionColor,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Text(dream.name, textAlign: TextAlign.center),
+              child: Text(widget.dream.name, textAlign: TextAlign.center),
             ),
-            Text("User: ${dream.owner}", style: TextStyle(color: Colors.white)),
+            Text(
+              "User: ${widget.dream.owner}",
+              style: TextStyle(color: Colors.white),
+            ),
             // middle part
             Container(
               width: double.infinity,
               margin: const EdgeInsets.all(5),
               child: Text(
-                dream.describe,
+                widget.dream.describe,
                 textAlign: TextAlign.start,
                 style: TextStyle(color: Colors.white),
               ),
@@ -3436,11 +3478,19 @@ class Tile extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // likes
-                  onTabIcon(likeStatus, changeBackendLikeStatus),
+                  onTabIcon(
+                    Icon(
+                      localIsLiked ? Icons.favorite : Icons.favorite_border,
+                      color: localIsLiked
+                          ? widget.dream.emotionColor
+                          : Colors.grey,
+                    ),
+                    changeBackendLikeStatus,
+                  ),
                   Container(
                     margin: EdgeInsets.only(left: 3),
                     child: Text(
-                      dream.likes.toString(),
+                      localLikesCount.toString(),
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
@@ -3455,7 +3505,7 @@ class Tile extends StatelessWidget {
             ),
             Wrap(
               children: [
-                for (String tag in dream.tags)
+                for (String tag in widget.dream.tags)
                   // Container for our tags
                   Container(
                     margin: EdgeInsets.all(2),
