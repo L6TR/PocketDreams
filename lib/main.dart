@@ -3403,6 +3403,7 @@ class _TileState extends State<Tile> {
     localLikesCount = widget.dream.likes;
   }
 
+  // api function for liking
   Future<void> changeBackendLikeStatus() async {
     setState(() {
       localIsLiked = !localIsLiked;
@@ -3418,13 +3419,30 @@ class _TileState extends State<Tile> {
       );
 
       final data = json.decode(response.body);
-      print(data["likeStatus"]);
     } catch (error) {
       setState(() {
         localIsLiked = !localIsLiked;
         localIsLiked ? localLikesCount++ : localLikesCount--;
       });
     }
+  }
+
+  // api function for getting commenst for the dream
+  Future<void> getComments() async {
+    setState(() {});
+
+    //try {
+    final response = await http.get(
+      Uri.parse("$server/api/getComments?dream=${widget.dream.id}"),
+      headers: {"Content-Type": "application/json"},
+    );
+
+    final data = json.decode(response.body);
+    print(data);
+    /*} catch (error) {
+      setState(() {
+      });
+    }*/
   }
 
   @override
@@ -3498,7 +3516,7 @@ class _TileState extends State<Tile> {
                   // comments
                   onTabIcon(
                     Icon(Icons.comment, color: Colors.grey),
-                    changeBackendLikeStatus,
+                    getComments,
                   ),
                 ],
               ),

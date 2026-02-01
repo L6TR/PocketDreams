@@ -318,6 +318,10 @@ def saveTheChanges():
         "message": "Dream was edited successfully"
     })
 
+#
+# function that get dreams from backend by chosen tags by user
+# dream is id, name, description, date, publication date, emotions, tags, owner, likes and we had given a like 
+#
 @app.route("/api/getBackendDreams", methods=["GET"])
 def getBackendDreams():
     Username = request.args.get("username")
@@ -376,13 +380,11 @@ def getBackendDreams():
         "userTags": userTags 
     })
 
-
+# function for liking
 @app.route("/api/changeBackendLikeStatus", methods=["GET"])
 def changeBackendLikeStatus():
     conn = sqlite3.connect("pocketdreams.db")
     cursor = conn.cursor()
-
-
 
     Username = request.args.get("username")
     DreamID = request.args.get("dream")
@@ -420,6 +422,33 @@ def changeBackendLikeStatus():
     })  
 
         
+@app.route("/api/getComments", methods=["GET"])
+def getComments():
+    DreamID = request.args.get("dream")
+    if (not DreamID):
+        return jsonify({
+            "success": False,
+            "message": "Dream does not exist",
+        }), 400
+
+    conn = sqlite3.connect("pocketdreams.db")
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT * FROM Comments WHERE CommentedDream = ?
+    """, (DreamID,))
+    comments = cursor.fetchall()
+    print(comments)
+    if comments == []:
+        return jsonify({
+        "success": True,
+        "message": "This dream has no comments yet",
+    })
+    else:
+        pass
+
+    conn.commit()
+    conn.close()
 
 
 
