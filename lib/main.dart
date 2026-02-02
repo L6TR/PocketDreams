@@ -107,7 +107,7 @@ double mixHues(List<double> hues) {
 }
 
 String user = "merunka";
-String server = "http://10.0.1.12:5000";
+String server = "http://192.168.0.233:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -3429,8 +3429,6 @@ class _TileState extends State<Tile> {
 
   // api function for getting commenst for the dream
   Future<void> getComments() async {
-    setState(() {});
-
     //try {
     final response = await http.get(
       Uri.parse("$server/api/getComments?dream=${widget.dream.id}"),
@@ -3443,6 +3441,21 @@ class _TileState extends State<Tile> {
       setState(() {
       });
     }*/
+  }
+
+  Future<void> showCommentsSheet() async {
+    getComments();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color.fromARGB(255, 7, 7, 7),
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return SizedBox(height: 300, width: double.infinity);
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -3516,7 +3529,7 @@ class _TileState extends State<Tile> {
                   // comments
                   onTabIcon(
                     Icon(Icons.comment, color: Colors.grey),
-                    getComments,
+                    showCommentsSheet,
                   ),
                 ],
               ),
