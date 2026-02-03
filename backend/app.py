@@ -443,6 +443,7 @@ def getComments():
         return jsonify({
         "success": True,
         "message": "This dream has no comments yet",
+        "comments": [],
     })
     else:
         pass

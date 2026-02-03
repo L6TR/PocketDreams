@@ -107,7 +107,7 @@ double mixHues(List<double> hues) {
 }
 
 String user = "merunka";
-String server = "http://192.168.0.233:5000";
+String server = "http://10.1.133.178:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -3428,7 +3428,7 @@ class _TileState extends State<Tile> {
   }
 
   // api function for getting commenst for the dream
-  Future<void> getComments() async {
+  Future<List<List<Map<String, String>>>> getComments() async {
     //try {
     final response = await http.get(
       Uri.parse("$server/api/getComments?dream=${widget.dream.id}"),
@@ -3437,21 +3437,50 @@ class _TileState extends State<Tile> {
 
     final data = json.decode(response.body);
     print(data);
-    /*} catch (error) {
-      setState(() {
-      });
-    }*/
+    return [
+      [{}],
+    ];
   }
 
   Future<void> showCommentsSheet() async {
-    getComments();
+    // first list is a list of comments
+    // second is a list of comment attributes
+    // map is this attribustes
+    List<List<Map<String, String>>> comments =
+        await getComments() ??
+        [
+          [{}],
+        ];
+    print(comments);
+
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color.fromARGB(255, 7, 7, 7),
       builder: (sheetContext) {
         return StatefulBuilder(
           builder: (context, setSheetState) {
-            return SizedBox(height: 300, width: double.infinity);
+            return SizedBox(
+              height: 300,
+              width: double.infinity,
+              child: Column(
+                children: [
+                  Container(
+                    margin: EdgeInsets.all(7),
+                    child: Text(
+                      "Comments",
+                      style: TextStyle(color: Colors.white, fontSize: 20),
+                    ),
+                  ),
+                  Spacer(),
+                  Container(
+                    margin: EdgeInsets.only(right: 75, left: 75, bottom: 20),
+                    color: Colors.white,
+                    height: 35,
+                    width: 120,
+                  ),
+                ],
+              ),
+            );
           },
         );
       },
