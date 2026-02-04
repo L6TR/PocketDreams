@@ -438,12 +438,12 @@ def getComments():
         SELECT * FROM Comments WHERE CommentedDream = ?
     """, (DreamID,))
     comments = cursor.fetchall()
-    print(comments)
-    if comments == []:
+    if not comments:
         return jsonify({
         "success": True,
         "message": "This dream has no comments yet",
-        "comments": [],
+        "noComments": True,
+        "comments": [[]],
     })
     else:
         pass

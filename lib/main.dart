@@ -107,7 +107,7 @@ double mixHues(List<double> hues) {
 }
 
 String user = "merunka";
-String server = "http://10.1.133.178:5000";
+String server = "http://192.168.0.233:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -3176,7 +3176,6 @@ class _CalendarState extends State<Calendar> {
                                                           });
                                                         }
                                                       },
-
                                                       Colors.white,
                                                       mainColor,
                                                     ),
@@ -3198,7 +3197,6 @@ class _CalendarState extends State<Calendar> {
                                     for (Hemotion e in tempEmotions) {
                                       tempEmotionsName.add(e.name);
                                     }
-
                                     _id = dream.id;
                                     _tags = tempTags;
                                     _emotions = tempEmotionsName;
@@ -3436,7 +3434,9 @@ class _TileState extends State<Tile> {
     );
 
     final data = json.decode(response.body);
-    print(data);
+    if (data["noComments"]) {
+      print("hi");
+    }
     return [
       [{}],
     ];
@@ -3446,12 +3446,7 @@ class _TileState extends State<Tile> {
     // first list is a list of comments
     // second is a list of comment attributes
     // map is this attribustes
-    List<List<Map<String, String>>> comments =
-        await getComments() ??
-        [
-          [{}],
-        ];
-    print(comments);
+    List<List<Map<String, String>>> comments = await getComments();
 
     showModalBottomSheet(
       context: context,
@@ -3471,12 +3466,38 @@ class _TileState extends State<Tile> {
                       style: TextStyle(color: Colors.white, fontSize: 20),
                     ),
                   ),
+                  if (comments[0][0].isEmpty)
+                    Column(
+                      children: [
+                        Text(
+                          "No comments yet",
+                          style: TextStyle(color: Colors.white70, fontSize: 20),
+                        ),
+                        Text(
+                          "But you could be first",
+                          style: TextStyle(color: Colors.white30, fontSize: 16),
+                        ),
+                      ],
+                    ),
                   Spacer(),
                   Container(
                     margin: EdgeInsets.only(right: 75, left: 75, bottom: 20),
-                    color: Colors.white,
-                    height: 35,
-                    width: 120,
+                    height: 25,
+                    width: 145,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.white,
+                    ),
+                    child: InkWell(
+                      child: Text(
+                        "Write a comment",
+                        style: TextStyle(fontSize: 16),
+                        textAlign: TextAlign.center,
+                      ),
+                      onTap: () {
+                        print("hola");
+                      },
+                    ),
                   ),
                 ],
               ),
