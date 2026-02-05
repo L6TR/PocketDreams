@@ -31,6 +31,9 @@ final List<Hemotion> hSLemotions = [
 
   Hemotion(name: "Warmth", color: HSLColor.fromAHSL(1.0, 39.0, 0.7, 0.5)),
   Hemotion(name: "Fear", color: HSLColor.fromAHSL(1.0, 275.0, 0.7, 0.5)),
+
+  Hemotion(name: "Sadness", color: HSLColor.fromAHSL(1.0, 220.0, 0.7, 0.5)),
+  Hemotion(name: "Anger", color: HSLColor.fromAHSL(1.0, 0.0, 0.85, 0.5)),
 ];
 
 HSLColor mixEmotions(List<HSLColor> emotions) {
@@ -107,7 +110,7 @@ double mixHues(List<double> hues) {
 }
 
 String user = "merunka";
-String server = "http://192.168.0.233:5000";
+String server = "http://10.93.41.4:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -3443,6 +3446,8 @@ class _TileState extends State<Tile> {
   }
 
   Future<void> showCommentsSheet() async {
+    final TextEditingController _commentController = TextEditingController();
+
     // first list is a list of comments
     // second is a list of comment attributes
     // map is this attribustes
@@ -3450,56 +3455,72 @@ class _TileState extends State<Tile> {
 
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       backgroundColor: const Color.fromARGB(255, 7, 7, 7),
       builder: (sheetContext) {
         return StatefulBuilder(
           builder: (context, setSheetState) {
-            return SizedBox(
-              height: 300,
-              width: double.infinity,
-              child: Column(
-                children: [
-                  Container(
-                    margin: EdgeInsets.all(7),
-                    child: Text(
-                      "Comments",
-                      style: TextStyle(color: Colors.white, fontSize: 20),
-                    ),
-                  ),
-                  if (comments[0][0].isEmpty)
-                    Column(
-                      children: [
-                        Text(
-                          "No comments yet",
-                          style: TextStyle(color: Colors.white70, fontSize: 20),
-                        ),
-                        Text(
-                          "But you could be first",
-                          style: TextStyle(color: Colors.white30, fontSize: 16),
-                        ),
-                      ],
-                    ),
-                  Spacer(),
-                  Container(
-                    margin: EdgeInsets.only(right: 75, left: 75, bottom: 20),
-                    height: 25,
-                    width: 145,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      color: Colors.white,
-                    ),
-                    child: InkWell(
+            // Padding is cool
+            // Love padding
+            // it goes up with your keybord when you awake she
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: SizedBox(
+                height: 300,
+                width: double.infinity,
+                child: Column(
+                  children: [
+                    Container(
+                      margin: EdgeInsets.all(7),
                       child: Text(
-                        "Write a comment",
-                        style: TextStyle(fontSize: 16),
-                        textAlign: TextAlign.center,
+                        "Comments",
+                        style: TextStyle(color: Colors.white, fontSize: 20),
                       ),
-                      onTap: () {
-                        print("hola");
-                      },
                     ),
-                  ),
-                ],
+                    if (comments[0][0].isEmpty)
+                      Column(
+                        children: [
+                          Text(
+                            "No comments yet",
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 20,
+                            ),
+                          ),
+                          Text(
+                            "But you could be the first.",
+                            style: TextStyle(
+                              color: Colors.white30,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    Spacer(),
+                    // Write a new comment part
+                    Container(
+                      margin: EdgeInsets.only(right: 50, left: 50, bottom: 20),
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: TextField(
+                        controller: _commentController,
+                        decoration: InputDecoration(
+                          hintText: "Write new comment",
+                          // x button for clear
+                          suffixIcon: IconButton(
+                            onPressed: () => _commentController.clear(),
+                            icon: Icon(Icons.clear),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           },

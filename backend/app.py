@@ -28,6 +28,7 @@ cursor = conn.cursor() # we need this one for our SQL commands
 
 #cursor.execute("CREATE TABLE IF NOT EXISTS Users (ID INTEGER PRIMARY KEY, Username TEXT, HashPassword TEXT)")
 #cursor.execute("CREATE TABLE IF NOT EXISTS Emotions (ID INTEGER PRIMARY KEY, Name TEXT)")
+#cursor.execute("INSERT INTO Emotions (Name) VALUES ('Happiness'), ('Love'), ('Calm'), ('Harmony'), ('Freedom'), ('Creativity'), ('Purity'), ('Depth'),('Warmth'),('Fear'), ('Sadness'), ('Anger') ;")
 
 
 #cursor.execute("CREATE TABLE IF NOT EXISTS Dreams (ID INTEGER PRIMARY KEY, Name TEXT, Description TEXT, Date INTEGER, IsPrivate INTEGER, PublicationDate INTEGER, User INTEGER, FOREIGN KEY (User) REFERENCES Users(ID));")
