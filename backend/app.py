@@ -28,7 +28,7 @@ cursor = conn.cursor() # we need this one for our SQL commands
 
 #cursor.execute("CREATE TABLE IF NOT EXISTS Users (ID INTEGER PRIMARY KEY, Username TEXT, HashPassword TEXT)")
 #cursor.execute("CREATE TABLE IF NOT EXISTS Emotions (ID INTEGER PRIMARY KEY, Name TEXT)")
-#cursor.execute("INSERT INTO Emotions (Name) VALUES ('Happiness'), ('Love'), ('Calm'), ('Harmony'), ('Freedom'), ('Creativity'), ('Purity'), ('Depth'),('Warmth'),('Fear'), ('Sadness'), ('Anger') ;")
+#cursor.execute("INSERT INTO Emotions (Name) VALUES ('Happiness'), ('Love'), ('Calm'), ('Harmony'), ('Freedom'), ('Creativity'), ('Purity'), ('Depth'),('Warmth'),('Fear'), ('Sadness'), ('Anger'), ('Shame') ;")
 
 
 #cursor.execute("CREATE TABLE IF NOT EXISTS Dreams (ID INTEGER PRIMARY KEY, Name TEXT, Description TEXT, Date INTEGER, IsPrivate INTEGER, PublicationDate INTEGER, User INTEGER, FOREIGN KEY (User) REFERENCES Users(ID));")
@@ -423,7 +423,7 @@ def changeBackendLikeStatus():
     })  
 
         
-@app.route("/api/getComments", methods=["GET"])
+@app.route("/api/getComments")
 def getComments():
     DreamID = request.args.get("dream")
     if (not DreamID):
@@ -440,6 +440,7 @@ def getComments():
     """, (DreamID,))
     comments = cursor.fetchall()
     if not comments:
+        conn.close()
         return jsonify({
         "success": True,
         "message": "This dream has no comments yet",
@@ -447,11 +448,48 @@ def getComments():
         "comments": [[]],
     })
     else:
-        pass
+        cursor.execute("SELECT * FROM Comments")
+        rawComments = cursor.fetchall()
+        comments = []
+        #for every comment
+        for comm in rawComments:
+            comments.append({"CommentID": comm[0], "Description": comm[1], "Date": comm[2], "DreamID": comm[3]})
+        print(comments) 
+        
+        conn.close()
+        return jsonify({
+        "success": True,
+        "message": "Here you have your comments",
+        "noComments": False,
+        "comments": comments,
+    })
+
+# function for adding our comments
+@app.route("/api/sendYourComment")
+def sendYourComment():
+    comment = request.args.get("comment")
+    user = request.args.get("user")
+    dreamID = request.args.get("dreamID")
+    date= request.args.get("date")
+
+    if (not comment or not user or not dreamID or not date):
+        return jsonify({
+        "success": False,
+        "message": "Wrong data",
+    }), 400
+
+    conn = sqlite3.connect("pocketdreams.db")
+    cursor = conn.cursor()
+
+    cursor.execute("INSERT INTO Comments (CommentedText, CreatedAt, CommentedBy, CommentedDream) VALUES (?,?,?,?)", (comment,date,user,dreamID))
 
     conn.commit()
     conn.close()
 
+    return jsonify({
+        "success": True,
+        "message": "Your comment was added",
+    })
 
 
 if __name__ == "__main__":

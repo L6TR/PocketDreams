@@ -34,6 +34,8 @@ final List<Hemotion> hSLemotions = [
 
   Hemotion(name: "Sadness", color: HSLColor.fromAHSL(1.0, 220.0, 0.7, 0.5)),
   Hemotion(name: "Anger", color: HSLColor.fromAHSL(1.0, 0.0, 0.85, 0.5)),
+
+  Hemotion(name: "Shame", color: HSLColor.fromAHSL(1.0, 260.0, 0.4, 0.35)),
 ];
 
 HSLColor mixEmotions(List<HSLColor> emotions) {
@@ -63,7 +65,7 @@ double mixLinear(List<double> values) {
 }*/
 
 // by this function we are getting from a Int date like 20251209 => DateTime 2025-12-09
-DateTime cutADate(int date) {
+DateTime intToDate(int date) {
   int year = date ~/ 10000;
   int month = ((date % 10000) ~/ 100);
   int day = (date % 100);
@@ -110,7 +112,7 @@ double mixHues(List<double> hues) {
 }
 
 String user = "merunka";
-String server = "http://10.93.41.4:5000";
+String server = "http://10.0.1.12:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -853,8 +855,8 @@ class _BaseState extends State<Base> {
       bottomNavigationBar: NavigationBar(
         destinations: [
           NavigationDestination(
-            icon: Icon(Icons.chat, color: Colors.white),
-            label: "Chat",
+            icon: Icon(Icons.dashboard, color: Colors.white),
+            label: "Tiles",
           ),
           NavigationDestination(
             icon: Icon(Icons.cloud, color: Colors.white),
@@ -1016,7 +1018,7 @@ class Dream {
 
 // make from date format in integer like yearmonthday
 // like if we have 2025.12.04 we create 20251204
-int rightDateFormat(date) {
+int dateToInt(date) {
   // if we have for example 4 month we need 04, that means if we have month < 10 we are adding 0
   String month = date.month < 10
       ? "0${date.month.toString()}"
@@ -1101,11 +1103,11 @@ class _TodaysDreamState extends State<TodaysDream> {
       body: json.encode({
         "Name": _name,
         "Description": _description,
-        "Date": rightDateFormat(_chosenDate),
+        "Date": dateToInt(_chosenDate),
         "IsPrivate": _isPrivate,
         "Tags": _tags,
         "User": user,
-        "PublicationDate": rightDateFormat(DateTime.now()),
+        "PublicationDate": dateToInt(DateTime.now()),
         "Emotions": _emotions,
       }),
     );
@@ -1895,9 +1897,9 @@ class _CalendarState extends State<Calendar> {
             id: cDream["ID"],
             name: cDream["Name"],
             description: cDream["Description"],
-            date: normalize(cutADate(cDream["Date"])),
+            date: normalize(intToDate(cDream["Date"])),
             isPrivate: (cDream["IsPrivate"] == 1),
-            publicationDate: cutADate(cDream["PublicationDate"]),
+            publicationDate: intToDate(cDream["PublicationDate"]),
             tags: cDream["Tags"],
             emotions: cDream["Emotions"],
             user: cDream["User"],
@@ -1908,7 +1910,7 @@ class _CalendarState extends State<Calendar> {
       dreams.clear();
       _dreamsList = dreamsList;
       for (int c = 0; c < _dreamsList.length; c++) {
-        DateTime date = cutADate(_dreamsList[c]["Date"]);
+        DateTime date = intToDate(_dreamsList[c]["Date"]);
         final key = normalize(date);
 
         final List<String> dEmotions = List<String>.from(
@@ -3203,7 +3205,7 @@ class _CalendarState extends State<Calendar> {
                                     _id = dream.id;
                                     _tags = tempTags;
                                     _emotions = tempEmotionsName;
-                                    _date = rightDateFormat(tempDate);
+                                    _date = dateToInt(tempDate);
                                     _privacity = (tempPrivacity ? 1 : 0);
                                     _tempName = tempName;
                                     _description = tempDescription;
@@ -3285,7 +3287,6 @@ class _DreamViev extends State<DreamViev> {
 
     final data = json.decode(response.body);
     tileDreams = data["dreamsList"];
-    print(tileDreams);
 
     tileDreamsList.clear();
 
@@ -3322,10 +3323,10 @@ class _DreamViev extends State<DreamViev> {
         tileDreamsList.add(
           TileDream(
             id: dream[0],
-            publicationDate: normalize(cutADate(dream[4])),
+            publicationDate: normalize(intToDate(dream[4])),
             tags: tagsName,
             name: dream[1],
-            date: normalize(cutADate(dream[3])),
+            date: normalize(intToDate(dream[3])),
             isPrivate: 0,
             emotionColor: mixEmotions(emotionsColor).toColor(),
             describe: dream[2],
@@ -3423,9 +3424,19 @@ class _TileState extends State<Tile> {
     } catch (error) {
       setState(() {
         localIsLiked = !localIsLiked;
-        localIsLiked ? localLikesCount++ : localLikesCount--;
+        localIsLiked ? localLikesCount-- : localLikesCount++;
       });
     }
+  }
+
+  // sending our text to the backend
+  Future<void> sendYourComment(String comment, int dreamID, int date) async {
+    final response = await http.get(
+      Uri.parse(
+        "$server/api/sendYourComment?comment=$comment&user=$user&dreamID=$dreamID&date=$date",
+      ),
+      headers: {"Content-Type": "application/json"},
+    );
   }
 
   // api function for getting commenst for the dream
@@ -3437,16 +3448,14 @@ class _TileState extends State<Tile> {
     );
 
     final data = json.decode(response.body);
-    if (data["noComments"]) {
-      print("hi");
-    }
+    if (data["noComments"]) {}
     return [
       [{}],
     ];
   }
 
   Future<void> showCommentsSheet() async {
-    final TextEditingController _commentController = TextEditingController();
+    final TextEditingController commentController = TextEditingController();
 
     // first list is a list of comments
     // second is a list of comment attributes
@@ -3467,8 +3476,9 @@ class _TileState extends State<Tile> {
               padding: EdgeInsets.only(
                 bottom: MediaQuery.of(context).viewInsets.bottom,
               ),
+              // all comments + adding new
               child: SizedBox(
-                height: 300,
+                height: 650,
                 width: double.infinity,
                 child: Column(
                   children: [
@@ -3499,25 +3509,47 @@ class _TileState extends State<Tile> {
                         ],
                       ),
                     Spacer(),
-                    // Write a new comment part
-                    Container(
-                      margin: EdgeInsets.only(right: 50, left: 50, bottom: 20),
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: TextField(
-                        controller: _commentController,
-                        decoration: InputDecoration(
-                          hintText: "Write new comment",
-                          // x button for clear
-                          suffixIcon: IconButton(
-                            onPressed: () => _commentController.clear(),
-                            icon: Icon(Icons.clear),
+                    Row(
+                      children: [
+                        // Write a new comment part
+                        Container(
+                          margin: EdgeInsets.only(
+                            right: 20,
+                            left: 20,
+                            bottom: 20,
+                          ),
+                          width: 250,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          // Column for writting comments
+                          child: TextField(
+                            controller: commentController,
+                            decoration: InputDecoration(
+                              hintText: "Write new comment",
+                              // x button for clear
+                              suffixIcon: IconButton(
+                                onPressed: () => commentController.clear(),
+                                icon: Icon(Icons.clear),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                        Container(
+                          margin: EdgeInsets.only(bottom: 16),
+                          child: OutlinedButton(
+                            onPressed: commentController.text.isNotEmpty
+                                ? () => sendYourComment(
+                                    commentController.text,
+                                    widget.dream.id,
+                                    dateToInt(DateTime.now()),
+                                  )
+                                : null,
+                            child: Icon(Icons.send, color: cloudPink()),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
