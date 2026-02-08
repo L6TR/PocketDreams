@@ -243,12 +243,15 @@ def askAboutDreams():
 
         for tag in dreamTags:
             cursor.execute("SELECT Name FROM Tags WHERE ID = ?", (tag[0],))
-        
             Tags.append(cursor.fetchone()[0])
+
         for emotion in dreamEmotions:
             cursor.execute("SELECT Name FROM Emotions WHERE ID = ?", (emotion[0],))
-            
             Emotions.append(cursor.fetchone()[0])
+        
+        cursor.execute("SELECT COUNT(LikedBy) FROM Likes WHERE LikedDream = ?", (dreamID,))
+        Likes = cursor.fetchone()[0]
+
 
         
         dreamsListJSON.append({
@@ -261,6 +264,7 @@ def askAboutDreams():
             "User": Username,
             "Tags": Tags,
             "Emotions": Emotions,
+            "Likes": Likes
             })
     
     return jsonify({"success": True, "dreamsList": dreamsListJSON, "message": "You are here"})  
@@ -422,11 +426,11 @@ def changeBackendLikeStatus():
         "likeStatus": "deleted",
     })  
 
-        
+# sending to the front end all comments what we have (if we have something)
 @app.route("/api/getComments")
 def getComments():
     DreamID = request.args.get("dream")
-    if (not DreamID):
+    if not DreamID:
         return jsonify({
             "success": False,
             "message": "Dream does not exist",
@@ -436,33 +440,48 @@ def getComments():
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT * FROM Comments WHERE CommentedDream = ?
+        SELECT 
+            c.ID,
+            c.CommentedText, 
+            c.CreatedAt, 
+            u.Username,
+            c.CommentedDream
+        FROM Comments c
+        JOIN Users u ON u.ID = c.CommentedBy
+        WHERE c.CommentedDream = ?
     """, (DreamID,))
-    comments = cursor.fetchall()
-    if not comments:
+
+    rows = cursor.fetchall()
+
+    if not rows:
         conn.close()
         return jsonify({
-        "success": True,
-        "message": "This dream has no comments yet",
-        "noComments": True,
-        "comments": [[]],
-    })
-    else:
-        cursor.execute("SELECT * FROM Comments")
-        rawComments = cursor.fetchall()
-        comments = []
-        #for every comment
-        for comm in rawComments:
-            comments.append({"CommentID": comm[0], "Description": comm[1], "Date": comm[2], "DreamID": comm[3]})
-        print(comments) 
-        
-        conn.close()
-        return jsonify({
+            "success": True,
+            "message": "This dream has no comments yet",
+            "noComments": True,
+            "comments": [],
+        })
+
+    # for every comment
+    comments = [
+        {
+            "CommentID": c[0],
+            "Description": c[1],
+            "Date": c[2],
+            "CommentedBy": c[3],
+            "DreamID": c[4]
+        }
+        for c in rows
+    ]
+
+    conn.close()
+    return jsonify({
         "success": True,
         "message": "Here you have your comments",
         "noComments": False,
         "comments": comments,
     })
+
 
 # function for adding our comments
 @app.route("/api/sendYourComment")
@@ -481,7 +500,17 @@ def sendYourComment():
     conn = sqlite3.connect("pocketdreams.db")
     cursor = conn.cursor()
 
-    cursor.execute("INSERT INTO Comments (CommentedText, CreatedAt, CommentedBy, CommentedDream) VALUES (?,?,?,?)", (comment,date,user,dreamID))
+    cursor.execute("""INSERT INTO Comments 
+                   (CommentedText, 
+                   CreatedAt, 
+                   CommentedBy, 
+                   CommentedDream) 
+                   VALUES 
+                   (?,
+                   ?,
+                   (SELECT ID FROM Users WHERE Username = ?),
+                   ?)
+                   """, (comment,date,user,dreamID))
 
     conn.commit()
     conn.close()

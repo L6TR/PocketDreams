@@ -1851,8 +1851,10 @@ class CalendarDay {
   List<dynamic> tags;
   List<dynamic> emotions;
   String user;
+  int likes;
 
   CalendarDay({
+    required this.likes,
     required this.id,
     required this.name,
     required this.description,
@@ -1903,6 +1905,7 @@ class _CalendarState extends State<Calendar> {
             tags: cDream["Tags"],
             emotions: cDream["Emotions"],
             user: cDream["User"],
+            likes: cDream["Likes"] ?? 0,
           ),
         );
       }
@@ -2154,6 +2157,7 @@ class _CalendarState extends State<Calendar> {
     String tempName = dream.name;
     bool tempPrivacity = dream.isPrivate;
     DateTime tempDate = dream.date;
+    int tempLikes = dream.likes;
 
     List<Hemotion> tempEmotions = [];
     void getEmotionsFromTheDB() {
@@ -2251,7 +2255,7 @@ class _CalendarState extends State<Calendar> {
                 backgroundColor: const Color.fromARGB(255, 5, 5, 5),
                 content: /*maybe we need to put it into the function*/ SizedBox(
                   width: 250,
-                  height: 470,
+                  height: 520,
                   child: Column(
                     children: [
                       // top part
@@ -2844,6 +2848,12 @@ class _CalendarState extends State<Calendar> {
                             ),
                           ],
                         ),
+                      ),
+
+                      Icon(
+                        dream.likes != 0
+                            ? Icons.favorite
+                            : Icons.favorite_border,
                       ),
                       // bottom part
                       Expanded(
@@ -3440,7 +3450,7 @@ class _TileState extends State<Tile> {
   }
 
   // api function for getting commenst for the dream
-  Future<List<List<Map<String, String>>>> getComments() async {
+  Future<List<Map<String, dynamic>>> getComments() async {
     //try {
     final response = await http.get(
       Uri.parse("$server/api/getComments?dream=${widget.dream.id}"),
@@ -3448,10 +3458,10 @@ class _TileState extends State<Tile> {
     );
 
     final data = json.decode(response.body);
-    if (data["noComments"]) {}
-    return [
-      [{}],
-    ];
+    if (data["noComments"]) {
+      return [];
+    }
+    return List<Map<String, dynamic>>.from(data["comments"]);
   }
 
   Future<void> showCommentsSheet() async {
@@ -3460,7 +3470,7 @@ class _TileState extends State<Tile> {
     // first list is a list of comments
     // second is a list of comment attributes
     // map is this attribustes
-    List<List<Map<String, String>>> comments = await getComments();
+    List<Map<String, dynamic>> comments = await getComments();
 
     showModalBottomSheet(
       context: context,
@@ -3479,7 +3489,6 @@ class _TileState extends State<Tile> {
               // all comments + adding new
               child: SizedBox(
                 height: 650,
-                width: double.infinity,
                 child: Column(
                   children: [
                     Container(
@@ -3489,63 +3498,129 @@ class _TileState extends State<Tile> {
                         style: TextStyle(color: Colors.white, fontSize: 20),
                       ),
                     ),
-                    if (comments[0][0].isEmpty)
-                      Column(
-                        children: [
-                          Text(
-                            "No comments yet",
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 20,
+                    Expanded(
+                      child: comments.isEmpty
+                          ? Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Text(
+                                  "No comments yet",
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 20,
+                                  ),
+                                ),
+                                SizedBox(height: 5),
+                                Text(
+                                  "But you could be the first.",
+                                  style: TextStyle(
+                                    color: Colors.white30,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : ListView.builder(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              itemCount: comments.length,
+                              itemBuilder: (context, i) {
+                                final comment = comments[i];
+                                return Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      width: 3,
+                                      color: Colors.white70,
+                                    ),
+                                    borderRadius: BorderRadius.circular(5),
+                                    color: Colors.black87,
+                                  ),
+                                  width: double.infinity,
+                                  margin: const EdgeInsets.all(10),
+                                  child: Container(
+                                    margin: const EdgeInsets.all(5),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Text(
+                                              "dreamer: ${comment["CommentedBy"]}",
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            const Spacer(),
+                                            Text(
+                                              "${intToDate(comment["Date"]).year}-${intToDate(comment["Date"]).month}-${intToDate(comment["Date"]).day}",
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                comment["Description"],
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
-                          ),
-                          Text(
-                            "But you could be the first.",
-                            style: TextStyle(
-                              color: Colors.white30,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ],
-                      ),
-                    Spacer(),
+                    ),
                     Row(
                       children: [
                         // Write a new comment part
                         Container(
-                          margin: EdgeInsets.only(
-                            right: 20,
-                            left: 20,
-                            bottom: 20,
-                          ),
-                          width: 250,
+                          margin: EdgeInsets.only(left: 20, bottom: 20),
+                          width: 275,
                           decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.black87,
+                            borderRadius: BorderRadius.circular(5),
                           ),
                           // Column for writting comments
                           child: TextField(
+                            style: TextStyle(color: Colors.white),
                             controller: commentController,
+                            cursorColor: cloudPink(),
                             decoration: InputDecoration(
                               hintText: "Write new comment",
+                              hintStyle: TextStyle(color: Colors.white),
                               // x button for clear
                               suffixIcon: IconButton(
                                 onPressed: () => commentController.clear(),
-                                icon: Icon(Icons.clear),
+                                icon: Icon(Icons.clear, color: Colors.white),
                               ),
                             ),
                           ),
                         ),
+                        Spacer(),
+                        // send button
                         Container(
                           margin: EdgeInsets.only(bottom: 16),
                           child: OutlinedButton(
-                            onPressed: commentController.text.isNotEmpty
-                                ? () => sendYourComment(
-                                    commentController.text,
-                                    widget.dream.id,
-                                    dateToInt(DateTime.now()),
-                                  )
-                                : null,
+                            onPressed: commentController.text.trim().isEmpty
+                                ? null
+                                : () async {
+                                    await sendYourComment(
+                                      commentController.text,
+                                      widget.dream.id,
+                                      dateToInt(DateTime.now()),
+                                    );
+                                    commentController.clear();
+                                    comments = await getComments();
+
+                                    setSheetState(() {});
+                                  },
                             child: Icon(Icons.send, color: cloudPink()),
                           ),
                         ),
@@ -3596,13 +3671,19 @@ class _TileState extends State<Tile> {
               style: TextStyle(color: Colors.white),
             ),
             // middle part
-            Container(
-              width: double.infinity,
-              margin: const EdgeInsets.all(5),
-              child: Text(
-                widget.dream.describe,
-                textAlign: TextAlign.start,
-                style: TextStyle(color: Colors.white),
+            // Constrains means it could be some constant max height
+            ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: 300),
+              child: SingleChildScrollView(
+                child: Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.all(5),
+                  child: Text(
+                    widget.dream.describe,
+                    textAlign: TextAlign.start,
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
               ),
             ),
             // bottom part
