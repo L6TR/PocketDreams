@@ -112,7 +112,7 @@ double mixHues(List<double> hues) {
 }
 
 String user = "merunka";
-String server = "http://10.0.1.12:5000";
+String server = "http://192.168.0.233:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -2159,6 +2159,8 @@ class _CalendarState extends State<Calendar> {
     DateTime tempDate = dream.date;
     int tempLikes = dream.likes;
 
+    print(tempLikes);
+
     List<Hemotion> tempEmotions = [];
     void getEmotionsFromTheDB() {
       tempEmotions.clear();
@@ -2850,10 +2852,21 @@ class _CalendarState extends State<Calendar> {
                         ),
                       ),
 
-                      Icon(
-                        dream.likes != 0
-                            ? Icons.favorite
-                            : Icons.favorite_border,
+                      Row(
+                        children: [
+                          Icon(
+                            dream.likes != 0
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: dream.likes != 0 ? mainColor : Colors.grey,
+                          ),
+                          Text(
+                            dream.likes.toString(),
+                            style: TextStyle(
+                              color: dream.likes != 0 ? mainColor : Colors.grey,
+                            ),
+                          ),
+                        ],
                       ),
                       // bottom part
                       Expanded(
@@ -3441,7 +3454,7 @@ class _TileState extends State<Tile> {
 
   // sending our text to the backend
   Future<void> sendYourComment(String comment, int dreamID, int date) async {
-    final response = await http.get(
+    await http.get(
       Uri.parse(
         "$server/api/sendYourComment?comment=$comment&user=$user&dreamID=$dreamID&date=$date",
       ),
