@@ -251,8 +251,6 @@ def askAboutDreams():
         
         cursor.execute("SELECT COUNT(LikedBy) FROM Likes WHERE LikedDream = ?", (dreamID,))
         Likes = cursor.fetchone()[0]
-
-
         
         dreamsListJSON.append({
             "ID": dreamID,
@@ -269,6 +267,7 @@ def askAboutDreams():
     
     return jsonify({"success": True, "dreamsList": dreamsListJSON, "message": "You are here"})  
 
+# deleting a dream from database
 @app.route("/api/deleteThisDream", methods=["DELETE"])
 def deleteThisDream():
     dreamID = request.args.get("dream")
@@ -287,6 +286,8 @@ def deleteThisDream():
 
     return jsonify({"success": True, "message": "Dream was deleted successfully"})  
 
+
+# saving our changes that user made in the database
 @app.route("/api/saveTheChanges", methods=["PUT"])
 def saveTheChanges():
     data = request.get_json()
@@ -520,6 +521,38 @@ def sendYourComment():
         "message": "Your comment was added",
     })
 
+# function that returns a array of users that liked dream with this id
+@app.route("/api/getDreamLikesOwners")
+def getDreamLikesOwners():
+    
+    conn = sqlite3.connect("pocketdreams.db")
+    cursor = conn.cursor()
+
+    id = request.args.get("dreamId")
+    if (not id):
+        return jsonify({
+        "success": False,
+        "message": "Wrong Data",
+    }), 400
+
+    cursor.execute("""
+        SELECT l.LikedBy,
+                u.Username
+        FROM Likes l 
+        JOIN Users u 
+                ON u.ID = l.LikedBy 
+        WHERE LikedDream = ?
+    """, (id,))
+    
+    userList = []
+    for user in cursor.fetchall():
+        userList.append({"id": user[0], "username": user[1]}) 
+    
+    return jsonify({
+        "success": True,
+        "message": "Here are users that gived you a like",
+        "likeOwners": userList
+    })
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

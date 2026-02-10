@@ -112,7 +112,7 @@ double mixHues(List<double> hues) {
 }
 
 String user = "merunka";
-String server = "http://192.168.0.233:5000";
+String server = "http://10.1.248.137:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -2143,12 +2143,28 @@ class _CalendarState extends State<Calendar> {
     );
   }
 
+  // returning likes and their owners for a dream by his id in map format, where user id is a key and name is a value
+  Future<List<Map<String, dynamic>>> getDreamLikesOwners(int id) async {
+    final response = await http.get(
+      Uri.parse("$server/api/getDreamLikesOwners?dreamId=$id"),
+      headers: {"Content-Type": "application/json"},
+    );
+
+    final decoded = json.decode(response.body) as Map<String, dynamic>;
+    final list = decoded["likeOwners"] as List;
+
+    return list.cast<Map<String, dynamic>>();
+  }
+
   //              //
   // Dialog  Part //
   //              //
   Future<void> _showTheDream(CalendarDay dream) async {
     bool changes = false;
     Color mainColor = getColor(normalize(dream.date));
+
+    final List<Map<String, dynamic>> listOfLikeOwners =
+        await getDreamLikesOwners(dream.id);
 
     String errorText = "";
 
@@ -2157,9 +2173,6 @@ class _CalendarState extends State<Calendar> {
     String tempName = dream.name;
     bool tempPrivacity = dream.isPrivate;
     DateTime tempDate = dream.date;
-    int tempLikes = dream.likes;
-
-    print(tempLikes);
 
     List<Hemotion> tempEmotions = [];
     void getEmotionsFromTheDB() {
@@ -2854,17 +2867,99 @@ class _CalendarState extends State<Calendar> {
 
                       Row(
                         children: [
-                          Icon(
-                            dream.likes != 0
-                                ? Icons.favorite
-                                : Icons.favorite_border,
-                            color: dream.likes != 0 ? mainColor : Colors.grey,
-                          ),
-                          Text(
-                            dream.likes.toString(),
-                            style: TextStyle(
-                              color: dream.likes != 0 ? mainColor : Colors.grey,
+                          InkWell(
+                            child: Row(
+                              children: [
+                                Icon(
+                                  dream.likes != 0
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
+                                  color: dream.likes != 0
+                                      ? mainColor
+                                      : Colors.grey,
+                                ),
+                                Text(
+                                  dream.likes.toString(),
+                                  style: TextStyle(
+                                    color: dream.likes != 0
+                                        ? mainColor
+                                        : Colors.grey,
+                                  ),
+                                ),
+                              ],
                             ),
+                            // show users that liked your dream
+                            onTap: () async {
+                              await showModalBottomSheet(
+                                context: context,
+                                backgroundColor: const Color.fromARGB(
+                                  255,
+                                  7,
+                                  7,
+                                  7,
+                                ),
+                                builder: (sheetContext) {
+                                  return StatefulBuilder(
+                                    builder: (context, setSheetState) {
+                                      return SizedBox(
+                                        height: 300,
+                                        child: Column(
+                                          children: [
+                                            Container(
+                                              margin: EdgeInsets.all(15),
+                                              child: Text(
+                                                "People that liked your dream",
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 16,
+                                                ),
+                                              ),
+                                            ),
+                                            Expanded(
+                                              child: ListView(
+                                                children: [
+                                                  for (var u
+                                                      in listOfLikeOwners)
+                                                    Container(
+                                                      margin: EdgeInsets.only(
+                                                        right: 15,
+                                                        left: 15,
+                                                        bottom: 5,
+                                                      ),
+                                                      decoration: BoxDecoration(
+                                                        border: Border.all(
+                                                          width: 3,
+                                                          color: Colors.white70,
+                                                        ),
+                                                        color: Colors.black,
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              5,
+                                                            ),
+                                                      ),
+                                                      child: Row(
+                                                        children: [
+                                                          Text(
+                                                            "user: ${u["username"]}",
+                                                            style: TextStyle(
+                                                              color:
+                                                                  Colors.white,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                              );
+                            },
                           ),
                         ],
                       ),
