@@ -112,7 +112,7 @@ double mixHues(List<double> hues) {
 }
 
 String user = "merunka";
-String server = "http://10.1.248.137:5000";
+String server = "http://192.168.0.233:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -2156,6 +2156,19 @@ class _CalendarState extends State<Calendar> {
     return list.cast<Map<String, dynamic>>();
   }
 
+  // returning likes and their owners for a dream by his id in map format, where user id is a key and name is a value
+  Future<List<Map<String, dynamic>>> getDreamCommentsOwners(int id) async {
+    final response = await http.get(
+      Uri.parse("$server/api/getDreamLikesOwners?dreamId=$id"),
+      headers: {"Content-Type": "application/json"},
+    );
+
+    final decoded = json.decode(response.body) as Map<String, dynamic>;
+    final list = decoded["likeOwners"] as List;
+
+    return list.cast<Map<String, dynamic>>();
+  }
+
   //              //
   // Dialog  Part //
   //              //
@@ -2165,6 +2178,11 @@ class _CalendarState extends State<Calendar> {
 
     final List<Map<String, dynamic>> listOfLikeOwners =
         await getDreamLikesOwners(dream.id);
+
+    List<Map<String, dynamic>> commentsCalendarList = await getComments(
+      dream.id,
+    );
+    print(commentsCalendarList);
 
     String errorText = "";
 
@@ -2961,6 +2979,119 @@ class _CalendarState extends State<Calendar> {
                               );
                             },
                           ),
+                          Spacer(),
+                          InkWell(
+                            //it shows comments for your dream
+                            onTap: commentsCalendarList.isEmpty
+                                ? null
+                                : () async {
+                                    await showModalBottomSheet(
+                                      context: context,
+                                      backgroundColor: const Color.fromARGB(
+                                        255,
+                                        7,
+                                        7,
+                                        7,
+                                      ),
+                                      builder: (sheetContext) {
+                                        return StatefulBuilder(
+                                          builder: (context, setSheetState) {
+                                            return SizedBox(
+                                              height: 300,
+                                              child: Column(
+                                                children: [
+                                                  Container(
+                                                    margin: EdgeInsets.all(15),
+                                                    child: Text(
+                                                      "Comments for your dream",
+                                                      style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 16,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  Expanded(
+                                                    child: ListView(
+                                                      children: [
+                                                        for (var comm
+                                                            in commentsCalendarList)
+                                                          // Container for all comments
+                                                          Container(
+                                                            margin:
+                                                                EdgeInsets.only(
+                                                                  right: 15,
+                                                                  left: 15,
+                                                                  bottom: 5,
+                                                                ),
+                                                            decoration: BoxDecoration(
+                                                              border: Border.all(
+                                                                width: 3,
+                                                                color: Colors
+                                                                    .white70,
+                                                              ),
+                                                              color:
+                                                                  Colors.black,
+                                                              borderRadius:
+                                                                  BorderRadius.circular(
+                                                                    5,
+                                                                  ),
+                                                            ),
+                                                            child: Container(
+                                                              margin:
+                                                                  EdgeInsets.all(
+                                                                    5,
+                                                                  ),
+                                                              child: Row(
+                                                                children: [
+                                                                  Text(
+                                                                    "Dreamer: ${comm["CommentedBy"]} \nsaid: ${comm["Description"]}",
+                                                                    style: TextStyle(
+                                                                      color: Colors
+                                                                          .white,
+                                                                    ),
+                                                                  ),
+                                                                  Spacer(),
+                                                                  Text(
+                                                                    "${intToDate(comm["Date"]).year.toString()}-${intToDate(comm["Date"]).month.toString()}-${intToDate(comm["Date"]).day.toString()}",
+                                                                    style: TextStyle(
+                                                                      color: Colors
+                                                                          .white,
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          },
+                                        );
+                                      },
+                                    );
+                                  },
+                            child: Row(
+                              children: [
+                                Text(
+                                  commentsCalendarList.length.toString(),
+                                  style: TextStyle(
+                                    color: commentsCalendarList.isEmpty
+                                        ? Colors.grey
+                                        : Colors.white,
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.comment,
+                                  color: commentsCalendarList.isEmpty
+                                      ? Colors.grey
+                                      : Colors.white,
+                                ),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                       // bottom part
@@ -3493,6 +3624,21 @@ class _DreamViev extends State<DreamViev> {
   }
 }
 
+// api function for getting commenst for the dream
+Future<List<Map<String, dynamic>>> getComments(int dreamId) async {
+  //try {
+  final response = await http.get(
+    Uri.parse("$server/api/getComments?dream=$dreamId"),
+    headers: {"Content-Type": "application/json"},
+  );
+
+  final data = json.decode(response.body);
+  if (data["noComments"]) {
+    return [];
+  }
+  return List<Map<String, dynamic>>.from(data["comments"]);
+}
+
 //                      //
 // Creating Tiles Part  //
 //                      //
@@ -3557,28 +3703,13 @@ class _TileState extends State<Tile> {
     );
   }
 
-  // api function for getting commenst for the dream
-  Future<List<Map<String, dynamic>>> getComments() async {
-    //try {
-    final response = await http.get(
-      Uri.parse("$server/api/getComments?dream=${widget.dream.id}"),
-      headers: {"Content-Type": "application/json"},
-    );
-
-    final data = json.decode(response.body);
-    if (data["noComments"]) {
-      return [];
-    }
-    return List<Map<String, dynamic>>.from(data["comments"]);
-  }
-
   Future<void> showCommentsSheet() async {
     final TextEditingController commentController = TextEditingController();
 
     // first list is a list of comments
     // second is a list of comment attributes
     // map is this attribustes
-    List<Map<String, dynamic>> comments = await getComments();
+    List<Map<String, dynamic>> comments = await getComments(widget.dream.id);
 
     showModalBottomSheet(
       context: context,
@@ -3725,7 +3856,9 @@ class _TileState extends State<Tile> {
                                       dateToInt(DateTime.now()),
                                     );
                                     commentController.clear();
-                                    comments = await getComments();
+                                    comments = await getComments(
+                                      widget.dream.id,
+                                    );
 
                                     setSheetState(() {});
                                   },
