@@ -2886,6 +2886,83 @@ class _CalendarState extends State<Calendar> {
                       Row(
                         children: [
                           InkWell(
+                            // show users that liked your dream
+                            onTap: listOfLikeOwners.isEmpty
+                                ? null
+                                : () async {
+                                    await showModalBottomSheet(
+                                      context: context,
+                                      backgroundColor: const Color.fromARGB(
+                                        255,
+                                        7,
+                                        7,
+                                        7,
+                                      ),
+                                      builder: (sheetContext) {
+                                        return StatefulBuilder(
+                                          builder: (context, setSheetState) {
+                                            return SizedBox(
+                                              height: 300,
+                                              child: Column(
+                                                children: [
+                                                  Container(
+                                                    margin: EdgeInsets.all(15),
+                                                    child: Text(
+                                                      "People that liked your dream",
+                                                      style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 16,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  Expanded(
+                                                    child: ListView(
+                                                      children: [
+                                                        for (var u
+                                                            in listOfLikeOwners)
+                                                          Container(
+                                                            margin:
+                                                                EdgeInsets.only(
+                                                                  right: 15,
+                                                                  left: 15,
+                                                                  bottom: 5,
+                                                                ),
+                                                            decoration: BoxDecoration(
+                                                              border: Border.all(
+                                                                width: 3,
+                                                                color: Colors
+                                                                    .white70,
+                                                              ),
+                                                              color:
+                                                                  Colors.black,
+                                                              borderRadius:
+                                                                  BorderRadius.circular(
+                                                                    5,
+                                                                  ),
+                                                            ),
+                                                            child: Row(
+                                                              children: [
+                                                                Text(
+                                                                  "user: ${u["username"]}",
+                                                                  style: TextStyle(
+                                                                    color: Colors
+                                                                        .white,
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          },
+                                        );
+                                      },
+                                    );
+                                  },
                             child: Row(
                               children: [
                                 Icon(
@@ -2906,78 +2983,6 @@ class _CalendarState extends State<Calendar> {
                                 ),
                               ],
                             ),
-                            // show users that liked your dream
-                            onTap: () async {
-                              await showModalBottomSheet(
-                                context: context,
-                                backgroundColor: const Color.fromARGB(
-                                  255,
-                                  7,
-                                  7,
-                                  7,
-                                ),
-                                builder: (sheetContext) {
-                                  return StatefulBuilder(
-                                    builder: (context, setSheetState) {
-                                      return SizedBox(
-                                        height: 300,
-                                        child: Column(
-                                          children: [
-                                            Container(
-                                              margin: EdgeInsets.all(15),
-                                              child: Text(
-                                                "People that liked your dream",
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 16,
-                                                ),
-                                              ),
-                                            ),
-                                            Expanded(
-                                              child: ListView(
-                                                children: [
-                                                  for (var u
-                                                      in listOfLikeOwners)
-                                                    Container(
-                                                      margin: EdgeInsets.only(
-                                                        right: 15,
-                                                        left: 15,
-                                                        bottom: 5,
-                                                      ),
-                                                      decoration: BoxDecoration(
-                                                        border: Border.all(
-                                                          width: 3,
-                                                          color: Colors.white70,
-                                                        ),
-                                                        color: Colors.black,
-                                                        borderRadius:
-                                                            BorderRadius.circular(
-                                                              5,
-                                                            ),
-                                                      ),
-                                                      child: Row(
-                                                        children: [
-                                                          Text(
-                                                            "user: ${u["username"]}",
-                                                            style: TextStyle(
-                                                              color:
-                                                                  Colors.white,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                  );
-                                },
-                              );
-                            },
                           ),
                           Spacer(),
                           InkWell(
@@ -3595,11 +3600,32 @@ class _DreamViev extends State<DreamViev> {
     //print(userTags);
   }
 
+  String? _dropdownValue;
   // getting dreams at the start
   @override
   void initState() {
-    getBackendDreams();
     super.initState();
+    getBackendDreams();
+    _dropdownValue = listChooseBy[0].value;
+  }
+
+  List<DropdownMenuItem<String>> listChooseBy = [
+    DropdownMenuItem(value: "Your tags", child: Text("Your tags")),
+    DropdownMenuItem(value: "Friends", child: Text("Friends")),
+    DropdownMenuItem(value: "My Likes", child: Text("My Likes")),
+    DropdownMenuItem(value: "Tags", child: Text("Tags")),
+    DropdownMenuItem(
+      value: "Emotions",
+      child: Text("Emotions", style: TextStyle(color: cloudPink())),
+    ),
+  ];
+
+  void dropdownCallBack(String? selectedValue) {
+    if (selectedValue is String) {
+      setState(() {
+        _dropdownValue = selectedValue;
+      });
+    }
   }
 
   @override
@@ -3608,16 +3634,40 @@ class _DreamViev extends State<DreamViev> {
       backgroundColor: Colors.black,
       body: Container(
         padding: EdgeInsets.only(left: 2, top: 5),
-        child: MasonryGridView.count(
-          crossAxisCount: 2,
-          itemCount: tileDreams != null ? tileDreams!.length : 0,
-          itemBuilder: (context, index) {
-            return Tile(
-              index: index,
-              maxHeight: 250,
-              dream: tileDreamsList[index],
-            );
-          },
+        child: Column(
+          children: [
+            Container(
+              width: 125,
+              decoration: BoxDecoration(
+                border: Border.all(color: cloudPink()),
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: DropdownButton<String>(
+                iconSize: 32,
+                isExpanded: true,
+                items: listChooseBy,
+                value: _dropdownValue,
+                onChanged: dropdownCallBack,
+                dropdownColor: const Color.fromARGB(255, 7, 7, 7),
+                iconEnabledColor: cloudPink(),
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ),
+            // our Tiles
+            Expanded(
+              child: MasonryGridView.count(
+                crossAxisCount: 2,
+                itemCount: tileDreams != null ? tileDreams!.length : 0,
+                itemBuilder: (context, index) {
+                  return Tile(
+                    index: index,
+                    maxHeight: 250,
+                    dream: tileDreamsList[index],
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
