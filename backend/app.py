@@ -331,16 +331,29 @@ def saveTheChanges():
 @app.route("/api/getBackendDreams", methods=["GET"])
 def getBackendDreams():
     Username = request.args.get("username")
+    Option = request.args.get("chooseOption")
+    if (not Username):
+        return jsonify({
+        "success": False,
+        "message": "Wrong Data",
+    }), 400
+
+    print(Option)
+
     Limit = 2
     Offset = 2
 
     conn = sqlite3.connect("pocketdreams.db")
     cursor = conn.cursor()
 
+    # userID
     cursor.execute("SELECT ID FROM Users WHERE Username = ?",(Username,))
     UserId = cursor.fetchone()[0]
 
+    # list of tags 
     cursor.execute("SELECT TagID FROM UserTags WHERE UserID = (SELECT ID FROM Users WHERE Username = ?)",(Username,))
+
+
 
     #SELECT DISTINCT d.ID, d.Name, d.Description, 
     cursor.execute("""
@@ -357,7 +370,9 @@ def getBackendDreams():
     JOIN UserTags ut ON ut.UserID = ?
     JOIN DreamTags dt ON dt.DreamID = d.ID
     JOIN DreamEmotions de On de.DreamID = d.ID
+                   
     WHERE dt.TagID = ut.tagID AND d.User != ? AND d.IsPrivate = 0
+                   
     GROUP BY d.ID
     """, (UserId, UserId, UserId,))
 

@@ -95,6 +95,7 @@ Dream newDream(
   );
 }
 
+// function for mixing hues from the double list
 double mixHues(List<double> hues) {
   double x = 0;
   double y = 0;
@@ -112,7 +113,7 @@ double mixHues(List<double> hues) {
 }
 
 String user = "merunka";
-String server = "http://192.168.0.233:5000";
+String server = "http://10.1.237.62:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -2186,7 +2187,7 @@ class _CalendarState extends State<Calendar> {
 
     String errorText = "";
 
-    // temporary gays
+    // temporary guys
     String tempDescription = dream.description;
     String tempName = dream.name;
     bool tempPrivacity = dream.isPrivate;
@@ -3533,9 +3534,11 @@ class _DreamViev extends State<DreamViev> {
   //
   // getting dreams from the backend
   //
-  Future<void> getBackendDreams() async {
+  Future<void> getBackendDreams(String? chooseOption) async {
     final response = await http.get(
-      Uri.parse("$server/api/getBackendDreams?username=$user"),
+      Uri.parse(
+        "$server/api/getBackendDreams?username=$user&chooseOption=$chooseOption",
+      ),
       headers: {"Content-Type": "application/json"},
     );
 
@@ -3605,26 +3608,27 @@ class _DreamViev extends State<DreamViev> {
   @override
   void initState() {
     super.initState();
-    getBackendDreams();
     _dropdownValue = listChooseBy[0].value;
+    getBackendDreams(_dropdownValue);
   }
 
+  // list of all searching options
   List<DropdownMenuItem<String>> listChooseBy = [
     DropdownMenuItem(value: "Your tags", child: Text("Your tags")),
     DropdownMenuItem(value: "Friends", child: Text("Friends")),
     DropdownMenuItem(value: "My Likes", child: Text("My Likes")),
     DropdownMenuItem(value: "Tags", child: Text("Tags")),
-    DropdownMenuItem(
-      value: "Emotions",
-      child: Text("Emotions", style: TextStyle(color: cloudPink())),
-    ),
+    DropdownMenuItem(value: "Emotions", child: Text("Emotions")),
   ];
 
+  // change value of chosen options and send backend request
   void dropdownCallBack(String? selectedValue) {
     if (selectedValue is String) {
       setState(() {
         _dropdownValue = selectedValue;
       });
+      getBackendDreams(_dropdownValue);
+      print(_dropdownValue);
     }
   }
 
@@ -3637,10 +3641,10 @@ class _DreamViev extends State<DreamViev> {
         child: Column(
           children: [
             Container(
-              width: 125,
+              width: 150,
               decoration: BoxDecoration(
-                border: Border.all(color: cloudPink()),
-                borderRadius: BorderRadius.circular(15),
+                border: Border.all(width: 3, color: cloudPink()),
+                borderRadius: BorderRadius.circular(5),
               ),
               child: DropdownButton<String>(
                 iconSize: 32,
