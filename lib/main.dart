@@ -113,7 +113,7 @@ double mixHues(List<double> hues) {
 }
 
 String user = "merunka";
-String server = "http://10.1.237.62:5000";
+String server = "http://192.168.0.233:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -3614,11 +3614,11 @@ class _DreamViev extends State<DreamViev> {
 
   // list of all searching options
   List<DropdownMenuItem<String>> listChooseBy = [
-    DropdownMenuItem(value: "Your tags", child: Text("Your tags")),
-    DropdownMenuItem(value: "Friends", child: Text("Friends")),
-    DropdownMenuItem(value: "My Likes", child: Text("My Likes")),
-    DropdownMenuItem(value: "Tags", child: Text("Tags")),
-    DropdownMenuItem(value: "Emotions", child: Text("Emotions")),
+    DropdownMenuItem(value: "userTags", child: Text("Your tags")),
+    DropdownMenuItem(value: "userFriends", child: Text("Friends")),
+    DropdownMenuItem(value: "userLikes", child: Text("My Likes")),
+    DropdownMenuItem(value: "chosenTags", child: Text("Tags")),
+    DropdownMenuItem(value: "chosenEmotions", child: Text("Emotions")),
   ];
 
   // change value of chosen options and send backend request

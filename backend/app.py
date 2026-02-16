@@ -332,74 +332,76 @@ def saveTheChanges():
 def getBackendDreams():
     Username = request.args.get("username")
     Option = request.args.get("chooseOption")
-    if (not Username):
+    if (not Username or not Option):
         return jsonify({
         "success": False,
         "message": "Wrong Data",
     }), 400
 
-    print(Option)
-
-    Limit = 2
-    Offset = 2
-
     conn = sqlite3.connect("pocketdreams.db")
     cursor = conn.cursor()
 
-    # userID
+    print(Option)
+
+            # userID
     cursor.execute("SELECT ID FROM Users WHERE Username = ?",(Username,))
     UserId = cursor.fetchone()[0]
 
-    # list of tags 
-    cursor.execute("SELECT TagID FROM UserTags WHERE UserID = (SELECT ID FROM Users WHERE Username = ?)",(Username,))
 
+    if (Option == "userTags"):
+        print("hi")
 
+        Limit = 2
+        Offset = 2
 
-    #SELECT DISTINCT d.ID, d.Name, d.Description, 
-    cursor.execute("""
-    SELECT DISTINCT d.ID, 
-                   d.Name, 
-                   d.Description, 
-                   d.Date, d.PublicationDate, 
-                   GROUP_CONCAT(DISTINCT de.EmotionID) as EmotionIDs, 
-                   GROUP_CONCAT(DISTINCT dt.TagID) as TagIDs, 
-                   (SELECT Username FROM Users WHERE ID = d.user),
-                   (SELECT COUNT(LikedBy) FROM Likes WHERE LikedDream = d.ID),
-                   (SELECT COUNT(LikedBy) FROM Likes WHERE LikedDream = d.ID AND LikedBy = ?)
-    FROM Dreams d
-    JOIN UserTags ut ON ut.UserID = ?
-    JOIN DreamTags dt ON dt.DreamID = d.ID
-    JOIN DreamEmotions de On de.DreamID = d.ID
-                   
-    WHERE dt.TagID = ut.tagID AND d.User != ? AND d.IsPrivate = 0
-                   
-    GROUP BY d.ID
-    """, (UserId, UserId, UserId,))
+        # list of tags 
+        cursor.execute("SELECT TagID FROM UserTags WHERE UserID = (SELECT ID FROM Users WHERE Username = ?)",(Username,))
 
-    #LIMIT ? OFFSET ?
-    #, Limit, Offset
+        #SELECT DISTINCT d.ID, d.Name, d.Description, 
+        cursor.execute("""
+        SELECT DISTINCT d.ID, 
+                    d.Name, 
+                    d.Description, 
+                    d.Date, d.PublicationDate, 
+                    GROUP_CONCAT(DISTINCT de.EmotionID) as EmotionIDs, 
+                    GROUP_CONCAT(DISTINCT dt.TagID) as TagIDs, 
+                    (SELECT Username FROM Users WHERE ID = d.user),
+                    (SELECT COUNT(LikedBy) FROM Likes WHERE LikedDream = d.ID),
+                    (SELECT COUNT(LikedBy) FROM Likes WHERE LikedDream = d.ID AND LikedBy = ?)
+        FROM Dreams d
+        JOIN UserTags ut ON ut.UserID = ?
+        JOIN DreamTags dt ON dt.DreamID = d.ID
+        JOIN DreamEmotions de On de.DreamID = d.ID
+                    
+        WHERE dt.TagID = ut.tagID AND d.User != ? AND d.IsPrivate = 0
+                    
+        GROUP BY d.ID
+        """, (UserId, UserId, UserId,))
 
-    
-    dreams = cursor.fetchall()
+        #LIMIT ? OFFSET ?
+        #, Limit, Offset
 
-    cursor.execute("""
-    SELECT t.Name
-    FROM UserTags ut
-    JOIN Tags t ON t.ID = ut.TagID 
-    WHERE ut.UserID = (SELECT ID FROM Users WHERE Username = ?)
-    """, (Username,))
+        
+        dreams = cursor.fetchall()
 
-    userTags = cursor.fetchall()
+        cursor.execute("""
+        SELECT t.Name
+        FROM UserTags ut
+        JOIN Tags t ON t.ID = ut.TagID 
+        WHERE ut.UserID = (SELECT ID FROM Users WHERE Username = ?)
+        """, (Username,))
 
-    conn.commit()
-    conn.close()
+        userTags = cursor.fetchall()
 
-    return jsonify({
-        "success": True,
-        "message": "You got dreams succesfully",
-        "dreamsList": dreams,
-        "userTags": userTags 
-    })
+        conn.commit()
+        conn.close()
+
+        return jsonify({
+            "success": True,
+            "message": "You got dreams succesfully",
+            "dreamsList": dreams,
+            "userTags": userTags 
+        })
 
 # function for liking
 @app.route("/api/changeBackendLikeStatus", methods=["GET"])
