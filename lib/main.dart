@@ -112,6 +112,7 @@ double mixHues(List<double> hues) {
   return result;
 }
 
+// !!! dont forget to change
 String user = "merunka";
 String server = "http://192.168.0.233:5000";
 
