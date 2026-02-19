@@ -114,7 +114,7 @@ double mixHues(List<double> hues) {
 
 // !!! dont forget to change
 String user = "merunka";
-String server = "http://10.1.210.171:5000";
+String server = "http://192.168.0.233:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -3932,11 +3932,19 @@ class _TileState extends State<Tile> {
     );
   }
 
+  // sending to the backend request for changing friendship status
   void changeFriendshipStatus(newFriendName) {
     print(newFriendName);
   }
 
+  // would return a lile list of dreams what this user have
+  void showUserProfile(userName) {}
+
+  // report user for something
+  void reportUser(reportedUser) {}
+
   Future<void> optionWithThisUser() {
+    // asking backend about current friendship status
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -3948,7 +3956,7 @@ class _TileState extends State<Tile> {
             // Love padding
             // it goes up with your keybord when you awake she
             return SizedBox(
-              height: 200,
+              height: 130,
               width: double.infinity,
               child: Column(
                 children: [
@@ -3966,12 +3974,30 @@ class _TileState extends State<Tile> {
                   Wrap(
                     children: [
                       cloudyButton(
+                        "Profile",
+                        () {
+                          showUserProfile(widget.dream.owner);
+                        },
+                        Colors.green,
+                        Colors.white,
+                      ),
+                      SizedBox(width: 5),
+                      cloudyButton(
                         // change it later !!!
                         "New friend",
                         () {
                           changeFriendshipStatus(widget.dream.owner);
                         },
                         Colors.blue,
+                        Colors.white,
+                      ),
+                      SizedBox(width: 5),
+                      cloudyButton(
+                        "Report",
+                        () {
+                          reportUser(widget.dream.owner);
+                        },
+                        Colors.red,
                         Colors.white,
                       ),
                     ],
