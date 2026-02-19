@@ -114,7 +114,7 @@ double mixHues(List<double> hues) {
 
 // !!! dont forget to change
 String user = "merunka";
-String server = "http://192.168.0.233:5000";
+String server = "http://10.1.210.171:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -3932,6 +3932,60 @@ class _TileState extends State<Tile> {
     );
   }
 
+  void changeFriendshipStatus(newFriendName) {
+    print(newFriendName);
+  }
+
+  Future<void> optionWithThisUser() {
+    return showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color.fromARGB(255, 7, 7, 7),
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            // Padding is cool
+            // Love padding
+            // it goes up with your keybord when you awake she
+            return SizedBox(
+              height: 200,
+              width: double.infinity,
+              child: Column(
+                children: [
+                  SizedBox(height: 15),
+                  Text(
+                    "What do you want to do with this user?",
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                  // change it later !!!
+                  Text(
+                    "You are not friend with this user yet",
+                    style: TextStyle(color: cloudPink(), fontSize: 14),
+                  ),
+                  Spacer(),
+                  Wrap(
+                    children: [
+                      cloudyButton(
+                        // change it later !!!
+                        "New friend",
+                        () {
+                          changeFriendshipStatus(widget.dream.owner);
+                        },
+                        Colors.blue,
+                        Colors.white,
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 15),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -3962,9 +4016,15 @@ class _TileState extends State<Tile> {
               ),
               child: Text(widget.dream.name, textAlign: TextAlign.center),
             ),
-            Text(
-              "User: ${widget.dream.owner}",
-              style: TextStyle(color: Colors.white),
+            InkWell(
+              onTap: () {
+                optionWithThisUser();
+                print("you my friend now");
+              },
+              child: Text(
+                "User: ${widget.dream.owner}",
+                style: TextStyle(color: Colors.white),
+              ),
             ),
             // middle part
             // Constrains means it could be some constant max height

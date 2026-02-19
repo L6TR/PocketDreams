@@ -355,7 +355,7 @@ def getBackendDreams():
         # list of tags 
         cursor.execute("SELECT TagID FROM UserTags WHERE UserID = (SELECT ID FROM Users WHERE Username = ?)",(Username,))
 
-        # We need dreams name, description, date, publication date, all emotions, all tags, owner username,   
+        # We need dreams id, name, description, date, publication date, all emotions, all tags, owner username, count of likes, count of our likes   
         cursor.execute("""
         SELECT DISTINCT d.ID, d.Name, d.Description, d.Date, d.PublicationDate, 
                     GROUP_CONCAT(DISTINCT de.EmotionID) as EmotionIDs, 
@@ -400,29 +400,21 @@ def getBackendDreams():
         })
     
     if (Option == "userLikes"):
-        cursor.execute("""SELECT LikedDream 
-                       FROM Likes 
-                       WHERE LikedBy = ? """,(UserId,))
-        likes = [row[0] for row in cursor.fetchall()]
-
         cursor.execute("""
-            SELECT DISTINCT d.Name, 
-                    d.Description, 
-                    d.Date, d.PublicationDate, 
+            SELECT DISTINCT d.ID, d.Name, d.Description, d.Date, d.PublicationDate, 
                     GROUP_CONCAT(DISTINCT de.EmotionID) as EmotionIDs, 
                     GROUP_CONCAT(DISTINCT dt.TagID) as TagIDs, 
                     (SELECT Username FROM Users WHERE ID = d.user),
                     (SELECT COUNT(LikedBy) FROM Likes WHERE LikedDream = d.ID),
                     (SELECT COUNT(LikedBy) FROM Likes WHERE LikedDream = d.ID AND LikedBy = ?)
         FROM Dreams d
-        JOIN UserTags ut ON ut.UserID = ?
         JOIN DreamTags dt ON dt.DreamID = d.ID
         JOIN DreamEmotions de ON de.DreamID = d.ID
 
-        WHERE d.ID = (SELECT LikedDream WHERE Likedby = ?)
+        WHERE d.ID IN (SELECT LikedDream FROM Likes WHERE Likedby = ?)
                        
         GROUP BY d.ID
-        """, (UserId, UserId, UserId, UserId))
+        """, (UserId, UserId,))
        
 
         
@@ -432,7 +424,6 @@ def getBackendDreams():
             "success": True,
             "message": "You got dreams succesfully",
             "dreamsList": dreams,
-            "userTags": userTags 
         })
 
     return jsonify({
