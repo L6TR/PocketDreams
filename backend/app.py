@@ -15,7 +15,7 @@ cursor = conn.cursor() # we need this one for our SQL commands
 #cursor.execute("DROP TABLE IF EXISTS Emotions;")
 #cursor.execute("DROP TABLE IF EXISTS Comments;")
 #cursor.execute("DROP TABLE IF EXISTS Reports;")
-#cursor.execute("DROP TABLE IF EXISTS Friendship;")
+#cursor.execute("DROP TABLE IF EXISTS Friendships;")
 #cursor.execute("DROP TABLE IF EXISTS DreamReports;")
 #cursor.execute("DROP TABLE IF EXISTS DreamTags;")
 #cursor.execute("DROP TABLE IF EXISTS DreamEmotions;")
@@ -37,7 +37,7 @@ cursor = conn.cursor() # we need this one for our SQL commands
 #cursor.execute("CREATE TABLE IF NOT EXISTS Comments (ID INTEGER PRIMARY KEY, CommentedText TEXT, CreatedAt INTEGER, CommentedBy INTEGER, CommentedDream INTEGER, FOREIGN KEY (CommentedBy) REFERENCES Users(ID), FOREIGN KEY (CommentedDream) REFERENCES Dreams(ID))")
 #cursor.execute("CREATE TABLE IF NOT EXISTS Reports (ID INTEGER PRIMARY KEY, Type TEXT, CreatedBy INTEGER, FOREIGN KEY (CreatedBy) REFERENCES Users(ID))")
 #cursor.execute("CREATE TABLE IF NOT EXISTS Likes ( LikedBy INTEGER, LikedDream INTEGER, FOREIGN KEY (LikedDream) REFERENCES Dreams(ID), FOREIGN KEY (LikedBy) REFERENCES Users(ID))")
-#cursor.execute("CREATE TABLE IF NOT EXISTS Friendship (ID INTEGER PRIMARY KEY, UserID INTEGER, FriendID INTEGER, FOREIGN KEY (UserID) REFERENCES Users(ID), FOREIGN KEY (FriendID) REFERENCES Users(ID))")
+#cursor.execute("CREATE TABLE IF NOT EXISTS Friendships (UserID INTEGER, FriendID INTEGER, FOREIGN KEY (UserID) REFERENCES Users(ID), FOREIGN KEY (FriendID) REFERENCES Users(ID))")
 
 
 #cursor.execute("CREATE TABLE IF NOT EXISTS DreamReports (DreamID INTEGER, ReportID INTEGER, FOREIGN KEY (DreamID) REFERENCES Dreams(ID), FOREIGN KEY (ReportID) REFERENCES Reports(ID));")
@@ -575,6 +575,7 @@ def getDreamLikesOwners():
 
     id = request.args.get("dreamId")
     if (not id):
+        conn.close()
         return jsonify({
         "success": False,
         "message": "Wrong Data",
@@ -593,11 +594,116 @@ def getDreamLikesOwners():
     for user in cursor.fetchall():
         userList.append({"id": user[0], "username": user[1]}) 
     
+    conn.close()
     return jsonify({
         "success": True,
         "message": "Here are users that gived you a like",
         "likeOwners": userList
     })
+
+# getting information is user A and user B are friends
+# return true or false
+@app.route("/api/isHeMyFriend")
+def isHeMyFriend():
+    userA = request.args.get("myName")
+    userB = request.args.get("protentialFriend")
+    if (not userA or not userB):
+        return jsonify({
+        "success": False,
+        "message": "Wrong Data",
+    }), 400
+
+    conn = sqlite3.connect("pocketdreams.db")
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT ID FROM Users Where Username = ?",(userA,))
+    userA = cursor.fetchone()[0]
+
+    cursor.execute("SELECT ID FROM Users Where Username = ?",(userB,))
+    userB = cursor.fetchone()[0]
+
+    cursor.execute("""SELECT 1 
+                   FROM Friendships 
+                   WHERE 
+                   (UserID = ? AND FriendID = ?) 
+                   OR (UserID = ? AND FriendID = ?) 
+                   LIMIT 1
+                   """, (userA,userB,userB,userA))
+    
+    # if friendship exists
+    if (cursor.fetchone() != None):
+        conn.close()
+        return jsonify({
+            "success": True,
+            "message": "Now you know this friendship status",
+            "friendship": True
+        })
+    conn.close()
+    # if friendship is not exists yet
+    return jsonify({
+            "success": True,
+            "message": "Now you know this friendship status",
+            "friendship": False
+        })
+
+# changing friendship status
+# if userA and userB are now friends we adding their friendship into the database
+# if they already are friends we end their friendship by deleting it from the database
+@app.route("/api/changeFriendshipStatus", methods=["POST", "DELETE"])
+def changeFriendshipStatus():
+    data = request.json
+    userA = data.get("user")
+    userB = data.get("friend")
+    if (not userA or not userB):
+        return jsonify({
+        "success": False,
+        "message": "Wrong Data",
+    }), 400
+
+    conn = sqlite3.connect("pocketdreams.db")
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT ID FROM Users Where Username = ?",(userA,))
+    userA = cursor.fetchone()[0]
+
+    cursor.execute("SELECT ID FROM Users Where Username = ?",(userB,))
+    userB = cursor.fetchone()[0]
+
+    cursor.execute("""SELECT 1 
+                   FROM Friendships 
+                   WHERE 
+                   (UserID = ? AND FriendID = ?) 
+                   OR (UserID = ? AND FriendID = ?) 
+                   LIMIT 1
+                   """, (userA,userB,userB,userA))
+
+    # if friendship exists
+    if (cursor.fetchone() != None):
+        cursor.execute("""DELETE 
+                       FROM Friendships 
+                       WHERE (UserID = ? AND FriendID = ?) 
+                       OR (UserID = ? AND FriendID = ?)
+                """, (userA,userB,userB,userA))
+        conn.commit()
+        conn.close()
+        return jsonify({
+            "success": True,
+            "message": "Friendship was ended",
+        })
+    cursor.execute("""INSERT 
+                   INTO Friendships 
+                   (UserID, FriendID) 
+                   VALUES (?,?)
+    """, (userA,userB,))
+
+    conn.commit()
+    conn.close()
+    # if friendship is not exists yet
+    return jsonify({
+            "success": True,
+            "message": "User has new friend now",
+        })
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

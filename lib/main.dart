@@ -114,7 +114,7 @@ double mixHues(List<double> hues) {
 
 // !!! dont forget to change
 String user = "merunka";
-String server = "http://192.168.0.233:5000";
+String server = "http://10.0.1.12:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -3932,9 +3932,28 @@ class _TileState extends State<Tile> {
     );
   }
 
+  // sending a request to the backend to verify whether this user is our friend yet
+  // returning true or false
+  Future<bool> isHeMyFriend(String potentialFriendName) async {
+    final response = await http.get(
+      Uri.parse(
+        "$server/api/isHeMyFriend?myName=$user&protentialFriend=$potentialFriendName",
+      ),
+      headers: {"Content-Type": "application/json"},
+    );
+    final data = json.decode(response.body);
+    return data["friendship"];
+  }
+
   // sending to the backend request for changing friendship status
-  void changeFriendshipStatus(newFriendName) {
-    print(newFriendName);
+  Future<void> changeFriendshipStatus(String newFriendName) async {
+    final response = await http.post(
+      Uri.parse("$server/api/changeFriendshipStatus"),
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({"user": user, "friend": newFriendName}),
+    );
+
+    final data = json.decode(response.body);
   }
 
   // would return a lile list of dreams what this user have
@@ -3943,7 +3962,8 @@ class _TileState extends State<Tile> {
   // report user for something
   void reportUser(reportedUser) {}
 
-  Future<void> optionWithThisUser() {
+  Future<void> optionWithThisUser(bool isFriend) {
+    bool friendship = isFriend;
     // asking backend about current friendship status
     return showModalBottomSheet(
       context: context,
@@ -3965,16 +3985,17 @@ class _TileState extends State<Tile> {
                     "What do you want to do with this user?",
                     style: TextStyle(color: Colors.white, fontSize: 16),
                   ),
-                  // change it later !!!
                   Text(
-                    "You are not friend with this user yet",
+                    friendship
+                        ? "He is your friend"
+                        : "You are not friend with this user yet",
                     style: TextStyle(color: cloudPink(), fontSize: 14),
                   ),
                   Spacer(),
                   Wrap(
                     children: [
                       cloudyButton(
-                        "Profile",
+                        "His dreams",
                         () {
                           showUserProfile(widget.dream.owner);
                         },
@@ -3983,10 +4004,12 @@ class _TileState extends State<Tile> {
                       ),
                       SizedBox(width: 5),
                       cloudyButton(
-                        // change it later !!!
-                        "New friend",
+                        friendship ? "End friendship" : "New friend",
                         () {
                           changeFriendshipStatus(widget.dream.owner);
+                          setSheetState(() {
+                            friendship = !friendship;
+                          });
                         },
                         Colors.blue,
                         Colors.white,
@@ -4043,8 +4066,8 @@ class _TileState extends State<Tile> {
               child: Text(widget.dream.name, textAlign: TextAlign.center),
             ),
             InkWell(
-              onTap: () {
-                optionWithThisUser();
+              onTap: () async {
+                optionWithThisUser(await isHeMyFriend(widget.dream.owner));
                 print("you my friend now");
               },
               child: Text(
