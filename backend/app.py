@@ -389,7 +389,6 @@ def getBackendDreams():
 
         userTags = cursor.fetchall()
 
-        conn.commit()
         conn.close()
 
         return jsonify({
@@ -401,6 +400,32 @@ def getBackendDreams():
     
     if (Option == "userLikes"):
         cursor.execute("""
+            SELECT 
+                d.ID, 
+                d.Name, 
+                d.Description, 
+                d.Date, 
+                d.PublicationDate, 
+                (SELECT GROUP_CONCAT(EmotionID) FROM DreamEmotions WHERE DreamID = d.ID) as EmotionIDs,
+                (SELECT GROUP_CONCAT(TagID) FROM DreamTags WHERE DreamID = d.ID) as TagIDs,
+                (SELECT Username FROM Users WHERE ID = d.User) as AuthorName,
+                (SELECT COUNT(*) FROM Likes WHERE LikedDream = d.ID) as TotalLikes,
+                1 as IsLikedByMe
+            FROM Dreams d
+            WHERE d.ID IN (SELECT LikedDream FROM Likes WHERE LikedBy = ?)
+        """, (UserId,))
+        
+        dreams = cursor.fetchall()
+        conn.close()
+
+        return jsonify({
+            "success": True,
+            "message": "You got dreams succesfully",
+            "dreamsList": dreams,
+        })
+
+    if (Option == "userFriends"):
+        cursor.execute("""
             SELECT DISTINCT d.ID, d.Name, d.Description, d.Date, d.PublicationDate, 
                     GROUP_CONCAT(DISTINCT de.EmotionID) as EmotionIDs, 
                     GROUP_CONCAT(DISTINCT dt.TagID) as TagIDs, 
@@ -411,21 +436,22 @@ def getBackendDreams():
         JOIN DreamTags dt ON dt.DreamID = d.ID
         JOIN DreamEmotions de ON de.DreamID = d.ID
 
-        WHERE d.ID IN (SELECT LikedDream FROM Likes WHERE Likedby = ?)
+        WHERE d.User IN (SELECT FriendID FROM Friendships WHERE UserID = ?)
                        
         GROUP BY d.ID
         """, (UserId, UserId,))
-       
 
-        
+
         dreams = cursor.fetchall()
+        conn.close()
+        
 
         return jsonify({
             "success": True,
             "message": "You got dreams succesfully",
             "dreamsList": dreams,
-        })
-
+        })  
+       
     return jsonify({
         "success": False,
         "message": "Wrong Data",
@@ -530,12 +556,13 @@ def getComments():
 
 
 # function for adding our comments
-@app.route("/api/sendYourComment")
+@app.route("/api/sendYourComment", methods=["POST"])
 def sendYourComment():
-    comment = request.args.get("comment")
-    user = request.args.get("user")
-    dreamID = request.args.get("dreamID")
-    date= request.args.get("date")
+    data = request.json
+    comment = data.get("comment")
+    user = data.get("user")
+    dreamID = data.get("dreamID")
+    date = data.get("date")
 
     if (not comment or not user or not dreamID or not date):
         return jsonify({

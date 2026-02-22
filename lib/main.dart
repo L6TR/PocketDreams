@@ -3750,11 +3750,15 @@ class _TileState extends State<Tile> {
 
   // sending our text to the backend
   Future<void> sendYourComment(String comment, int dreamID, int date) async {
-    await http.get(
-      Uri.parse(
-        "$server/api/sendYourComment?comment=$comment&user=$user&dreamID=$dreamID&date=$date",
-      ),
+    await http.post(
+      Uri.parse("$server/api/sendYourComment"),
       headers: {"Content-Type": "application/json"},
+      body: json.encode({
+        "comment": comment,
+        "user": user,
+        "dreamID": dreamID,
+        "date": date,
+      }),
     );
   }
 
