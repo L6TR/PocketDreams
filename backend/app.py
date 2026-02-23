@@ -731,6 +731,31 @@ def changeFriendshipStatus():
             "message": "User has new friend now",
         })
 
+# deleting comment from the database by his id
+@app.route("/api/deleteComment", methods=["DELETE"])
+def deleteComment():
+    data = request.json
+    ID = data["comment"]
+
+    if (not ID):
+        return jsonify({
+        "success": False,
+        "message": "Wrong Data",
+    }), 400
+
+    conn = sqlite3.connect("pocketdreams.db")
+    cursor = conn.cursor()
+    
+    cursor.execute("DELETE FROM Comments Where ID = ?",(ID,))
+
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+            "success": True,
+            "message": "User has new friend now",
+        })
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

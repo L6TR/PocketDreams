@@ -114,7 +114,7 @@ double mixHues(List<double> hues) {
 
 // !!! dont forget to change
 String user = "merunka";
-String server = "http://10.0.1.12:5000";
+String server = "http://192.168.0.233:5000";
 
 const List<String> tagList = [
   "Nightmare",
@@ -3762,6 +3762,15 @@ class _TileState extends State<Tile> {
     );
   }
 
+  // deleting comment of user by comment ID
+  Future<void> deleteComment(commentID) async {
+    await http.delete(
+      Uri.parse("$server/api/deleteComment"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({'comment': commentID}),
+    );
+  }
+
   Future<void> showCommentsSheet() async {
     final TextEditingController commentController = TextEditingController();
 
@@ -3868,6 +3877,29 @@ class _TileState extends State<Tile> {
                                             ),
                                           ],
                                         ),
+                                        if (comment["CommentedBy"] == user)
+                                          Column(
+                                            children: [
+                                              const SizedBox(height: 4),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.end,
+                                                children: [
+                                                  InkWell(
+                                                    child: Icon(
+                                                      Icons.delete_forever,
+                                                      color: Colors.red,
+                                                    ),
+                                                    onTap: () {
+                                                      deleteComment(
+                                                        comment["CommentID"],
+                                                      );
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
                                       ],
                                     ),
                                   ),
@@ -4072,7 +4104,6 @@ class _TileState extends State<Tile> {
             InkWell(
               onTap: () async {
                 optionWithThisUser(await isHeMyFriend(widget.dream.owner));
-                print("you my friend now");
               },
               child: Text(
                 "User: ${widget.dream.owner}",
