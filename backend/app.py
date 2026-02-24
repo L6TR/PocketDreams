@@ -7,6 +7,9 @@ app = Flask(__name__)
 conn = sqlite3.connect("pocketdreams.db") # connection to the databse
 cursor = conn.cursor() # we need this one for our SQL commands
 
+# making from [(1,), (2,)] this [1,2]
+def fetchallBuilder(result):
+    return [row[0] for row in result]
 
 #cursor.execute("DROP TABLE IF EXISTS Tags;")
 #cursor.execute("DROP TABLE IF EXISTS Users;")
@@ -357,28 +360,28 @@ def getBackendDreams():
 
         # We need dreams id, name, description, date, publication date, all emotions, all tags, owner username, count of likes, count of our likes   
         cursor.execute("""
-        SELECT DISTINCT d.ID, d.Name, d.Description, d.Date, d.PublicationDate, 
-                    GROUP_CONCAT(DISTINCT de.EmotionID) as EmotionIDs, 
-                    GROUP_CONCAT(DISTINCT dt.TagID) as TagIDs, 
-                    u.Username,
-                    (SELECT COUNT(*) FROM Likes WHERE LikedDream = d.ID) as TotalLikes,
-                    (SELECT COUNT(*) FROM Likes WHERE LikedDream = d.ID AND LikedBy = ?)
+        SELECT 
+        d.ID, d.Name, d.Description, d.Date, d.PublicationDate, 
+        (SELECT GROUP_CONCAT(DISTINCT EmotionID) FROM DreamEmotions WHERE DreamID = d.ID) as EmotionIDs, 
+        (SELECT GROUP_CONCAT(DISTINCT TagID) FROM DreamTags WHERE DreamID = d.ID) as TagIDs, 
+        u.Username,
+        (SELECT COUNT(*) FROM Likes WHERE LikedDream = d.ID) as TotalLikes,
+        (SELECT COUNT(*) FROM Likes WHERE LikedDream = d.ID AND LikedBy = ?)
         FROM Dreams d
         JOIN Users u ON u.ID = d.User
         JOIN UserTags ut ON ut.UserID = ?
         JOIN DreamTags dt ON dt.DreamID = d.ID
-        JOIN DreamEmotions de ON de.DreamID = d.ID
-                    
         WHERE dt.TagID = ut.tagID AND d.User != ? AND d.IsPrivate = 0
-                    
         GROUP BY d.ID
         """, (UserId, UserId, UserId,))
 
         #LIMIT ? OFFSET ?
         #, Limit, Offset
 
-        
         dreams = cursor.fetchall()
+
+        
+        print(dreams)
 
         cursor.execute("""
         SELECT t.Name
@@ -400,23 +403,21 @@ def getBackendDreams():
     
     if (Option == "userLikes"):
         cursor.execute("""
-            SELECT 
-                d.ID, 
-                d.Name, 
-                d.Description, 
-                d.Date, 
-                d.PublicationDate, 
-                (SELECT GROUP_CONCAT(EmotionID) FROM DreamEmotions WHERE DreamID = d.ID) as EmotionIDs,
-                (SELECT GROUP_CONCAT(TagID) FROM DreamTags WHERE DreamID = d.ID) as TagIDs,
-                (SELECT Username FROM Users WHERE ID = d.User) as AuthorName,
-                (SELECT COUNT(*) FROM Likes WHERE LikedDream = d.ID) as TotalLikes,
-                1 as IsLikedByMe
-            FROM Dreams d
-            WHERE d.ID IN (SELECT LikedDream FROM Likes WHERE LikedBy = ?)
+        SELECT 
+        d.ID, d.Name, d.Description, d.Date, d.PublicationDate, 
+        (SELECT GROUP_CONCAT(EmotionID) FROM DreamEmotions WHERE DreamID = d.ID) as EmotionIDs,
+        (SELECT GROUP_CONCAT(TagID) FROM DreamTags WHERE DreamID = d.ID) as TagIDs,
+        (SELECT Username FROM Users WHERE ID = d.User) as AuthorName,
+        (SELECT COUNT(*) FROM Likes WHERE LikedDream = d.ID) as TotalLikes,
+        1 as IsLikedByMe
+        FROM Dreams d
+        WHERE d.ID IN (SELECT LikedDream FROM Likes WHERE LikedBy = ?)
         """, (UserId,))
         
         dreams = cursor.fetchall()
         conn.close()
+
+        print(dreams)
 
         return jsonify({
             "success": True,
@@ -426,18 +427,16 @@ def getBackendDreams():
 
     if (Option == "userFriends"):
         cursor.execute("""
-            SELECT DISTINCT d.ID, d.Name, d.Description, d.Date, d.PublicationDate, 
-                    GROUP_CONCAT(DISTINCT de.EmotionID) as EmotionIDs, 
-                    GROUP_CONCAT(DISTINCT dt.TagID) as TagIDs, 
-                    (SELECT Username FROM Users WHERE ID = d.user),
-                    (SELECT COUNT(LikedBy) FROM Likes WHERE LikedDream = d.ID),
-                    (SELECT COUNT(LikedBy) FROM Likes WHERE LikedDream = d.ID AND LikedBy = ?)
+        SELECT 
+        d.ID, d.Name, d.Description, d.Date, d.PublicationDate, 
+        (SELECT GROUP_CONCAT(DISTINCT EmotionID) FROM DreamEmotions WHERE DreamID = d.ID) as EmotionIDs, 
+        (SELECT GROUP_CONCAT(DISTINCT TagID) FROM DreamTags WHERE DreamID = d.ID) as TagIDs, 
+        (SELECT Username FROM Users WHERE ID = d.user),
+        (SELECT COUNT(LikedBy) FROM Likes WHERE LikedDream = d.ID),
+        (SELECT COUNT(LikedBy) FROM Likes WHERE LikedDream = d.ID AND LikedBy = ?)
         FROM Dreams d
-        JOIN DreamTags dt ON dt.DreamID = d.ID
-        JOIN DreamEmotions de ON de.DreamID = d.ID
-
-        WHERE d.User IN (SELECT FriendID FROM Friendships WHERE UserID = ?)
-                       
+        WHERE d.User IN (SELECT FriendID FROM Friendships WHERE UserID = ?) 
+        AND d.IsPrivate = 0
         GROUP BY d.ID
         """, (UserId, UserId,))
 
@@ -445,7 +444,8 @@ def getBackendDreams():
         dreams = cursor.fetchall()
         conn.close()
         
-
+        print(dreams)
+        
         return jsonify({
             "success": True,
             "message": "You got dreams succesfully",
@@ -596,10 +596,6 @@ def sendYourComment():
 # function that returns a array of users that liked dream with this id
 @app.route("/api/getDreamLikesOwners")
 def getDreamLikesOwners():
-    
-    conn = sqlite3.connect("pocketdreams.db")
-    cursor = conn.cursor()
-
     id = request.args.get("dreamId")
     if (not id):
         conn.close()
@@ -607,6 +603,9 @@ def getDreamLikesOwners():
         "success": False,
         "message": "Wrong Data",
     }), 400
+
+    conn = sqlite3.connect("pocketdreams.db")
+    cursor = conn.cursor()
 
     cursor.execute("""
         SELECT l.LikedBy,
@@ -643,10 +642,10 @@ def isHeMyFriend():
     conn = sqlite3.connect("pocketdreams.db")
     cursor = conn.cursor()
 
-    cursor.execute("SELECT ID FROM Users Where Username = ?",(userA,))
+    cursor.execute("SELECT ID FROM Users WHERE Username = ?",(userA,))
     userA = cursor.fetchone()[0]
 
-    cursor.execute("SELECT ID FROM Users Where Username = ?",(userB,))
+    cursor.execute("SELECT ID FROM Users WHERE Username = ?",(userB,))
     userB = cursor.fetchone()[0]
 
     cursor.execute("""SELECT 1 
@@ -748,7 +747,6 @@ def deleteComment():
     
     cursor.execute("DELETE FROM Comments Where ID = ?",(ID,))
 
-
     conn.commit()
     conn.close()
 
@@ -756,6 +754,41 @@ def deleteComment():
             "success": True,
             "message": "User has new friend now",
         })
+
+# deleting comment from the database by his id
+@app.route("/api/getFriendsList")
+def getFriendsList():
+    username = request.args.get("user")
+    if (not username):
+        return jsonify({
+        "success": False,
+        "message": "Wrong Data",
+    }), 400
+
+    conn = sqlite3.connect("pocketdreams.db")
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT ID FROM Users WHERE Username = ?",(username,))
+    userID = cursor.fetchone()[0]
+
+    cursor.execute("""
+    SELECT u.Username
+    FROM Users u
+    JOIN Friendships f 
+        ON (f.UserID = ? AND f.FriendID = u.ID)
+        OR (f.FriendID = ? AND f.UserID = u.ID)
+    """, (userID, userID))
+    result = cursor.fetchall()
+    conn.close()
+
+    friendsMap = fetchallBuilder(result)
+
+    return jsonify({
+            "success": True,
+            "message": "Here you have friends of this user",
+            "friendsMap": friendsMap
+        })
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

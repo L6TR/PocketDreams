@@ -897,12 +897,131 @@ class Settings extends StatefulWidget {
   State<Settings> createState() => _SettingsState();
 }
 
+// get Map of user friends from the backend
+Future<List<String>> getFriendsList(String user) async {
+  final response = await http.get(
+    Uri.parse("$server/api/getFriendsList?user=$user"),
+    headers: {"Content-Type": "application/json"},
+  );
+  final data = json.decode(response.body);
+  return List<String>.from(data["friendsMap"]);
+}
+
 //
 // _SettingsState widget
 // child of Settings()
 //
 
 class _SettingsState extends State<Settings> {
+  // showing a dialog with all friends of this user
+  Future<void> showMyFriends(List<String> friendsList) async {
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (dialogContext, setDialogState) {
+            return AlertDialog(
+              backgroundColor: Color.fromARGB(255, 15, 15, 15),
+
+              content: SizedBox(
+                height: 350,
+                width: 150,
+                child: Column(
+                  children: [
+                    Container(
+                      margin: EdgeInsets.all(15),
+                      child: Text(
+                        "Here you can see your friends",
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                    ),
+                    Expanded(
+                      child: ListView(
+                        children: [
+                          for (var friend in friendsList)
+                            // container for every friend
+                            Container(
+                              margin: EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                color: const Color.fromARGB(255, 30, 30, 30),
+                                borderRadius: BorderRadius.circular(15),
+                                border: Border.all(
+                                  color: cloudPink(),
+                                  width: 3,
+                                ),
+                              ),
+                              child: Container(
+                                margin: EdgeInsets.all(5),
+                                child: Row(
+                                  children: [
+                                    SizedBox(
+                                      width: 75,
+                                      child: Text(
+                                        friend,
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ),
+                                    Spacer(),
+                                    InkWell(
+                                      child: Column(
+                                        children: [
+                                          Icon(
+                                            Icons.remove_red_eye,
+                                            color: Colors.green,
+                                          ),
+                                          Text(
+                                            "See profile",
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 10,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(width: 15),
+                                    InkWell(
+                                      onTap: () async {
+                                        changeFriendshipStatus(friend);
+                                        List<String> tempFriends =
+                                            await getFriendsList(user);
+                                        setDialogState(() {
+                                          friendsList = tempFriends;
+                                        });
+                                      },
+                                      child: Column(
+                                        children: [
+                                          Icon(
+                                            Icons.person_off,
+                                            color: Colors.red,
+                                          ),
+                                          Text(
+                                            "Delete friend",
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 10,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -912,37 +1031,36 @@ class _SettingsState extends State<Settings> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            OutlinedButton(
-              style: ButtonStyle(
-                backgroundColor: WidgetStatePropertyAll(Colors.white),
-                side: WidgetStatePropertyAll(
-                  BorderSide(color: cloudPink(), width: 5),
-                ),
-              ),
-              onPressed: () {
+            Container(height: 250),
+            cloudyButton(
+              "Change my interests",
+              () {
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(builder: (context) => const TagScreen()),
                 );
               },
-              child: Text(
-                "Change my interests",
-                style: TextStyle(color: Colors.black),
-              ),
+              cloudPink(),
+              Colors.white,
             ),
-
-            OutlinedButton(
-              style: ButtonStyle(
-                backgroundColor: WidgetStatePropertyAll(Colors.white),
-                side: WidgetStatePropertyAll(
-                  BorderSide(color: cloudPink(), width: 5),
-                ),
-              ),
-              onPressed: () {
+            cloudyButton(
+              "My friends",
+              () async {
+                List<String> userFriends = await getFriendsList(user);
+                showMyFriends(userFriends);
+              },
+              cloudPink(),
+              Colors.white,
+            ),
+            Spacer(),
+            cloudyButton(
+              "Log Out",
+              () {
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(builder: (context) => const LoginScreen()),
                 );
               },
-              child: Text("Log Out", style: TextStyle(color: Colors.black)),
+              cloudPink(),
+              Colors.white,
             ),
           ],
         ),
@@ -3578,6 +3696,7 @@ class _DreamViev extends State<DreamViev> {
             tagsName.add(tagList[id - 1]);
           }
         }
+        print(dream[9]);
         tileDreamsList.add(
           TileDream(
             id: dream[0],
@@ -3586,7 +3705,9 @@ class _DreamViev extends State<DreamViev> {
             name: dream[1],
             date: normalize(intToDate(dream[3])),
             isPrivate: 0,
-            emotionColor: mixEmotions(emotionsColor).toColor(),
+            emotionColor: emotionsColor.isNotEmpty
+                ? mixEmotions(emotionsColor).toColor()
+                : Colors.grey,
             describe: dream[2],
             emotionsName: emotionsName,
             owner: dream[7],
@@ -3629,7 +3750,6 @@ class _DreamViev extends State<DreamViev> {
         _dropdownValue = selectedValue;
       });
       getBackendDreams(_dropdownValue);
-      print(_dropdownValue);
     }
   }
 
@@ -3711,6 +3831,15 @@ class Tile extends StatefulWidget {
 
   @override
   State<Tile> createState() => _TileState();
+}
+
+// sending to the backend request for changing friendship status
+Future<void> changeFriendshipStatus(String newFriendName) async {
+  await http.post(
+    Uri.parse("$server/api/changeFriendshipStatus"),
+    headers: {"Content-Type": "application/json"},
+    body: json.encode({"user": user, "friend": newFriendName}),
+  );
 }
 
 class _TileState extends State<Tile> {
@@ -3890,10 +4019,17 @@ class _TileState extends State<Tile> {
                                                       Icons.delete_forever,
                                                       color: Colors.red,
                                                     ),
-                                                    onTap: () {
-                                                      deleteComment(
+                                                    onTap: () async {
+                                                      await deleteComment(
                                                         comment["CommentID"],
                                                       );
+                                                      final newComments =
+                                                          await getComments(
+                                                            widget.dream.id,
+                                                          );
+                                                      setSheetState(() {
+                                                        comments = newComments;
+                                                      });
                                                     },
                                                   ),
                                                 ],
@@ -3979,17 +4115,6 @@ class _TileState extends State<Tile> {
     );
     final data = json.decode(response.body);
     return data["friendship"];
-  }
-
-  // sending to the backend request for changing friendship status
-  Future<void> changeFriendshipStatus(String newFriendName) async {
-    final response = await http.post(
-      Uri.parse("$server/api/changeFriendshipStatus"),
-      headers: {"Content-Type": "application/json"},
-      body: json.encode({"user": user, "friend": newFriendName}),
-    );
-
-    final data = json.decode(response.body);
   }
 
   // would return a lile list of dreams what this user have
