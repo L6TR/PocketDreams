@@ -694,6 +694,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             SizedBox(
                               width: 250,
                               child: TextField(
+                                maxLength: 30,
                                 controller: nicknameController,
                                 style: TextStyle(color: Colors.white),
 
@@ -718,6 +719,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             SizedBox(
                               width: 250,
                               child: TextField(
+                                maxLength: 50,
                                 controller: passwordController,
                                 style: TextStyle(color: Colors.white),
                                 obscureText: true,

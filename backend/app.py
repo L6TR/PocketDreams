@@ -72,6 +72,10 @@ def register():
         return jsonify({"success": False, "message": "A username is required"}), 400
     elif not Password:
         return jsonify({"success": False, "message": "A password is required"}), 400
+    elif len(Username) > 30:
+        return jsonify({"success": False, "message": "Username too long"}), 400
+    elif len(Password) > 50:
+        return jsonify({"success": False, "message": "Password too long"}), 400
 
 
     hashPassword = bcrypt.hashpw(Password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
@@ -99,6 +103,11 @@ def login():
     data = request.json
     Username = data.get("Username")
     Password = data.get("Password")
+
+    if len(Username) > 30:
+        return jsonify({"success": False, "message": "Username too long"}), 400
+    elif len(Password) > 50:
+        return jsonify({"success": False, "message": "Password too long"}), 400
 
     conn = sqlite3.connect("pocketdreams.db")
     cursor = conn.cursor()
@@ -166,9 +175,15 @@ def addDream():
     PublicationDate = data.get("PublicationDate")
     Emotions = data.get("Emotions") or []
 
+    if len(DreamName) > 15:
+        return jsonify({"success": False, "message": "Dream name too long"}), 400
+    elif len(Description) > 3000:
+        return jsonify({"success": False, "message": "Description too long"}), 400
+
     conn = sqlite3.connect("pocketdreams.db")
     cursor = conn.cursor()
     
+
     # now we know users id
     cursor.execute("SELECT ID FROM Users WHERE Username = ?", (User,))
     user_result = cursor.fetchone()
@@ -303,6 +318,11 @@ def saveTheChanges():
 
     emotions = data["emotions"]
     tags = data["tags"]
+
+    if len(name) > 15:
+        return jsonify({"success": False, "message": "Dream name too long"}), 400
+    elif len(description) > 3000:
+        return jsonify({"success": False, "message": "Description too long"}), 400
 
     conn = sqlite3.connect("pocketdreams.db")
     cursor = conn.cursor()
@@ -568,6 +588,9 @@ def sendYourComment():
         "success": False,
         "message": "Wrong data",
     }), 400
+    
+    elif len(comment) > 40:
+        return jsonify({"success": False, "message": "Dream name too long"}), 400
 
     conn = sqlite3.connect("pocketdreams.db")
     cursor = conn.cursor()
