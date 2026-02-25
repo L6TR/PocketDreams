@@ -47,7 +47,8 @@ def fetchallBuilder(result):
 #cursor.execute("CREATE TABLE IF NOT EXISTS DreamTags (DreamID INTEGER, TagID INTEGER, FOREIGN KEY (DreamID) REFERENCES Dreams(ID), FOREIGN KEY (TagID) REFERENCES Tags(ID));")
 #cursor.execute("CREATE TABLE IF NOT EXISTS DreamEmotions (DreamID INTEGER, EmotionID INTEGER, FOREIGN KEY (DreamID) REFERENCES Dreams(ID), FOREIGN KEY (EmotionID) REFERENCES Emotions(ID));")
 #cursor.execute("CREATE TABLE IF NOT EXISTS UserTags (UserID INTEGER, TagID INTEGER, FOREIGN KEY (UserID) REFERENCES Users(ID), FOREIGN KEY (TagID) REFERENCES Tags(ID));")
-
+#
+#cursor.execute("CREATE TABLE IF NOT EXISTS CommentLikes (CommentID INTEGER, UserID INTEGER, FOREIGN KEY (CommentID) REFERENCES Comments(ID), FOREIGN KEY (UserID) REFERENCES Users(ID));")
 
 #making a table if it does not exist
 
@@ -185,7 +186,6 @@ def addDream():
     
     # checking if we already had a dream with this name
     cursor.execute("SELECT ID FROM Dreams WHERE Name = ? AND User = ?",(DreamName, UserID,))
-    print(cursor.fetchall())
     if cursor.fetchall():   
         conn.commit()
         conn.close()
@@ -344,8 +344,7 @@ def getBackendDreams():
     conn = sqlite3.connect("pocketdreams.db")
     cursor = conn.cursor()
 
-    print(Option)
-            # userID
+    # userID
     cursor.execute("SELECT ID FROM Users WHERE Username = ?",(Username,))
     UserId = cursor.fetchone()[0]
 
@@ -445,6 +444,7 @@ def getBackendDreams():
         conn.close()
         
         print(dreams)
+        #print(len(dreams))
         
         return jsonify({
             "success": True,
@@ -469,7 +469,6 @@ def changeBackendLikeStatus():
         conn.close()
         return jsonify({"success": False, "error": "Missing parameters"}), 400
 
-    print(Username)
     cursor.execute("SELECT 1 FROM Likes WHERE LikedBy = (SELECT ID FROM Users WHERE Username = ?) AND LikedDream = ?",(Username, DreamID,))
     
     if (not cursor.fetchone()):

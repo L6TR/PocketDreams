@@ -250,6 +250,8 @@ class RegisterScreen extends StatefulWidget {
 // child of Login()
 //
 
+int maxUsernameameLength = 30;
+
 class _RegisterScreenState extends State<RegisterScreen> {
   final nicknameController = TextEditingController();
   final passwordController = TextEditingController();
@@ -275,7 +277,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       setState(() {
         user = nicknameController.text;
       });
-
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => TagScreen()),
@@ -323,6 +325,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             SizedBox(
                               width: 250,
                               child: TextField(
+                                maxLength: maxUsernameameLength,
                                 controller: nicknameController,
                                 style: TextStyle(color: Colors.white),
 
@@ -349,6 +352,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             SizedBox(
                               width: 250,
                               child: TextField(
+                                maxLength: 50,
                                 controller: passwordController,
                                 style: TextStyle(color: Colors.white),
                                 obscureText: true,
@@ -465,6 +469,7 @@ class _TagScreenState extends State<TagScreen> {
     });
 
     if (data["success"]) {
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => Base()),
@@ -641,7 +646,7 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         user = nicknameController.text;
       });
-
+      if (!mounted) return;
       Navigator.push(context, MaterialPageRoute(builder: (context) => Base()));
     }
   }
@@ -1531,6 +1536,7 @@ class _TodaysDreamState extends State<TodaysDream> {
                       SizedBox(
                         width: 120,
                         child: TextField(
+                          maxLength: 3000,
                           textAlign: TextAlign.center,
                           style: TextStyle(color: Colors.white),
                           controller: TextEditingController(text: _description),
@@ -1750,37 +1756,39 @@ class _TodaysDreamState extends State<TodaysDream> {
           backgroundColor: Color.fromARGB(255, 5, 5, 5),
 
           content: SizedBox(
-            height: 300,
+            height: 350,
             child: Column(
               children: [
-                Expanded(
-                  flex: 1,
-                  child: SizedBox(
-                    width: 150,
-                    child: TextField(
-                      controller: nameController,
-                      maxLines: null,
-                      expands: true,
-                      style: TextStyle(color: Colors.white),
-                      cursorColor: cloudPink(),
-                      decoration: InputDecoration(
-                        hintText: "Add a name",
-                        hintStyle: TextStyle(color: Colors.white54),
-                        border: OutlineInputBorder(),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: cloudPink()),
-                        ),
+                SizedBox(
+                  width: 150,
+                  height: 75,
+                  // name of our dream
+                  child: TextField(
+                    controller: nameController,
+                    maxLines: null,
+                    maxLength: 15,
+                    expands: true,
+                    style: TextStyle(color: Colors.white),
+                    cursorColor: cloudPink(),
+                    decoration: InputDecoration(
+                      hintText: "Add a name",
+                      hintStyle: TextStyle(color: Colors.white54),
+                      border: OutlineInputBorder(),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: cloudPink()),
                       ),
                     ),
                   ),
                 ),
+
                 SizedBox(height: 16),
                 Expanded(
-                  flex: 4,
                   child: SizedBox(
+                    // our dream description
                     child: TextField(
                       controller: descriptionController,
                       maxLines: null,
+                      maxLength: 3000,
                       expands: true,
                       style: TextStyle(color: Colors.white),
                       cursorColor: cloudPink(),
@@ -1816,6 +1824,7 @@ class _TodaysDreamState extends State<TodaysDream> {
                 setState(() {
                   lastNameUpdate = nameController.text;
                   lastDescriptionUpdate = descriptionController.text;
+                  _description = lastDescriptionUpdate ?? "";
                 });
                 Navigator.pop(context);
               },
@@ -2387,8 +2396,10 @@ class _CalendarState extends State<Calendar> {
       return false;
     }
 
+    if (!mounted) return;
     await showDialog(
       barrierDismissible: (!changes),
+
       context: context,
       builder: (context) {
         return StatefulBuilder(
@@ -2405,7 +2416,7 @@ class _CalendarState extends State<Calendar> {
               },
               child: AlertDialog(
                 backgroundColor: const Color.fromARGB(255, 5, 5, 5),
-                content: /*maybe we need to put it into the function*/ SizedBox(
+                content: SizedBox(
                   width: 250,
                   height: 520,
                   child: Column(
@@ -2442,6 +2453,7 @@ class _CalendarState extends State<Calendar> {
                                       width: double.infinity,
                                       child: Center(
                                         child: TextField(
+                                          maxLength: 15,
                                           controller: nameController,
                                           maxLines: 1,
                                           keyboardType: TextInputType.multiline,
@@ -2452,6 +2464,11 @@ class _CalendarState extends State<Calendar> {
                                           textAlign: TextAlign.center,
 
                                           decoration: const InputDecoration(
+                                            counterStyle: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 10,
+                                            ),
+
                                             border: InputBorder.none,
                                             isDense: true,
                                             contentPadding: EdgeInsets.all(8),
@@ -2490,6 +2507,7 @@ class _CalendarState extends State<Calendar> {
                                   child: SizedBox(
                                     height: 300,
                                     child: TextField(
+                                      maxLength: 3000,
                                       expands: true,
                                       controller: descriptionController,
                                       maxLines: null,
@@ -3748,8 +3766,8 @@ class _DreamViev extends State<DreamViev> {
     DropdownMenuItem(value: "userTags", child: Text("Your tags")),
     DropdownMenuItem(value: "userFriends", child: Text("Friends")),
     DropdownMenuItem(value: "userLikes", child: Text("My Likes")),
-    DropdownMenuItem(value: "chosenTags", child: Text("Tags")),
-    DropdownMenuItem(value: "chosenEmotions", child: Text("Emotions")),
+    //DropdownMenuItem(value: "chosenTags", child: Text("Tags")),
+    //DropdownMenuItem(value: "chosenEmotions", child: Text("Emotions")),
   ];
 
   // change value of chosen options and send backend request
@@ -3770,6 +3788,7 @@ class _DreamViev extends State<DreamViev> {
         padding: EdgeInsets.only(left: 2, top: 5),
         child: Column(
           children: [
+            // choosing part
             Container(
               width: 150,
               decoration: BoxDecoration(
@@ -3787,6 +3806,7 @@ class _DreamViev extends State<DreamViev> {
                 style: TextStyle(color: Colors.white, fontSize: 16),
               ),
             ),
+
             // our Tiles
             Expanded(
               child: MasonryGridView.count(
@@ -3925,7 +3945,7 @@ class _TileState extends State<Tile> {
     // second is a list of comment attributes
     // map is this attribustes
     List<Map<String, dynamic>> comments = await getComments(widget.dream.id);
-
+    if (!mounted) return;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -4073,6 +4093,7 @@ class _TileState extends State<Tile> {
                           ),
                           // Column for writting comments
                           child: TextField(
+                            maxLength: 40,
                             style: TextStyle(color: Colors.white),
                             controller: commentController,
                             cursorColor: cloudPink(),
