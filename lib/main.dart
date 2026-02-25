@@ -3862,6 +3862,17 @@ class _TileState extends State<Tile> {
     localLikesCount = widget.dream.likes;
   }
 
+  @override
+  void didUpdateWidget(covariant Tile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.dream.id != widget.dream.id) {
+      localIsLiked = widget.dream.doILikeThis;
+      localLikesCount = widget.dream.likes;
+    }
+  }
+  // ai helped
+
   // api function for liking
   Future<void> changeBackendLikeStatus() async {
     setState(() {
