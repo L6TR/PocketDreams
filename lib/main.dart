@@ -2302,7 +2302,6 @@ class _CalendarState extends State<Calendar> {
     List<Map<String, dynamic>> commentsCalendarList = await getComments(
       dream.id,
     );
-    print(commentsCalendarList);
 
     String errorText = "";
 
@@ -3541,18 +3540,29 @@ class _CalendarState extends State<Calendar> {
                                                     cloudyButton(
                                                       "Save",
                                                       () {
-                                                        if (tempTags
-                                                                .isNotEmpty ||
-                                                            tempEmotions
-                                                                .isNotEmpty) {
+                                                        if ((!tempPrivacity &&
+                                                                tempTags
+                                                                    .isNotEmpty &&
+                                                                tempDescription
+                                                                    .isNotEmpty) ||
+                                                            tempPrivacity) {
                                                           Navigator.of(
                                                             sheetContext,
                                                           ).pop(true);
                                                         } else {
-                                                          setSheetState(() {
-                                                            errorText =
-                                                                "please choose Tags or Emotions for your dream";
-                                                          });
+                                                          if (tempTags
+                                                              .isEmpty) {
+                                                            setSheetState(() {
+                                                              errorText =
+                                                                  "please choose at least one Tag for your public dream";
+                                                            });
+                                                          } else if (tempDescription
+                                                              .isEmpty) {
+                                                            setSheetState(() {
+                                                              errorText =
+                                                                  "please write a description for your public dream";
+                                                            });
+                                                          }
                                                         }
                                                       },
                                                       Colors.white,
@@ -3696,7 +3706,6 @@ class _DreamViev extends State<DreamViev> {
             tagsName.add(tagList[id - 1]);
           }
         }
-        print(dream[9]);
         tileDreamsList.add(
           TileDream(
             id: dream[0],
@@ -3861,14 +3870,12 @@ class _TileState extends State<Tile> {
     });
 
     try {
-      final response = await http.get(
+      await http.get(
         Uri.parse(
           "$server/api/changeBackendLikeStatus?username=$user&dream=${widget.dream.id}",
         ),
         headers: {"Content-Type": "application/json"},
       );
-
-      final data = json.decode(response.body);
     } catch (error) {
       setState(() {
         localIsLiked = !localIsLiked;
