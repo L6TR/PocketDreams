@@ -175,7 +175,7 @@ def addDream():
     PublicationDate = data.get("PublicationDate")
     Emotions = data.get("Emotions") or []
 
-    if len(DreamName) > 15:
+    if len(DreamName) > 20:
         return jsonify({"success": False, "message": "Dream name too long"}), 400
     elif len(Description) > 3000:
         return jsonify({"success": False, "message": "Description too long"}), 400
@@ -319,7 +319,7 @@ def saveTheChanges():
     emotions = data["emotions"]
     tags = data["tags"]
 
-    if len(name) > 15:
+    if len(name) > 20:
         return jsonify({"success": False, "message": "Dream name too long"}), 400
     elif len(description) > 3000:
         return jsonify({"success": False, "message": "Description too long"}), 400

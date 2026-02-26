@@ -1768,7 +1768,7 @@ class _TodaysDreamState extends State<TodaysDream> {
                   child: TextField(
                     controller: nameController,
                     maxLines: null,
-                    maxLength: 15,
+                    maxLength: 20,
                     expands: true,
                     style: TextStyle(color: Colors.white),
                     cursorColor: cloudPink(),
@@ -2342,6 +2342,90 @@ class _CalendarState extends State<Calendar> {
     descriptionController.text = tempDescription;
     nameController.text = tempName;
 
+    Future<void> localTextDataChanging() async {
+      await showModalBottomSheet<String>(
+        context: context,
+        backgroundColor: const Color.fromARGB(255, 7, 7, 7),
+        isScrollControlled: true,
+        builder: (sheetContext) {
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
+            ),
+            child: SafeArea(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(height: 25),
+                    const Text(
+                      "Change name",
+                      style: TextStyle(color: Colors.white, fontSize: 18),
+                    ),
+                    const SizedBox(height: 15),
+
+                    // Name part
+                    Container(
+                      color: const Color.fromARGB(255, 15, 15, 15),
+                      width: 300,
+                      height: 75,
+                      child: TextField(
+                        controller: nameController,
+                        maxLength: 20,
+                        style: const TextStyle(color: Colors.white),
+                        cursorColor: cloudPink(),
+                        decoration: InputDecoration(
+                          hintText: "Add a name",
+                          hintStyle: const TextStyle(color: Colors.white54),
+                          border: const OutlineInputBorder(),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: cloudPink()),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 25),
+                    const Text(
+                      "Change description",
+                      style: TextStyle(color: Colors.white, fontSize: 18),
+                    ),
+                    const SizedBox(height: 15),
+
+                    // description part
+                    Container(
+                      color: const Color.fromARGB(255, 15, 15, 15),
+                      width: 350,
+                      constraints: BoxConstraints(
+                        maxHeight: MediaQuery.of(context).size.height * 0.4,
+                        minHeight: 100,
+                      ),
+                      child: TextField(
+                        controller: descriptionController,
+                        maxLines: null,
+                        maxLength: 3000,
+                        style: const TextStyle(color: Colors.white),
+                        cursorColor: cloudPink(),
+                        decoration: InputDecoration(
+                          hintText: "Add description",
+                          hintStyle: const TextStyle(color: Colors.white54),
+                          border: const OutlineInputBorder(),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: cloudPink()),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+
     Future<bool> confirmClose() async {
       final bool? result = await showModalBottomSheet<bool>(
         context: context,
@@ -2455,7 +2539,8 @@ class _CalendarState extends State<Calendar> {
                                       width: double.infinity,
                                       child: Center(
                                         child: TextField(
-                                          maxLength: 15,
+                                          readOnly: true,
+                                          maxLength: 20,
                                           controller: nameController,
                                           maxLines: 1,
                                           keyboardType: TextInputType.multiline,
@@ -2480,6 +2565,10 @@ class _CalendarState extends State<Calendar> {
                                               tempName = value;
                                               changes = true;
                                             });
+                                          },
+                                          onTap: () {
+                                            localTextDataChanging();
+                                            changes = true;
                                           },
                                         ),
                                       ),
@@ -2509,6 +2598,7 @@ class _CalendarState extends State<Calendar> {
                                   child: SizedBox(
                                     height: 300,
                                     child: TextField(
+                                      readOnly: true,
                                       maxLength: 3000,
                                       expands: true,
                                       controller: descriptionController,
@@ -2528,6 +2618,10 @@ class _CalendarState extends State<Calendar> {
                                           tempDescription = value;
                                           changes = true;
                                         });
+                                      },
+                                      onTap: () {
+                                        localTextDataChanging();
+                                        changes = true;
                                       },
                                     ),
                                   ),
