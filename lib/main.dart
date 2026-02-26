@@ -113,7 +113,7 @@ double mixHues(List<double> hues) {
 }
 
 // !!! dont forget to change
-String user = "merunka";
+String user = "test1";
 String server = "http://192.168.0.233:5000";
 
 const List<String> tagList = [
@@ -227,7 +227,7 @@ class PocketDreams extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "Pocket Dreams",
-      home: const /*LoginScreen(),*/ Base(),
+      home: const LoginScreen() /*Base(),*/,
       /*TagScreen(),*/
     );
   }
