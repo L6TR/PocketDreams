@@ -298,6 +298,9 @@ def deleteThisDream():
     cursor.execute("DELETE FROM Reports WHERE ID = ?", (dreamID,))
     cursor.execute("DELETE FROM Dreams WHERE ID = ?", (dreamID,))
 
+    cursor.execute("DELETE FROM Comments WHERE CommentedDream = ?", (dreamID,))
+    cursor.execute("DELETE FROM Likes WHERE LikedDream = ?", (dreamID,))
+
     conn.commit()
     conn.close()
 
