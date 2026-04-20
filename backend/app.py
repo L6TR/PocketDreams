@@ -87,7 +87,7 @@ def register():
     cursor.execute("SELECT ID FROM Users WHERE Username = ?", (Username,))
     if cursor.fetchone():
         conn.close()
-        return jsonify({"success": False, "message": "The username is alredy taken"}), 400
+        return jsonify({"success": False, "message": "The username is already taken"}), 400
 
     # and now we can add a new user
     cursor.execute("INSERT INTO Users (Username, HashPassword) VALUES (?, ?)", (Username, hashPassword))
@@ -402,8 +402,6 @@ def getBackendDreams():
 
         dreams = cursor.fetchall()
 
-        
-        print(dreams)
 
         cursor.execute("""
         SELECT t.Name
@@ -439,8 +437,6 @@ def getBackendDreams():
         dreams = cursor.fetchall()
         conn.close()
 
-        print(dreams)
-
         return jsonify({
             "success": True,
             "message": "You got dreams succesfully",
@@ -465,9 +461,7 @@ def getBackendDreams():
 
         dreams = cursor.fetchall()
         conn.close()
-        
-        print(dreams)
-        #print(len(dreams))
+
         
         return jsonify({
             "success": True,
