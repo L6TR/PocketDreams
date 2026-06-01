@@ -29,7 +29,7 @@ The application is logically divided into two main parts:
 
 <p align="center">
   <img src="image_0ddfc2.png" width="30%" alt="Screenshot 1">
-  <img src="image_0d8e43.png" width="30%" alt="Screenshot 2">
+  <img src="windows/6aa0c8a5-68d5-4c23-9e51-fff00c7f7c09.png" width="30%" alt="Screenshot 2">
   <img src="image_0d8e1f.png" width="30%" alt="Screenshot 3">
 </p>
 
