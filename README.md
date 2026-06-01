@@ -35,6 +35,22 @@ The application is logically divided into two main parts:
 
 ---
 
+##  Database Architecture
+
+The system utilizes a fully normalized **SQLite** database managed on the backend server. Data persistence is decoupled from individual devices so users can seamlessly access their profiles across platform instances.
+
+### Key Structural Highlights:
+* **Core Entities:** Centered around the `Dreams` and `Users` tables. Accounts are cryptographically secured using secure password hashing via the `bcrypt` library.
+* **M:N Junction Tables:** To handle complex associations cleanly without text redundancy, relationships such as user likes, friendships, and dream tags/emotions are split into specialized junction tables (e.g., `DreamEmotions`, `DreamTags`, `Likes`, `Friendship`).
+* **Constant Dictionaries (`Emotions` & `Tags`):** Fixed parameters are isolated into dictionary tables. This setup ensures database normalization, speeds up payload exchanges with the frontend (transferring simple integer arrays), and leaves the architecture fully prepared for multi-language localization.
+* **Cross-Platform Type Mapping:** To bypass database serialization limits, the Flutter frontend converts native `DateTime` objects into a uniform integer format via a custom `dateToInt()` mapping before pushing to the SQLite instance, enabling robust, low-overhead sorting.
+* **Dual-Layer Integrity Constraints:** Strict text boundaries are enforced both on the frontend (for interactive UI character counting) and the backend (as a security perimeter). For instance, dream descriptions have a data ceiling of 3,000 characters—a metric derived from personal data analysis.
+
+<p align="center">
+  <img src="windows/e7f5bb76-9de5-4323-9381-dcab0c83e3ed.png" width="30%" alt="Screenshot 1">
+</p>
+---
+
 ## Technologies Used
 
 The project was built using a modern tech stack, ensuring cross-platform compatibility and efficient backend communication.
@@ -47,6 +63,44 @@ The project was built using a modern tech stack, ensuring cross-platform compati
 * **[Flask](https://flask.palletsprojects.com/):** A lightweight WSGI web application framework based on **Python**, serving as the API and backend logic handler.
 * **SQLite:** A C-language library that implements a small, fast, self-contained, high-reliability SQL database engine used for storing user data, dreams, emotions, and interactions.
 
+---
+
+
+## How to Run (Local Development)
+
+Since the application is configured for a local development lifecycle, both the Flask API server and the Flutter frontend client must be spun up within your local environment.
+
+### 1. Backend Server Setup (Flask)
+The server establishes the database connection and exposes API endpoints for the client application.
+
+1. Navigate to the backend source directory:
+   ```bash
+   cd backend
+2. Set up and activate a isolated Python virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows use: venv\Scripts\activate
+4. Install the essential framework dependencies:
+   ```bash
+   pip install flask bcrypt
+6. Start the local server instance:
+   ```bash
+   python app.py # The local API will spin up and listen natively at http://127.0.0.1:5000/.
+
+### 2. Frontend Client Setup (Flutter)
+Make sure you have the Flutter SDK configured and an active mobile emulator (or debugging device) running.
+
+1. Navigate to the frontend workspace directory:
+   ```bash
+   cd frontend
+2. Fetch the required package dependencies:
+   ```bash
+   flutter pub get
+3. Network Configuration Note: Before building, open your API configuration script 
+(e.g., constants.dart or your network service module) and redirect the base URL from localhost to your local machine's dedicated local network IP address (or 10.0.2.2 if you are verifying via a standard Android Emulator) so the client can reach the local machine's Flask server.
+4. Launch the application:
+   ```bash
+   flutter run
 ---
 
 ## About The Project
