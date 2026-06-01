@@ -47,8 +47,9 @@ The system utilizes a fully normalized **SQLite** database managed on the backen
 * **Dual-Layer Integrity Constraints:** Strict text boundaries are enforced both on the frontend (for interactive UI character counting) and the backend (as a security perimeter). For instance, dream descriptions have a data ceiling of 3,000 characters—a metric derived from personal data analysis.
 
 <p align="center">
-  <img src="windows/e7f5bb76-9de5-4323-9381-dcab0c83e3ed.png" width="30%" alt="Screenshot 1">
+  <img src="6aa0c8a5-68d5-4c23-9e51-fff00c7f7c09.png" width="30%" alt="Screenshot 4">
 </p>
+
 ---
 
 ## Technologies Used
