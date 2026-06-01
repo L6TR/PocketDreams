@@ -28,9 +28,9 @@ The application is logically divided into two main parts:
 *(Here is a glimpse of the application's interface)*
 
 <p align="center">
-  <img src="image_0ddfc2.png" width="30%" alt="Screenshot 1">
+  <img src="windows/e7f5bb76-9de5-4323-9381-dcab0c83e3ed.png" width="30%" alt="Screenshot 1">
   <img src="windows/6aa0c8a5-68d5-4c23-9e51-fff00c7f7c09.png" width="30%" alt="Screenshot 2">
-  <img src="image_0d8e1f.png" width="30%" alt="Screenshot 3">
+  <img src="iwindows/f82d6d9f-e157-44cd-a7b6-9974744675ba.png" width="30%" alt="Screenshot 3">
 </p>
 
 ---
